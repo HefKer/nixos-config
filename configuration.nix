@@ -186,7 +186,6 @@
       starship.enable = true;
       bat.enable = true;
       lazygit.enable = true;
-      git.enable = true;
 
       # Gui
       firefox.enable = true;
@@ -265,6 +264,9 @@
     nodePackages.vscode-json-languageserver
     nodejs
     vscode-langservers-extracted
+
+    # -- Games --
+    osu-lazer
   ];
   # Other programs:
   # pinta - img editing
