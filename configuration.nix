@@ -232,6 +232,12 @@
     #teams-for-linux
     spotify
     bitwarden-desktop
+
+    # AI
+    lmstudio
+
+    # VPN
+    proton-vpn-cli
     
     # -- Development --
     # Python
@@ -264,6 +270,7 @@
     # -- Games --
     appimage-run
     osu-lazer-bin
+    opentabletdriver
   ];
   # Other programs:
   # pinta - img editing
