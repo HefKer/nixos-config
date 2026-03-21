@@ -179,7 +179,7 @@
       git.enable = true;
       neovim.enable = true;
       zoxide.enable = true;
-      starship.enable = true;
+    # starship.enable = true;
       bat.enable = true;
       lazygit.enable = true;
 
@@ -209,6 +209,9 @@
     evtest
     #signal-cli
     #bitwarden-cli
+    spotifyd
+    ncspot
+    starship
 
     # Virtualization
     libvirt
