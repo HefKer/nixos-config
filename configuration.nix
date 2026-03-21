@@ -103,7 +103,7 @@
     xkb = {
       layout = "us";
       variant = "";
-      #options = "caps:escape";
+      options = "caps:escape";
     };
   };
 
@@ -201,7 +201,7 @@
     wget
     fd
     fzf
-    lsd
+    eza
     ripgrep
     tree-sitter
     stow
@@ -209,6 +209,9 @@
     evtest
     #signal-cli
     #bitwarden-cli
+
+    # Virtualization
+    libvirt
 
     # compilers
     gcc
