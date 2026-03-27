@@ -46,11 +46,14 @@
       insmod fat
       insmod search_fs_uuid
       insmod chain
-      sleep 2
+      sleep 5
       search --no-floppy --fs-uuid --set=root CE76-3D21
       chainloader /EFI/Microsoft/Boot/bootmgfw.efi
     }
   '';
+  # Required by OpenTabletDriver
+  hardware.uinput.enable = true;
+  boot.kernelModules = [ "uinput" ];
 
   networking.hostName = "nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
@@ -212,6 +215,8 @@
     spotifyd
     ncspot
     starship
+    tint
+    nnn
 
     # Virtualization
     libvirt
@@ -235,12 +240,15 @@
     brave
     obsidian
     signal-desktop
-    #teams-for-linux
+    teams-for-linux
+    zoom-us
     spotify
     bitwarden-desktop
+    onlyoffice-desktopeditors
 
     # AI
     lmstudio
+    opencode-desktop
 
     # VPN
     proton-vpn-cli
