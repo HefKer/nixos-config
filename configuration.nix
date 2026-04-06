@@ -190,6 +190,9 @@
       # Gui
       firefox.enable = true;
       localsend.enable = true;
+      
+      # onlyoffice
+      xwayland.enable = true;
   };
 
   # Allow unfree packages
@@ -212,7 +215,6 @@
     os-prober
     evtest
     #signal-cli
-    #bitwarden-cli
     spotifyd
     ncspot
     starship
@@ -237,7 +239,6 @@
     # GUIs
     #super-productivity
     vesktop
-    qutebrowser
     brave
     obsidian
     signal-desktop
@@ -245,7 +246,6 @@
     zoom-us
     spotify
     bitwarden-desktop
-    onlyoffice-desktopeditors
 
     # AI
     lmstudio
@@ -256,6 +256,7 @@
     
     # -- Development --
     # Python
+    python315
     python313
     pyright
     ruff
@@ -282,9 +283,23 @@
     nodejs
     vscode-langservers-extracted
 
-    # -- Games --
+    # AI
+    opencode
+
+    # -- Gaming --
     appimage-run
     osu-lazer-bin
+
+    # -- qutebrowser -- 
+    qutebrowser
+    bitwarden-cli
+    python313Packages.tldextract
+    python313Packages.pyperclip
+    rofi
+
+    # onlyoffice
+    onlyoffice-desktopeditors
+    pkgs.xwayland-satellite
   ];
   # Other programs:
   # pinta - img editing
@@ -308,12 +323,6 @@
   #   enable = true;
   #   enableSSHSupport = true;
   # };
-
-  # List services that you want to enable:
-  # services.onlyoffice.enable = true;
-  #services.onlyoffice = {
-  #  enable = true;
-  #};
 
   #services.pipewire = {
 
