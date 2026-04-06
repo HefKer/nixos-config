@@ -52,6 +52,7 @@
     }
   '';
   # Required by OpenTabletDriver
+  hardware.opentabletdriver.enable = true;
   hardware.uinput.enable = true;
   boot.kernelModules = [ "uinput" ];
 
@@ -277,14 +278,13 @@
     yaml-language-server
 
     # Lazy
-    nodePackages.vscode-json-languageserver
+    vscode-json-languageserver
     nodejs
     vscode-langservers-extracted
 
     # -- Games --
     appimage-run
     osu-lazer-bin
-    opentabletdriver
   ];
   # Other programs:
   # pinta - img editing
