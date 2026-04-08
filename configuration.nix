@@ -3,7 +3,7 @@
 {
   imports =
     [ # Include the results of the hardware scan.
-      ./hardware-configuration.nix
+      #./hardware-configuration.nix
     ];
 
   # Bootloader.
@@ -51,16 +51,9 @@
       chainloader /EFI/Microsoft/Boot/bootmgfw.efi
     }
   '';
-  # Required by OpenTabletDriver
-  hardware.opentabletdriver.enable = true;
-  hardware.uinput.enable = true;
-  boot.kernelModules = [ "uinput" ];
 
   networking.hostName = "nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
-
-  # NIXOS
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   # Configure network proxy if necessary
   # networking.proxy.default = "http://user:password@proxy:port/";
@@ -68,31 +61,6 @@
 
   # Enable networking
   networking.networkmanager.enable = true;
-
-  # Set your time zone.
-  time.timeZone = "America/Chicago";
-
-  # Select internationalisation properties.
-  i18n.defaultLocale = "en_US.UTF-8";
-
-  i18n.extraLocaleSettings = {
-    LC_ADDRESS = "en_US.UTF-8";
-    LC_IDENTIFICATION = "en_US.UTF-8";
-    LC_MEASUREMENT = "en_US.UTF-8";
-    LC_MONETARY = "en_US.UTF-8";
-    LC_NAME = "en_US.UTF-8";
-    LC_NUMERIC = "en_US.UTF-8";
-    LC_PAPER = "en_US.UTF-8";
-    LC_TELEPHONE = "en_US.UTF-8";
-    LC_TIME = "en_US.UTF-8";
-  };
-
-  # Enable the X11 windowing system.
-  # You can disable this if you're only using the Wayland session.
-
-  # Enable the KDE Plasma Desktop Environment.
-  #services.displayManager.sddm.enable = true;
-  #services.desktopManager.plasma6.enable = true;
 
   # Configure keymap in X11
   #services.displayManager.dms-greeter = {
@@ -103,18 +71,6 @@
   # Keybinds
   services.xserver = {
     enable = true;
-
-    xkb = {
-      layout = "us";
-      variant = "";
-      options = "caps:escape";
-    };
-  };
-
-  fonts = {
-       packages = with pkgs; [
-         maple-mono.truetype
-       ];
   };
 
   # Enable CUPS to print documents.
@@ -141,25 +97,7 @@
 
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
-
-  # Define a user account. Don't forget to set a password with ‘passwd’.
-  users.users.hefker = {
-    isNormalUser = true;
-    description = "Nelson";
-    extraGroups = [ 
-      "networkmanager" 
-      "wheel"
-      "dialout" # For CharaChorder
-      # "tty" # If the above doesn't work
-    ];
-    packages = with pkgs; [
-      #kdePackages.kate
-      #  thunderbird
-    ];
-  };
-
   programs = {
-      niri.enable = true;
 
       dms-shell = {
         enable = true;
@@ -176,23 +114,6 @@
         enableAudioWavelength = true;      # Audio visualizer (cava)
         enableCalendarEvents = true;       # Calendar integration (khal)
       };
-  
-      # Terminal stuff
-      fish.enable = true;
-      pay-respects.enable = true;
-      git.enable = true;
-      neovim.enable = true;
-      zoxide.enable = true;
-    # starship.enable = true;
-      bat.enable = true;
-      lazygit.enable = true;
-
-      # Gui
-      firefox.enable = true;
-      localsend.enable = true;
-      
-      # onlyoffice
-      xwayland.enable = true;
   };
 
   # Allow unfree packages
@@ -202,108 +123,12 @@
   # $ nix search wget
   environment.systemPackages = with pkgs; [
     # Terminal stuff
-    wezterm
-    ani-cli
-    fastfetch
     wget
-    fd
-    fzf
-    eza
-    ripgrep
     tree-sitter
-    stow
-    os-prober
     evtest
-    #signal-cli
-    spotifyd
-    ncspot
-    starship
-    tint
-    nnn
-
-    # Virtualization
-    libvirt
-
-    # compilers
-    gcc
-    gdb
-
-    # TUIs
-    btop
-    impala
-    bluetui
-    #bitwarden-menu
-    mpv
-    #mpv-unwrapped
-
-    # GUIs
-    #super-productivity
-    vesktop
-    brave
-    obsidian
-    signal-desktop
-    teams-for-linux
-    zoom-us
-    spotify
-    bitwarden-desktop
-
-    # AI
-    lmstudio
-    opencode-desktop
-
-    # VPN
-    proton-vpn-cli
-    
-    # -- Development --
-    # Python
-    python315
-    python313
-    pyright
-    ruff
-
-    # Shell Scripting
-    bash-language-server
-
-    # Rust
-    rustup
-
-    # Nix
-    nil
-    statix
-
-    # Lua
-    lua55Packages.luarocks
-    lua-language-server
-
-    # Other Languages/Tools
-    yaml-language-server
-
-    # Lazy
-    vscode-json-languageserver
-    nodejs
-    vscode-langservers-extracted
-
-    # AI
-    opencode
-
-    # -- Gaming --
-    appimage-run
-    osu-lazer-bin
-
-    # -- qutebrowser -- 
-    qutebrowser
-    bitwarden-cli
-    python313Packages.tldextract
-    python313Packages.pyperclip
-    rofi
-
-    # onlyoffice
-    onlyoffice-desktopeditors
-    pkgs.xwayland-satellite
   ];
   # Other programs:
   # pinta - img editing
-  # libreoffice/
   # obs, kdenlive
   # document viewer, xournal++
 
