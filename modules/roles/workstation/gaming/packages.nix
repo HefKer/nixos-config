@@ -65,6 +65,18 @@
     heroic # for the high seas
     bottles # can run windows .exe games
     # https://www.protondb.com/ to verify if games run on loonix
+    (prismlauncher.override {
+      # Add binary required by some mod
+      additionalPrograms = [ ffmpeg ];
+
+      # Change Java runtimes available to Prism Launcher
+      jdks = [
+        graalvmPackages.graalvm-ce
+        zulu8
+        zulu17
+        zulu
+      ];
+    })
   ];
 
   environment.sessionVariables = {
