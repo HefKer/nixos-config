@@ -1,11 +1,18 @@
 {
   config,
+  lib,
   pkgs,
   ...
 }:
-
+let
+  cfg = config.custom.roles.workstation.packages;
+in
 {
-  config = {
+  options.custom.roles.workstation.packages = with lib; {
+    enable = mkEnableOption "Enable workstation packages";
+  };
+
+  config = lib.mkIf cfg.enable {
     environment.systemPackages = with pkgs; [
       wezterm
       atuin
@@ -14,6 +21,7 @@
       eza
       proton-vpn-cli
       starship
+
       # nnn # set up with home manaager
 
       # --- System Information & Diagnostics ---
@@ -62,7 +70,13 @@
       python313Packages.tldextract
       python313Packages.pyperclip
       rofi
-      mpv
+      yt-dlp
+      (mpv.override {
+        scripts = [
+          mpvScripts.uosc
+          mpvScripts.sponsorblock
+        ];
+      })
       #mpv-unwrapped
 
       # --- Virtualization ---
@@ -81,6 +95,22 @@
       firefox.enable = true;
       localsend.enable = true;
       xwayland.enable = true; # required by onlyoffice
+
+      dms-shell = {
+        enable = true;
+
+        systemd = {
+          enable = true; # Systemd service for auto-start
+          restartIfChanged = true; # Auto-restart dms.service when dms-shell changes
+        };
+
+        # Core features
+        enableSystemMonitoring = true; # System monitoring widgets (dgop)
+        enableVPN = true; # VPN management widget
+        enableDynamicTheming = true; # Wallpaper-based theming (matugen)
+        enableAudioWavelength = true; # Audio visualizer (cava)
+        enableCalendarEvents = true; # Calendar integration (khal)
+      };
     };
 
     fonts = {

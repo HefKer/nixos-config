@@ -1,6 +1,5 @@
 {
   config,
-  consts,
   ...
 }:
 let
@@ -11,12 +10,14 @@ in
   networking.hostName = hostName;
 
   custom = {
-    roles = {
-      workstation = { };
-
+    roles.workstation = {
       gaming = {
         packages.enable = true;
         hardware.enable = true;
+      };
+
+      development = {
+        packages.enable = true;
       };
     };
 

@@ -14,24 +14,38 @@
     { self, nixpkgs, ... }@inputs:
     let
       system = "x86_64-linux";
-      pkgs = import nixpkgs { inherit system; };
+      pkgs = import nixpkgs {
+        inherit system;
+        config.allowUnfree = true;
+      };
       consts = import ./lib/consts.nix;
+      inherit (consts) username home;
     in
     {
-      nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
-        specialArgs = { inherit inputs consts; };
-        modules = [
-          ./configuration.nix
-          ./hardware-configuration.nix
-          ./modules/core/nixos.nix
-          ./modules/core/packages.nix
-          ./modules/core/services.nix
-          ./modules/core/users.nix
-          ./modules/roles/workstation/packages.nix
-          ./modules/roles/workstation/development/packages.nix
-          ./modules/roles/workstation/gaming/packages.nix
-          inputs.home-manager.nixosModules.default
-        ];
+      nixosConfigurations = {
+        desktop = lib.nixosSystem {
+          inherit system;
+          specialArgs = {
+            inherit inputs consts;
+          };
+          modules = [
+            ./modules
+            ./hosts/desktop.nix
+            inputs.home-manager.nixosModules.default
+          ];
+        };
+
+        lenovo = lib.nixosSystem {
+          inherit system;
+          specialArgs = {
+            inherit inputs consts;
+          };
+          modules = [
+            ./modules
+            ./hosts/lenovo.nix
+            inputs.home-manager.nixosModules.default
+          ];
+        };
       };
     };
 }

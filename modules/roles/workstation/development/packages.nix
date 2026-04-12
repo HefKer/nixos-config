@@ -1,11 +1,18 @@
 {
   config,
+  lib,
   pkgs,
   ...
 }:
-
+let
+  cfg = config.custom.roles.workstation.development.packages;
+in
 {
-  config = {
+  options.custom.roles.workstation.development.packages = with lib; {
+    enable = mkEnableOption "Enable development packages";
+  };
+
+  config = lib.mkIf cfg.enable {
     environment.systemPackages = with pkgs; [
       # --- File & Text Search/Manipulation CLI Tools ---
       jq
