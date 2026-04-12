@@ -8,7 +8,7 @@ This repository is structured in a modularized format, with each directory servi
 
 **modules**: Reusable chunks of configuration that can be toggled on or off.
 
-- core contains the baseline configuration that apply to every machine.
+- core contains the baseline configuration that applies to every machine.
 - roles contains configurations that apply to specific types of machines- headless or workstation.
   - Workstation is further split into different use cases, development and gaming
 
