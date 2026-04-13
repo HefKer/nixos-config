@@ -14,12 +14,14 @@
     { self, nixpkgs, ... }@inputs:
     let
       system = "x86_64-linux";
+      inherit (nixpkgs) lib;
+      consts = import ./lib/consts.nix;
+      inherit (consts) username home;
+
       pkgs = import nixpkgs {
         inherit system;
         config.allowUnfree = true;
       };
-      consts = import ./lib/consts.nix;
-      inherit (consts) username home;
     in
     {
       nixosConfigurations = {
