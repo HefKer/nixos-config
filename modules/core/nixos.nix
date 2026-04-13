@@ -1,6 +1,15 @@
 { inputs, ... }:
 
 {
+  environment.sessionVariables = {
+    EDITOR = "nvim";
+    SUDO_EDITOR = "nvim";
+  };
+
+  security.sudo.extraConfig = ''
+    Defaults env_keep += "TERM COLORTERM TERMINFO"
+  '';
+
   nix = {
     settings = {
       experimental-features = [

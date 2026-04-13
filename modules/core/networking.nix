@@ -1,0 +1,7 @@
+{ consts, lib, ... }:
+
+{
+  networking = {
+
+  };
+}

@@ -13,6 +13,16 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    # consider moving these later
+    services = {
+      xserver.enable = true;
+      services.printing.enable = true;
+      # noctalia
+      power-profiles-daemon.enable = true;
+      upower.enable = true;
+    };
+    networking.networkmanager.enable = true;
+
     environment.systemPackages = with pkgs; [
       wezterm
       atuin
