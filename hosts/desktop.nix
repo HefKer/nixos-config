@@ -1,5 +1,5 @@
 {
-  config,
+  _,
   ...
 }:
 let
@@ -15,6 +15,7 @@ in
       kernel.enable = true;
     };
     roles.workstation = {
+      packages.enable = true;
       gaming = {
         packages.enable = true;
         hardware.enable = true;
@@ -24,7 +25,5 @@ in
         packages.enable = true;
       };
     };
-
-    services = { };
   };
 }

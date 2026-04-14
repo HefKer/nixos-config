@@ -62,8 +62,8 @@ in
     ];
 
     programs = {
-      niri.enable = true;
-      obs-studio.enable = true;
+      niri.enable = true; # todo: move
+      obs-studio.enable = true; # todo: move
     };
   };
 }

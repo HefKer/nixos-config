@@ -1,12 +1,12 @@
 {
-  config,
+  _,
   ...
 }:
 let
   hostName = "lenovo";
 in
 {
-  system.stateVersion = ""; # set this
+  system.stateVersion = "25.11"; # set this
   networking.hostName = hostName;
 
   custom = {
@@ -17,7 +17,5 @@ in
         packages.enable = true;
       };
     };
-
-    services = { };
   };
 }

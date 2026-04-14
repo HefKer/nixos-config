@@ -16,10 +16,10 @@ in
     # consider moving these later
     services = {
       xserver.enable = true;
-      services.printing.enable = true;
+      printing.enable = true;
       # noctalia
-      power-profiles-daemon.enable = true;
-      upower.enable = true;
+      # power-profiles-daemon.enable = true;
+      # upower.enable = true;
     };
     networking.networkmanager.enable = true;
 
@@ -94,7 +94,6 @@ in
     ];
 
     programs = {
-      git.enable = true;
       neovim.enable = true;
       fish.enable = true;
       zoxide.enable = true;

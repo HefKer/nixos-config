@@ -2,7 +2,6 @@
   config,
   lib,
   modulesPath,
-  pkgs,
   ...
 }:
 let
@@ -39,38 +38,38 @@ in
           }
         '';
       };
+    };
+    boot.initrd.availableKernelModules = [
+      "xhci_pci"
+      "ahci"
+      "nvme"
+      "usb_storage"
+      "usbhid"
+      "sd_mod"
+    ];
+    boot.initrd.kernelModules = [ ];
+    boot.kernelModules = [ ];
+    boot.extraModulePackages = [ ];
 
-      boot.initrd.availableKernelModules = [
-        "xhci_pci"
-        "ahci"
-        "nvme"
-        "usb_storage"
-        "usbhid"
-        "sd_mod"
-      ];
-      boot.initrd.kernelModules = [ ];
-      boot.kernelModules = [ ];
-      boot.extraModulePackages = [ ];
+    hardware = {
+      bluetooth.enable = true;
+      cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+    };
 
-      hardware = {
-        bluetooth.enable = true;
-        cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
-      };
-
-      services = {
-        # Enable sound with pipewire.
-        pulseaudio.enable = false;
-        rtkit.enable = true;
-        pipewire = {
-          enable = true;
-          alsa.enable = true;
-          alsa.support32Bit = true;
-          pulse.enable = true;
-          jack.enable = true; # for JACK apps (MIDI/adv audio)
-        };
-
+    # todo: move this out
+    services = {
+      # Enable sound with pipewire.
+      pulseaudio.enable = false;
+      pipewire = {
+        enable = true;
+        alsa.enable = true;
+        alsa.support32Bit = true;
+        pulse.enable = true;
+        jack.enable = true; # for JACK apps (MIDI/adv audio)
       };
     };
+
+    security.rtkit.enable = true;
   };
 
 }

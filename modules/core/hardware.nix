@@ -1,7 +1,7 @@
-{ lib, pkgs, ... }:
+{ lib, ... }:
 let
   inherit (lib) mkDefault;
 in
 {
-  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
+  nixpkgs.hostPlatform = mkDefault "x86_64-linux";
 }

@@ -19,9 +19,8 @@ in
       # Required by OpenTabletDriver
       opentabletdriver.enable = true;
       uinput.enable = true;
-      # Enable opengl
+      # Enable renderer
       graphics.enable = true;
-      opengl.enable = true;
 
       nvidia = {
         modesetting.enable = true;
