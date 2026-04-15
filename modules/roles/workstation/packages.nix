@@ -126,6 +126,8 @@ in
     fonts = {
       packages = with pkgs; [
         maple-mono.truetype
+        liberation_ttf
+        noto-fonts
       ];
     };
   };
