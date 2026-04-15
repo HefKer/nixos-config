@@ -2,6 +2,7 @@
   config,
   lib,
   modulesPath,
+  pkgs,
   ...
 }:
 let
@@ -44,7 +45,6 @@ in
     # todo: move this out
     services = {
       pulseaudio.enable = false;
-      rtkit.enable = true;
       pipewire = {
         enable = true;
         alsa.enable = true;
@@ -57,7 +57,8 @@ in
         variant = "";
         options = "caps:escape";
       };
-
     };
+
+    security.rtkit.enable = true;
   };
 }
