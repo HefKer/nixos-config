@@ -1,7 +1,4 @@
-{
-  _,
-  ...
-}:
+{ ... }:
 let
   hostName = "lenovo";
 in
