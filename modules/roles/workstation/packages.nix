@@ -24,6 +24,7 @@ in
     networking.networkmanager.enable = true;
 
     environment.systemPackages = with pkgs; [
+      # --- Terminal Utils ---
       wezterm
       atuin
       fastfetch
@@ -31,6 +32,7 @@ in
       eza
       proton-vpn-cli
       starship
+      stow
 
       # nnn # set up with home manaager
 
@@ -48,8 +50,6 @@ in
       unzip
       gzip
 
-      # --- Utilities ---
-      stow
       # --- GUI Applications ---
       obsidian
       vesktop
@@ -61,6 +61,7 @@ in
       spotify
       #spotifyd
       #ncspot
+      cheese
 
       # --- TUIs ---
       btop
