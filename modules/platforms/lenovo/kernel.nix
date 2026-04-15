@@ -55,7 +55,8 @@ in
       xserver.xkb = {
         layout = "us";
         variant = "";
-        options = "caps:escape";
+        # todo: replace with services.keyd for per-device remapping (see TODO.md).
+        options = lib.mkForce "caps:escape";
       };
     };
 
