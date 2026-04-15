@@ -8,7 +8,7 @@
 
     xserver.xkb = {
       layout = "us";
-      variant = ""; # ?
+      variant = ""; # Selects a sub-variant of the layout. "" = default. Other options (for "us"): "dvorak", "colemak", "altgr-intl", "intl", "mac", "workman"
       # options = "caps:escape";
     };
   };
