@@ -62,6 +62,7 @@ in
       #spotifyd
       #ncspot
       cheese
+      kdePackages.kdeconnect-kde
 
       # --- TUIs ---
       btop
@@ -77,7 +78,7 @@ in
 
       # qutebrowser
       qutebrowser
-      bitwarden-cli
+      rbw # rust bitwarden
       python313Packages.tldextract
       python313Packages.pyperclip
       rofi
@@ -105,6 +106,7 @@ in
       firefox.enable = true;
       localsend.enable = true;
       xwayland.enable = true; # required by onlyoffice
+      kdeconnect.enable = true;
 
       dms-shell = {
         enable = true;

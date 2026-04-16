@@ -32,9 +32,11 @@ in
 
       # Python
       python313
+      python314
       pyright
       ruff
       python313Packages.debugpy
+      uv
 
       # Lua
       lua55Packages.luarocks
