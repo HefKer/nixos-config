@@ -77,7 +77,8 @@ in
       brave
 
       # qutebrowser
-      qutebrowser
+      qutebrowser # https://github.com/nixos/nixpkgs/issues/508375
+      ranger
       rbw # rust bitwarden
       python313Packages.tldextract
       python313Packages.pyperclip
