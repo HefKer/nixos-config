@@ -80,6 +80,7 @@ in
       qutebrowser # https://github.com/nixos/nixpkgs/issues/508375
       ranger
       rbw # rust bitwarden
+      pinentry-curses
       python313Packages.tldextract
       python313Packages.pyperclip
       rofi
@@ -108,7 +109,13 @@ in
       localsend.enable = true;
       xwayland.enable = true; # required by onlyoffice
       kdeconnect.enable = true;
-
+      gnupg.agent = {
+        # for rbw
+        enable = true;
+        pinentryPackage = pkgs.pinentry-curses;
+        # pinentryPackage = pkgs.pinentry-gnome3;
+        # pinentryPackage = pkgs.pinentry-qt;
+      };
       dms-shell = {
         enable = true;
 
