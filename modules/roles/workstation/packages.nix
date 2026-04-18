@@ -53,6 +53,7 @@ in
       # --- GUI Applications ---
       obsidian
       vesktop
+      discord
       signal-desktop
       teams-for-linux
       super-productivity

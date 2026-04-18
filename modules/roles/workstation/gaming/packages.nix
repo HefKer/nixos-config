@@ -23,6 +23,14 @@ in
       gamescope %command%
       - Runs game inside a nested Wayland compositor (forces a resolution/refresh rate, upscaling, session)
     */
+    services = {
+      sunshine = {
+        enable = true;
+        autoStart = false;
+        capSysAdmin = true; # only needed for Wayland -- omit this when using with Xorg
+        openFirewall = true;
+      };
+    };
 
     programs = {
       gamemode.enable = true;
@@ -53,6 +61,7 @@ in
       lutris
       heroic # for the high seas
       bottles # can run windows .exe games
+      cemu
       # https://www.protondb.com/ to verify if games run on loonix
       (prismlauncher.override {
         # Add binary required by some mod

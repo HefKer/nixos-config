@@ -10,6 +10,8 @@
     wget # nix search wget to list installed pkgs
     tree-sitter
     lsof
+
+    moonlight-qt
   ];
 
   programs = {
