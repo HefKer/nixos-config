@@ -142,10 +142,15 @@ in
         liberation_ttf
         noto-fonts
         corefonts # Arial, Times New Roman, etc.
-        vistafonts # Calibri, Cambria, etc.
+        vista-fonts # Calibri, Cambria, etc.
         google-fonts # Good general coverage
-        noto-fonts-emoji
+        noto-fonts-color-emoji
+        nerd-fonts.jetbrains-mono
       ];
+
+      fontconfig.defaultFonts = {
+        monospace = [ "JetBrainsMono Nerd Font" ];
+      };
     };
   };
 }
