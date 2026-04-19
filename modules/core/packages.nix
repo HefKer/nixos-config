@@ -11,7 +11,7 @@
     tree-sitter
     lsof
     czkawka
-
+    p7zip
     moonlight-qt
   ];
 
