@@ -20,7 +20,6 @@ in
       opentabletdriver.enable = true;
       uinput.enable = true;
       # Enable renderer
-      graphics.enable = true;
 
       nvidia = {
         modesetting.enable = true;
