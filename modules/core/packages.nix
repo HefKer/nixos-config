@@ -10,6 +10,7 @@
     wget # nix search wget to list installed pkgs
     tree-sitter
     lsof
+    czkawka
 
     moonlight-qt
   ];
