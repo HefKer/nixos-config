@@ -11,6 +11,7 @@
     tree-sitter
     lsof
     p7zip
+    moonlight-qt
   ];
 
   programs = {
