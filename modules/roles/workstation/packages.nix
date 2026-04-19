@@ -57,13 +57,15 @@ in
       signal-desktop
       teams-for-linux
       super-productivity
-      onlyoffice-desktopeditors
-      xwayland-satellite # req by onlyoffice
       spotify
       #spotifyd
       #ncspot
       cheese
       kdePackages.kdeconnect-kde
+
+      # Documents
+      onlyoffice-desktopeditors
+      xwayland-satellite # req by onlyoffice
 
       # --- TUIs ---
       btop
@@ -139,6 +141,10 @@ in
         maple-mono.truetype
         liberation_ttf
         noto-fonts
+        corefonts # Arial, Times New Roman, etc.
+        vistafonts # Calibri, Cambria, etc.
+        google-fonts # Good general coverage
+        noto-fonts-emoji
       ];
     };
   };
