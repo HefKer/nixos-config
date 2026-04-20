@@ -33,7 +33,7 @@ in
       proton-vpn-cli
       starship
       stow
-
+      yazi
       # nnn # set up with home manaager
 
       # --- System Information & Diagnostics ---
@@ -100,6 +100,15 @@ in
       libvirt
     ];
 
+    # testing
+    xdg.portal = {
+      enable = true;
+      extraPortals = [ pkgs.xdg-desktop-portal-termfilechooser ];
+      config.common = {
+        "org.freedesktop.impl.portal.FileChooser" = "termfilechooser";
+      };
+    };
+
     programs = {
       neovim.enable = true;
       fish.enable = true;
@@ -151,6 +160,11 @@ in
       fontconfig.defaultFonts = {
         monospace = [ "JetBrainsMono Nerd Font" ];
       };
+    };
+
+    hardware.graphics = {
+      enable = true;
+      enable32Bit = true;
     };
   };
 }

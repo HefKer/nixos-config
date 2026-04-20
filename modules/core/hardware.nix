@@ -4,8 +4,4 @@ let
 in
 {
   nixpkgs.hostPlatform = mkDefault "x86_64-linux";
-  hardware.graphics = {
-    enable = true;
-    enable32Bit = true;
-  };
 }
