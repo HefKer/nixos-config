@@ -80,7 +80,7 @@ in
       brave
 
       # qutebrowser
-      qutebrowser # https://github.com/nixos/nixpkgs/issues/508375
+      qutebrowser # https://github.com/nixos/nixpkgs/issues/508998
       ranger
       rbw # rust bitwarden
       pinentry-curses
