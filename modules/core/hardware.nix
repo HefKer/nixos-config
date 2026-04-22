@@ -4,4 +4,5 @@ let
 in
 {
   nixpkgs.hostPlatform = mkDefault "x86_64-linux";
+  hardware.bluetooth.enable = true;
 }
