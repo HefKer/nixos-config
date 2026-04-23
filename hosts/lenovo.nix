@@ -10,6 +10,7 @@ in
     platforms.lenovo = {
       disks.enable = true;
       kernel.enable = true;
+      networking.enable = true;
     };
     roles.workstation = {
       packages.enable = true;
