@@ -69,8 +69,9 @@ in
 
       # --- TUIs ---
       btop
-      impala
+      impala # wifi
       bluetui
+      kalker # calculator
 
       # --- cool stuff ---
       ani-cli
@@ -99,15 +100,6 @@ in
       # --- Virtualization ---
       libvirt
     ];
-
-    # testing
-    xdg.portal = {
-      enable = true;
-      extraPortals = [ pkgs.xdg-desktop-portal-termfilechooser ];
-      config.common = {
-        "org.freedesktop.impl.portal.FileChooser" = "termfilechooser";
-      };
-    };
 
     programs = {
       neovim.enable = true;
