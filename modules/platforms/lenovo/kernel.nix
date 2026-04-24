@@ -65,6 +65,8 @@ in
 
     environment.systemPackages = with pkgs; [
       libwacom # for wacom bamboo ink stylus gen2
+      libinput
+      evtest
     ];
   };
 }
