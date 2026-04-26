@@ -26,6 +26,7 @@ in
       opencode
       gemini-cli
       github-copilot-cli
+      claude-code
 
       # Rust
       rustup
