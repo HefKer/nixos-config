@@ -14,6 +14,9 @@ in
 
   config = lib.mkIf cfg.enable {
     environment.systemPackages = with pkgs; [
+      # -- CLI tools ---
+      gh
+
       # --- File & Text Search/Manipulation CLI Tools ---
       jq
 
