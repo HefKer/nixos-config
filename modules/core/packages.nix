@@ -13,6 +13,7 @@
     czkawka
     p7zip
     moonlight-qt
+    wl-clipboard
   ];
 
   programs = {
