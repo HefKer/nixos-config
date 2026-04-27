@@ -65,6 +65,7 @@ in
 
       # Web Dev
       nodejs
+      pnpm
     ];
 
     programs = {
