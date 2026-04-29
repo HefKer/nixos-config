@@ -14,6 +14,10 @@
     p7zip
     moonlight-qt
     wl-clipboard
+    # File conversions
+    imagemagick
+    pandoc
+    ffmpeg
   ];
 
   programs = {
