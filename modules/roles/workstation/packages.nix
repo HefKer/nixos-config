@@ -63,6 +63,11 @@ in
       cheese
       kdePackages.kdeconnect-kde
 
+      # Image manipulation
+      inkscape
+      pinta
+      # ksnip
+
       # Documents
       onlyoffice-desktopeditors
       xwayland-satellite # req by onlyoffice
