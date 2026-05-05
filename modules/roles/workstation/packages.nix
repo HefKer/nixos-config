@@ -51,6 +51,7 @@ in
       gzip
 
       # --- GUI Applications ---
+      nautilus
       obsidian
       vesktop
       discord
@@ -129,8 +130,8 @@ in
         enable = true;
 
         systemd = {
-          enable = true; # Systemd service for auto-start
-          restartIfChanged = true; # Auto-restart dms.service when dms-shell changes
+          enable = false; # disabled — suspected shutdown inhibit lock
+          restartIfChanged = true;
         };
 
         # Core features
