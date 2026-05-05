@@ -58,9 +58,9 @@ in
       osu-lazer-bin
 
       # Game launchers
-      lutris
+      # lutris
       heroic # for the high seas
-      bottles # can run windows .exe games
+      # bottles # can run windows .exe games
       cemu
       # https://www.protondb.com/ to verify if games run on loonix
       (prismlauncher.override {
