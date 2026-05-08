@@ -34,6 +34,7 @@ in
       starship
       stow
       yazi
+      python313Packages.youtube-transcript-api
       # nnn # set up with home manaager
 
       # --- System Information & Diagnostics ---
