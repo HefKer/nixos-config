@@ -131,7 +131,7 @@ in
         enable = true;
 
         systemd = {
-          enable = false; # disabled — suspected shutdown inhibit lock
+          enable = true;
           restartIfChanged = true;
         };
 
