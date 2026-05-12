@@ -26,13 +26,12 @@ in
   users = {
     users.${username} = {
       isNormalUser = true;
-      extraGroups = [ 
-        "networkmanager" 
+      extraGroups = [
+        "networkmanager"
         "wheel"
         "dialout" # Rquired by CharaChorder
         # use "tty" if "dialout" stops working
-    ];
+      ];
     };
   };
 }
-
