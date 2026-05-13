@@ -71,6 +71,7 @@ in
       # ksnip
 
       # Documents
+      zathura
       onlyoffice-desktopeditors
       xwayland-satellite # req by onlyoffice
 
