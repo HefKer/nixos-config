@@ -16,6 +16,7 @@ in
     environment.systemPackages = with pkgs; [
       # -- CLI tools ---
       gh
+      direnv
 
       # --- File & Text Search/Manipulation CLI Tools ---
       jq
