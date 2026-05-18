@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  inputs,
   ...
 }:
 let
@@ -87,6 +88,7 @@ in
 
       # --- browsers ---
       brave
+      inputs.helium.packages.${system}.default
 
       # qutebrowser
       qutebrowser # https://github.com/nixos/nixpkgs/issues/508998
