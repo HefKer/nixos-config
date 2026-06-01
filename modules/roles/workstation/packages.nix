@@ -16,11 +16,18 @@ in
   config = lib.mkIf cfg.enable {
     # consider moving these later
     services = {
-      xserver.enable = true;
+      xserver.enable = true; # xkb, libinput, nvidia driver attach
       printing.enable = true;
       # noctalia
       # power-profiles-daemon.enable = true;
       # upower.enable = true;
+
+      displayManager.sddm = {
+        enable = true;
+        wayland.enable = true;
+      };
+      xserver.displayManager.lightdm.enable = lib.mkForce false;
+      gnome.gnome-keyring.enable = true; # req by niri's secret portal
     };
     networking.networkmanager.enable = true;
 
