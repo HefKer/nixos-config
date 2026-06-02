@@ -47,6 +47,7 @@ in
       stow
       yazi
       python313Packages.youtube-transcript-api
+      kanata
       # nnn # set up with home manaager
 
       # --- System Information & Diagnostics ---
