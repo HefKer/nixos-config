@@ -44,7 +44,7 @@ in
 
     # todo: move this out
     services = {
-      libinput.enable = true; # for wacom bamboo stylus
+      libinput.enable = true;
       pulseaudio.enable = false;
       pipewire = {
         enable = true;
@@ -62,11 +62,5 @@ in
     };
 
     security.rtkit.enable = true;
-
-    environment.systemPackages = with pkgs; [
-      libwacom # for wacom bamboo ink stylus gen2
-      libinput
-      evtest
-    ];
   };
 }
