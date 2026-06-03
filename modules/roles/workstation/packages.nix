@@ -48,6 +48,7 @@ in
       yazi
       python313Packages.youtube-transcript-api
       kanata
+      rclone
       # nnn # set up with home manaager
 
       # --- System Information & Diagnostics ---
