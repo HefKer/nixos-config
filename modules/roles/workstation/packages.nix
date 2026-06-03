@@ -33,7 +33,7 @@ in
 
     nixpkgs.overlays = [ # Enables DRM in qutebrowser
       (final: prev: { qutebrowser = prev.qutebrowser.override { enableWideVine = true; }; })
-    ]
+    ];
 
     environment.systemPackages = with pkgs; [
       # --- Terminal Utils ---
