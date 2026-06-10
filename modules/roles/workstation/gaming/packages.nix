@@ -51,6 +51,7 @@ in
       mangohud
       protonup-ng
       xremap
+      wine
 
       # AI - Here because my laptop is a potato with no gpu
       lmstudio # todo: move somewhere else
