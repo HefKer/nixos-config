@@ -49,6 +49,7 @@ in
       python313Packages.youtube-transcript-api
       kanata
       rclone
+      yq
       # nnn # set up with home manaager
 
       # --- System Information & Diagnostics ---
