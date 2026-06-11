@@ -16,12 +16,16 @@ in
     environment.systemPackages = with pkgs; [
       # -- CLI tools ---
       gh
+      gh-dash
       direnv
 
       # --- File & Text Search/Manipulation CLI Tools ---
       jq
 
       # --- Development Tools ---
+      # GUI
+      zed-editor
+
       # Compilers
       gcc
       gdb
