@@ -102,7 +102,7 @@ in
 
       # --- browsers ---
       brave
-      inputs.helium.packages.${system}.default
+      inputs.helium.packages.${stdenv.hostPlatform.system}.default
       inputs.zen-browser.packages.${stdenv.hostPlatform.system}.default
 
       # qutebrowser
