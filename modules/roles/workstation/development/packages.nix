@@ -20,6 +20,7 @@ in
       direnv
       yt-dlp #mc
       deno #mc
+      tmux
 
       # --- File & Text Search/Manipulation CLI Tools ---
       jq
