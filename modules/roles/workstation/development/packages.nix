@@ -18,6 +18,8 @@ in
       gh
       gh-dash
       direnv
+      yt-dlp #mc
+      deno #mc
 
       # --- File & Text Search/Manipulation CLI Tools ---
       jq

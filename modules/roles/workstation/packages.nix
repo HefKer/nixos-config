@@ -79,6 +79,7 @@ in
       #ncspot
       cheese
       kdePackages.kdeconnect-kde
+      zapzap # Whatsapp
 
       # Image manipulation
       inkscape
