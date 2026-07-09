@@ -80,6 +80,7 @@ in
       cheese
       kdePackages.kdeconnect-kde
       zapzap # Whatsapp
+      qbittorrent
 
       # Image manipulation
       inkscape
