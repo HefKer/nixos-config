@@ -41,6 +41,15 @@
             ./modules
             ./hosts/desktop.nix
             inputs.home-manager.nixosModules.default
+            {
+              home-manager = {
+                useGlobalPkgs = true;
+                useUserPackages = true;
+                extraSpecialArgs = { inherit inputs consts; };
+                backupFileExtension = "hm-bak";
+                users.${consts.username} = import ./homes/hefker.nix;
+              };
+            }
           ];
         };
 
@@ -53,6 +62,15 @@
             ./modules
             ./hosts/lenovo.nix
             inputs.home-manager.nixosModules.default
+            {
+              home-manager = {
+                useGlobalPkgs = true;
+                useUserPackages = true;
+                extraSpecialArgs = { inherit inputs consts; };
+                backupFileExtension = "hm-bak";
+                users.${consts.username} = import ./homes/hefker.nix;
+              };
+            }
           ];
         };
       };
