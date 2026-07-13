@@ -5,5 +5,6 @@
     ./services.nix
     ./users.nix
     ./hardware.nix
+    ./home-manager.nix
   ];
 }
