@@ -2,8 +2,15 @@
 {
   programs.git = {
     enable = true;
-    userName = "hefker";
-    userEmail = "nelsonjulioaviles@gmail.com";
+    settings.user = {
+      name = "hefker";
+      email = "nelsonjulioaviles@gmail.com";
+    };
+    ignores = [
+      ".stglobalignore"
+      "CLAUDE.md"
+      ".claude/"
+    ];
   };
 
   programs.fish.enable = true;

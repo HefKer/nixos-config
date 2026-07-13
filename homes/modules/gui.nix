@@ -1,6 +1,6 @@
 { ... }:
 {
-  imports = [ ./noctalia.nix ];
+  # imports = [ ./noctalia.nix ];
 
   programs.wezterm.enable = true;
   programs.qutebrowser.enable = true;
