@@ -13,8 +13,9 @@
     ];
   };
 
-  programs.fish.enable = true;
-  programs.starship.enable = true;
-  programs.atuin.enable = true;
-  programs.bat.enable = true;
+
+  programs.fish.enable = false;
+  programs.starship.enable = false;
+  programs.atuin.enable = false;
+  programs.bat.enable = false;
 }
