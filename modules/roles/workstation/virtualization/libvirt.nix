@@ -6,11 +6,11 @@
   ...
 }:
 let
-  cfg = config.custom.roles.workstation.virtualisation;
+  cfg = config.custom.roles.workstation.virtualization.libvirt;
   inherit (consts) username;
 in
 {
-  options.custom.roles.workstation.virtualisation = with lib; {
+  options.custom.roles.workstation.virtualization.libvirt = with lib; {
     enable = mkEnableOption "libvirt/QEMU/KVM virtual machines via virt-manager";
   };
 
@@ -22,13 +22,8 @@ in
       enable = true;
 
       qemu = {
-        # OVMF is the open-source UEFI firmware for guests. The *Full* variant
-        # is built with Secure Boot + TPM support, both mandatory to install
-        # Windows 11. `.fd` exposes the flattened firmware files libvirt loads.
-        ovmf = {
-          enable = true;
-          packages = [ pkgs.OVMFFull.fd ];
-        };
+        # OVMF (open-source UEFI firmware for guests, incl. Secure Boot needed
+        # for Windows 11) is now shipped by default — no ovmf submodule needed.
 
         # swtpm emulates a TPM 2.0 chip in software and hands it to the guest.
         # Windows 11 refuses to install without a TPM 2.0 device present.

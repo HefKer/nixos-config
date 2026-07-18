@@ -3,5 +3,6 @@
     ./development
     ./packages.nix
     ./gaming
+    ./virtualization
   ];
 }

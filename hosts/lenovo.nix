@@ -14,9 +14,12 @@ in
     };
     roles.workstation = {
       packages.enable = true;
+      virtualization.libvirt.enable = true;
+
       development = {
         packages.enable = true;
       };
+
       gaming = {
         packages.enable = true;
       };
