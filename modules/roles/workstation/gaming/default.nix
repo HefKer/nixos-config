@@ -1,6 +1,7 @@
 {
   imports = [
     ./packages.nix
-    ./hardware.nix
+    ./nvidia.nix
+    ./tablet.nix
   ];
 }
