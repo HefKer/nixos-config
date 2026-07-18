@@ -25,6 +25,10 @@ in
       # --- File & Text Search/Manipulation CLI Tools ---
       jq
 
+      # --- Display / mirroring ---
+      wl-mirror # mirror one Wayland output into a window
+      wlr-randr # query/set output modes at runtime (resolution, position)
+
       # --- Development Tools ---
       # GUI
       zed-editor
