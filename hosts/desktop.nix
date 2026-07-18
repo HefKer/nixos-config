@@ -18,7 +18,8 @@ in
       packages.enable = true;
       gaming = {
         packages.enable = true;
-        hardware.enable = true;
+        nvidia.enable = true;
+        tablet.enable = true;
       };
 
       development = {
