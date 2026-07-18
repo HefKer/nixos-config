@@ -17,6 +17,9 @@ in
       development = {
         packages.enable = true;
       };
+      gaming = {
+        packages.enable = true;
+      };
     };
   };
 }
