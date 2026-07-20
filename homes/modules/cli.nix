@@ -10,6 +10,9 @@
       ".stglobalignore"
       "CLAUDE.md"
       ".claude/"
+      "docs/"
+      "CONTEXT.md"
+      "/.scratch"
     ];
   };
 
