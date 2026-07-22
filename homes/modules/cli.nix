@@ -13,6 +13,8 @@
       "docs/"
       "CONTEXT.md"
       "/.scratch"
+      "inspo/"
+      ".stfolder/"
     ];
   };
 
