@@ -50,6 +50,7 @@ in
       kanata
       rclone
       yq
+      translate-shell # `def` fish func: dict/translate lookups
       # nnn # set up with home manaager
 
       # --- System Information & Diagnostics ---
