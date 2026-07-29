@@ -18,9 +18,10 @@ in
       gh
       gh-dash
       direnv
-      yt-dlp #mc
-      deno #mc
+      yt-dlp # mc
+      deno # mc
       tmux
+      herdr
 
       # --- File & Text Search/Manipulation CLI Tools ---
       jq
