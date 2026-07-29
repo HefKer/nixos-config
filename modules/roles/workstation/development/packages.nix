@@ -41,7 +41,6 @@ in
       # AI
       opencode
       gemini-cli
-      github-copilot-cli
       claude-code
 
       # Rust
