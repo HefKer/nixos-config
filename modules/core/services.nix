@@ -12,6 +12,9 @@
       # options = "caps:escape";
     };
 
-    tailscale.enable = true;
+    tailscale = {
+      enable = true;
+      extraSetFlags = [ "--ssh" ];
+    };
   };
 }
