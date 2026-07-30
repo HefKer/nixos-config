@@ -28,7 +28,9 @@ in
         enable = true;
         autoStart = false;
         capSysAdmin = true; # only needed for Wayland -- omit this when using with Xorg
-        openFirewall = true;
+        # Don't open Sunshine's ports to the whole LAN; stream over Tailscale.
+        # Flip back to true if you need LAN clients (e.g. Moonlight on the couch).
+        openFirewall = false;
       };
     };
 
