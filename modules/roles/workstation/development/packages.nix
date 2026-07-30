@@ -20,7 +20,6 @@ in
       direnv
       yt-dlp # mc
       deno # mc
-      tmux
       herdr
 
       # --- File & Text Search/Manipulation CLI Tools ---
@@ -40,7 +39,6 @@ in
 
       # AI
       opencode
-      gemini-cli
       claude-code
 
       # Rust
