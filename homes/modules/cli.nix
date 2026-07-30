@@ -2,9 +2,13 @@
 {
   programs.git = {
     enable = true;
-    settings.user = {
-      name = "hefker";
-      email = "nelsonjulioaviles@gmail.com";
+    settings = {
+      user = {
+        name = "hefker";
+        email = "nelsonjulioaviles@gmail.com";
+      };
+      init.defaultBranch = "main";
+      pull.rebase = false;
     };
     ignores = [
       ".stglobalignore"
