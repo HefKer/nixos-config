@@ -42,7 +42,6 @@ in
       cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
     };
 
-    # todo: move this out
     services = {
       libinput.enable = true;
       pulseaudio.enable = false;

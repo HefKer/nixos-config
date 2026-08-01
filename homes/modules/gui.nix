@@ -1,8 +1,4 @@
 { ... }:
 {
-  # imports = [ ./noctalia.nix ];
-
-  programs.wezterm.enable = false;
-  programs.qutebrowser.enable = false;
-  programs.mpv.enable = false;
+  # GUI home-manager config for workstation hosts.
 }

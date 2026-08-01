@@ -2,11 +2,6 @@
 {
   programs = {
 
-    fish.enable = false;
-    starship.enable = false;
-    atuin.enable = false;
-    bat.enable = false;
-
     git = {
       enable = true;
       settings = {

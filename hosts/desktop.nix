@@ -1,7 +1,4 @@
-{
-  _,
-  ...
-}:
+{ ... }:
 let
   hostName = "desktop";
 in

@@ -21,9 +21,6 @@ in
     services = {
       xserver.enable = true; # xkb, libinput, nvidia driver attach
       printing.enable = true;
-      # noctalia
-      # power-profiles-daemon.enable = true;
-      # upower.enable = true;
 
       displayManager.sddm = {
         enable = true;
@@ -56,7 +53,6 @@ in
       yq
       translate-shell # `def` fish func: dict/translate lookups
       oscclip # osc-copy/osc-paste: pipe to local clipboard over SSH via OSC 52
-      # nnn # set up with home manaager
 
       # --- System Information & Diagnostics ---
       pciutils
@@ -81,8 +77,6 @@ in
       teams-for-linux
       super-productivity
       spotify
-      #spotifyd
-      #ncspot
       cheese
       kdePackages.kdeconnect-kde
       zapzap # Whatsapp
@@ -91,7 +85,6 @@ in
       # Image manipulation
       inkscape
       pinta
-      # ksnip
 
       # Documents
       zathura
@@ -128,7 +121,6 @@ in
           mpvScripts.sponsorblock
         ];
       })
-      #mpv-unwrapped
 
       # --- Virtualization ---
       libvirt
@@ -150,8 +142,6 @@ in
         # for rbw
         enable = true;
         pinentryPackage = pkgs.pinentry-curses;
-        # pinentryPackage = pkgs.pinentry-gnome3;
-        # pinentryPackage = pkgs.pinentry-qt;
       };
       dms-shell = {
         enable = true;

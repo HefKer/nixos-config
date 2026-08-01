@@ -55,7 +55,6 @@ in
       cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
     };
 
-    # todo: move this out
     services = {
       # Enable sound with pipewire.
       pulseaudio.enable = false;
