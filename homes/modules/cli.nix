@@ -22,10 +22,7 @@
         "reference/"
 
         # Agent files
-        "CLAUDE.md"
-        "CONTEXT.md"
         "/.claude"
-        "/docs"
         "/.scratch"
       ];
     };
