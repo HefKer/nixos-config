@@ -3,6 +3,7 @@
   lib,
   pkgs,
   inputs,
+  consts,
   ...
 }:
 let
@@ -14,6 +15,8 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    users.users.${consts.username}.shell = pkgs.fish;
+
     # consider moving these later
     services = {
       xserver.enable = true; # xkb, libinput, nvidia driver attach
@@ -31,7 +34,8 @@ in
     };
     networking.networkmanager.enable = true;
 
-    nixpkgs.overlays = [ # Enables DRM in qutebrowser
+    nixpkgs.overlays = [
+      # Enables DRM in qutebrowser
       (final: prev: { qutebrowser = prev.qutebrowser.override { enableWideVine = true; }; })
     ];
 
