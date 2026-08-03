@@ -14,6 +14,7 @@ in
   config = lib.mkIf cfg.enable {
     networking.networkmanager = {
       ensureProfiles = {
+        # Not in the repo — create it by hand with $HCC_IDENTITY and $HCC_PASSWORD.
         environmentFiles = [ "/etc/nixos/secrets/hcc-wifi.env" ];
         profiles = {
           "HCCprivate" = {
