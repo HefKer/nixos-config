@@ -21,6 +21,7 @@ in
       yt-dlp # mc
       deno # mc
       herdr
+      hunk
 
       # --- File & Text Search/Manipulation CLI Tools ---
       jq
