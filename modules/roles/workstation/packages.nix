@@ -80,6 +80,7 @@ in
       kdePackages.kdeconnect-kde
       zapzap # Whatsapp
       qbittorrent
+      webex
 
       # Image manipulation
       inkscape
