@@ -18,6 +18,7 @@
     imagemagick
     pandoc
     ffmpeg
+    poppler-utils # pdftotext, pdfinfo, pdftoppm, ...
   ];
 
   programs = {
