@@ -14,6 +14,7 @@ in
     };
     roles.workstation = {
       packages.enable = true;
+      chromium.enable = true;
       virtualization.libvirt.enable = true;
 
       development = {

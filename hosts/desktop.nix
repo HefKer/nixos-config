@@ -13,6 +13,8 @@ in
     };
     roles.workstation = {
       packages.enable = true;
+      chromium.enable = true;
+
       gaming = {
         packages.enable = true;
         nvidia.enable = true;
