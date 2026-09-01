@@ -40,6 +40,11 @@ in
       steam = {
         enable = true;
         gamescopeSession.enable = true;
+
+        # Set here, not systemPackages: this wrapping is what lets protontricks see extraCompatPackages below.
+        protontricks.enable = true;
+
+        extraCompatPackages = with pkgs; [ proton-ge-bin ];
       };
       # to execute appimage games via steam
       appimage = {
@@ -51,7 +56,6 @@ in
     environment.systemPackages = with pkgs; [
       # Gaming utils/deps
       mangohud
-      protonup-ng
       xremap
       wine
 
@@ -81,11 +85,6 @@ in
       })
     ];
 
-    environment.sessionVariables = {
-      # used for proton. Install proton with the command protonup
-      STEAM_EXTRA_COMPAT_TOOLS_PATHS = "\${HOME}/.steam/root/compatibilitytools.d";
-      # proton can then be enabled inside steam -> compatibility -> proton {latest}
-      # note to self: move to homemanager later
-    };
+    # Steam's wrapper assigns STEAM_EXTRA_COMPAT_TOOLS_PATHS itself, overriding sessionVariables, so it isn't set here.
   };
 }
