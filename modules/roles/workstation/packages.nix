@@ -103,7 +103,6 @@ in
 
       # --- browsers ---
       brave
-      google-chrome # for claudio
       inputs.helium.packages.${stdenv.hostPlatform.system}.default
       inputs.zen-browser.packages.${stdenv.hostPlatform.system}.default
 
