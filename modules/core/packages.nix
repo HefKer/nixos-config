@@ -12,6 +12,7 @@
     lsof
     czkawka
     p7zip
+    unrar
     moonlight-qt
     wl-clipboard
     # File conversions
