@@ -2,12 +2,15 @@
   config,
   lib,
   pkgs,
+  inputs,
   ...
 }:
 let
   cfg = config.custom.roles.workstation.gaming.packages;
 in
 {
+  imports = [ inputs.nix-flatpak.nixosModules.nix-flatpak ];
+
   options.custom.roles.workstation.gaming.packages = with lib; {
     enable = mkEnableOption "Enable gaming role packages";
   };
@@ -24,6 +27,11 @@ in
       - Runs game inside a nested Wayland compositor (forces a resolution/refresh rate, upscaling, session)
     */
     services = {
+      flatpak = {
+        enable = true;
+        packages = [ "com.usebottles.bottles" ];
+      };
+
       sunshine = {
         enable = true;
         autoStart = false;
@@ -66,9 +74,8 @@ in
       osu-lazer-bin
 
       # Game launchers
-      # lutris
-      heroic # for the high seas
-      # bottles # can run windows .exe games
+      lutris
+      heroic # Epic/GOG/Amazon
       cemu
       # https://www.protondb.com/ to verify if games run on loonix
       (prismlauncher.override {
