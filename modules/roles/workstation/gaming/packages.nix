@@ -67,6 +67,11 @@ in
       xremap
       wine
 
+      # osu-stable deps
+      zenity
+      desktop-file-utils
+      cabextract
+
       # AI - Here because my laptop is a potato with no gpu
       lmstudio # todo: move somewhere else
 
