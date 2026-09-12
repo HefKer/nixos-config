@@ -56,5 +56,37 @@ second column would appear, so they are the half worth closing.
   that infrastructure is down, half-built, or being reinstalled, which is
   precisely when they are wanted. A tracker hosted on the homelab cannot
   describe its own bootstrap.
-- The 26 pre-existing local tickets are not migrated yet, so both places are
-  live until they are.
+- ~~The 26 pre-existing local tickets are not migrated yet, so both places are
+  live until they are.~~ Resolved 2026-09-12; see the Status log.
+
+## Status log
+
+Amendments to the state this decision describes. The sections above are the
+record as written when the decision was taken and are not edited in place.
+
+### 2026-09-12 — the pre-existing tickets are migrated
+
+27 files across ten efforts became 27 issues in `HefKer/nixos-issues`, one
+milestone per effort. `Status:` lines became labels, `Blocked by:` lines became
+native dependency edges, and the four free-text status strings were mapped onto
+canonical labels rather than copied. `.scratch/` is no longer a second place to
+look for a ticket. The originals are kept as dead copies in
+`~/nixos/.archive/scratch/`, which — unlike `.scratch/` — is Syncthing-
+replicated; its README carries the file-to-issue mapping.
+
+`.scratch/homelab/` stayed local as this ADR requires, and is now the only live
+markdown effort.
+
+### Open: the homelab tickets are still unbacked
+
+The reason for keeping homelab tickets local is availability while the homelab
+is down — but the copy that gives them that availability is also the only copy,
+git-ignored and on one machine, which is the exact failure this ADR moved
+everything else to escape. Staying out of a tracker and staying out of a backup
+are separate things that `.scratch/` currently couples.
+
+The candidate answer is to stop treating "local markdown" and "tracker issue" as
+alternatives: keep the tracker as the source of truth and generate the markdown
+from it on a schedule, so the offline copy is a rendering rather than a second
+original. That is a decision about duplication, staleness and which side wins a
+conflict, and it is not taken here — see `HefKer/nixos-issues#31`.

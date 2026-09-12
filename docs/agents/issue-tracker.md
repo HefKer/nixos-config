@@ -42,8 +42,10 @@ conventions below. Notes about infrastructure must stay readable while that infr
 is down, half-built, or being reinstalled — which is exactly when they are needed.
 `.scratch/homelab/` is the standing case.
 
-`.scratch/` is also still the live tracker for efforts created before the split, until each
-is migrated. Check both places when looking for existing work on a topic.
+The pre-split efforts have all been migrated (2026-09-12), so `.scratch/` is no longer a
+second place to look: `HefKer/nixos-issues` is the only tracker, and `.scratch/homelab/` the
+only live markdown effort. The migrated originals are kept as dead copies in
+`~/nixos/.archive/scratch/` — see the README there for the file-to-issue mapping.
 
 Local conventions: one directory per effort, `PRD.md` for the spec, issues as
 `issues/<NN>-<slug>.md` numbered from `01`, a `Status:` line near the top carrying a role
