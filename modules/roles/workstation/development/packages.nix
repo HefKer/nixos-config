@@ -17,8 +17,6 @@ in
       # -- CLI tools ---
       gh
       gh-dash
-      direnv
-      nix-direnv
       yt-dlp # mc
       deno # mc
       herdr
@@ -83,6 +81,13 @@ in
     programs = {
       niri.enable = true;
       obs-studio.enable = true;
+
+      # nix-direnv keeps dev shells rooted so GC doesn't collect them
+      direnv = {
+        enable = true;
+        nix-direnv.enable = true;
+        silent = true;
+      };
     };
   };
 }
