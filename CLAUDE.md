@@ -12,6 +12,22 @@
 - Use `consts` (from `lib/consts.nix`, passed via `specialArgs`) for username/timezone/locale — never hardcode.
 - `system.stateVersion = "25.11"` — do not change without understanding implications.
 
+## Agent skills
+
+### Issue tracker
+
+Issues live in the **separate private repo `HefKer/nixos-issues`**, so every `gh` command
+needs `--repo HefKer/nixos-issues`; efforts about the homelab stay as markdown in `.scratch/`.
+See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+The five canonical roles, under their canonical names. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: `CONTEXT.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
+
 ## More
 
-Agent workflow docs live in `docs/agents/`. See `README.md` for repo layout.
+See `README.md` for repo layout.
