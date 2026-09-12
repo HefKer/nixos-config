@@ -18,6 +18,7 @@ in
       gh
       gh-dash
       direnv
+      nix-direnv
       yt-dlp # mc
       deno # mc
       herdr
