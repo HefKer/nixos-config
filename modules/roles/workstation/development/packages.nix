@@ -53,7 +53,7 @@ in
       uv
 
       # Lua
-      lua55Packages.luarocks
+      luajitPackages.luarocks
       stylua
       lua-language-server
 
