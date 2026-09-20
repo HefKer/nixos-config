@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  modulesPath,
   ...
 }:
 let
@@ -11,10 +10,6 @@ in
   options.custom.platforms.desktop.kernel = with lib; {
     enable = mkEnableOption "Enable Desktop kernel settings";
   };
-
-  imports = [
-    (modulesPath + "/installer/scan/not-detected.nix")
-  ];
 
   config = lib.mkIf cfg.enable {
     boot.loader = {
@@ -52,6 +47,8 @@ in
     boot.extraModulePackages = [ ];
 
     hardware = {
+      # Was nixpkgs' not-detected.nix; inlined so the enable gate actually covers it.
+      enableRedistributableFirmware = lib.mkDefault true;
       cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
     };
 

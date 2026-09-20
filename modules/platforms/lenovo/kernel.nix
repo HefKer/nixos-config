@@ -1,7 +1,6 @@
 {
   config,
   lib,
-  modulesPath,
   pkgs,
   ...
 }:
@@ -12,10 +11,6 @@ in
   options.custom.platforms.lenovo.kernel = with lib; {
     enable = mkEnableOption "Enable lenovo kernel settings";
   };
-
-  imports = [
-    (modulesPath + "/installer/scan/not-detected.nix")
-  ];
 
   config = lib.mkIf cfg.enable {
     boot = {
@@ -39,6 +34,8 @@ in
     };
 
     hardware = {
+      # Was nixpkgs' not-detected.nix; inlined so the enable gate actually covers it.
+      enableRedistributableFirmware = lib.mkDefault true;
       cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
     };
 
