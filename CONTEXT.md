@@ -17,13 +17,35 @@ Configuration owned by home-manager for a single user: the contents of `$HOME`.
 Evaluated as part of the system build, not activated separately.
 _Avoid_: user layer, HM layer
 
+**Core**:
+Configuration every host receives, including a headless server. Anything only a
+machine with a person sitting at it needs does not belong here.
+_Avoid_: base, common, default
+
+**Platform**:
+A class of hardware that one or more hosts run on, such as a laptop or a
+Raspberry Pi. Facts unique to a single machine belong to its host, not its
+platform.
+_Avoid_: machine, hardware profile
+
 **Role**:
-A named capability a machine can have, toggled on by a host. Roles are the unit
-of "what kind of machine is this".
+A named kind of machine, such as a workstation, switched on by a host as a
+whole. Roles are the unit of "what kind of machine is this".
+
+**Sub-role**:
+A narrower kind of use that only makes sense on top of a parent role, such as
+gaming on a workstation.
+_Avoid_: use case, profile, feature
+
+**Subsystem**:
+The part of the operating system a piece of configuration drives, such as
+audio, input, display, or boot. Configuration is grouped by subsystem within a
+layer; applications are not subsystems.
+_Avoid_: concern, area, topic
 
 **Host**:
-A single named machine built from this flake. The only place capabilities are
-switched on.
+A single named machine built from this flake: one platform plus the roles it
+takes on. The only place capabilities are switched on.
 _Avoid_: node, box, device
 
 ### Dotfiles
