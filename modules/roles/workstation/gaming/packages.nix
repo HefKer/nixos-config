@@ -61,6 +61,9 @@ in
       };
     };
 
+    # nix-gaming tracks osu releases within a day; nixpkgs lags by weeks.
+    nixpkgs.overlays = [ inputs.nix-gaming.overlays.default ];
+
     environment.systemPackages = with pkgs; [
       # Gaming utils/deps
       mangohud
@@ -77,6 +80,7 @@ in
 
       # Games
       osu-lazer-bin
+      osu-stable # self-installing wine/proton wrapper; first run downloads ~400MB
 
       # Game launchers
       lutris

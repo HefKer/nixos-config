@@ -19,6 +19,13 @@
         "nix-command"
         "flakes"
       ];
+
+      # nix-gaming ships prebuilt proton-osu/umu; without this they build from source.
+      # `extra-` so these append to cache.nixos.org rather than replacing it.
+      extra-substituters = [ "https://nix-gaming.cachix.org" ];
+      extra-trusted-public-keys = [
+        "nix-gaming.cachix.org-1:nbjlureqMbRAxR1gJ/f3hxemL9svXaZF/Ees8vCUUs4="
+      ];
     };
 
     gc = {
