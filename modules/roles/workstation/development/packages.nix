@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  inputs,
   ...
 }:
 let
@@ -13,6 +14,9 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    # sadjow's flake tracks Anthropic's releases hourly; nixpkgs lags by days.
+    nixpkgs.overlays = [ inputs.claude-code.overlays.default ];
+
     environment.systemPackages = with pkgs; [
       # -- CLI tools ---
       gh
