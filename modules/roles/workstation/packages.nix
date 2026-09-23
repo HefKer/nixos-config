@@ -74,6 +74,7 @@ in
       vesktop
       signal-desktop
       teams-for-linux
+      zoom-us
       super-productivity
       spotify
       cheese
