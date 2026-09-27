@@ -29,4 +29,7 @@
       extraSetFlags = [ "--ssh" ];
     };
   };
+
+  # nsncd queues every lookup behind its workers; a DNS burst starved passwd lookups (nixos-issues#46).
+  systemd.services.nscd.environment.NSNCD_WORKER_COUNT = "32";
 }
