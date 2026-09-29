@@ -44,6 +44,7 @@ in
       # AI
       opencode
       claude-code
+      (callPackage ../../../../pkgs/skillshare.nix { })
 
       # Rust
       rustup
