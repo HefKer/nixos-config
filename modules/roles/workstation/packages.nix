@@ -53,6 +53,7 @@ in
       yq
       translate-shell # `def` fish func: dict/translate lookups
       oscclip # osc-copy/osc-paste: pipe to local clipboard over SSH via OSC 52
+      wiremix
 
       # --- System Information & Diagnostics ---
       pciutils
