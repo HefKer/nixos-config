@@ -101,6 +101,7 @@ in
       # --- cool stuff ---
       ani-cli
       tint
+      inputs.pyroclear.packages.${stdenv.hostPlatform.system}.default
 
       # --- browsers ---
       brave

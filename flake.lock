@@ -276,6 +276,26 @@
         "type": "github"
       }
     },
+    "pyroclear": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1789549711,
+        "narHash": "sha256-mHRGK0HUyk8Q9waWfw0o2ahiLKu1azV0J7S36PqUmIo=",
+        "owner": "shreyanth-sureshkrishnaa",
+        "repo": "pyroclear",
+        "rev": "a13c6cff1233de67c4b7632b55a3b8668bcb8413",
+        "type": "github"
+      },
+      "original": {
+        "owner": "shreyanth-sureshkrishnaa",
+        "repo": "pyroclear",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "claude-code": "claude-code",
@@ -284,6 +304,7 @@
         "nix-flatpak": "nix-flatpak",
         "nix-gaming": "nix-gaming",
         "nixpkgs": "nixpkgs_2",
+        "pyroclear": "pyroclear",
         "zen-browser": "zen-browser"
       }
     },
