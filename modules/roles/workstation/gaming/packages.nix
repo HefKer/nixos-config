@@ -30,6 +30,8 @@ in
       flatpak = {
         enable = true;
         packages = [ "com.usebottles.bottles" ];
+        # Flatpak's NVIDIA GL runtime must match the host driver version exactly.
+        update.onActivation = true;
       };
 
       sunshine = {
