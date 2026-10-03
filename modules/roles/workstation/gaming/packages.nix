@@ -84,7 +84,8 @@ in
       lmstudio # todo: move somewhere else
 
       # Games
-      osu-lazer-bin
+      # gamemoderun's LD_PRELOAD aborts bwrap on exit (FeralInteractive/gamemode#577).
+      (osu-lazer-bin.override { gmrun_enable = false; })
       osu-stable # self-installing wine/proton wrapper; first run downloads ~400MB
 
       # Game launchers
