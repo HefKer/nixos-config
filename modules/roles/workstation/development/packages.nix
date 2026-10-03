@@ -7,6 +7,7 @@
 }:
 let
   cfg = config.custom.roles.workstation.development.packages;
+  llm-agents = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
 in
 {
   options.custom.roles.workstation.development.packages = with lib; {
@@ -14,16 +15,12 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    # sadjow's flake tracks Anthropic's releases hourly; nixpkgs lags by days.
-    nixpkgs.overlays = [ inputs.claude-code.overlays.default ];
-
     environment.systemPackages = with pkgs; [
       # -- CLI tools ---
       gh
       gh-dash
       yt-dlp # mc
       deno # mc
-      herdr
       hunk
 
       # --- File & Text Search/Manipulation CLI Tools ---
@@ -41,9 +38,11 @@ in
       gcc
       gdb
 
-      # AI
-      opencode
-      claude-code
+      # AI (llm-agents.nix updates daily; nixpkgs lags by days to weeks)
+      llm-agents.claude-code
+      llm-agents.opencode
+      llm-agents.herdr
+      llm-agents.collie
       (callPackage ../../../../pkgs/skillshare.nix { })
 
       # Rust

@@ -16,10 +16,8 @@
 
     zen-browser.url = "github:0xc000022070/zen-browser-flake";
 
-    claude-code = {
-      url = "github:sadjow/claude-code-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    # Not `follows`-ed: cache.numtide.com only hits against its own nixpkgs pin.
+    llm-agents.url = "github:numtide/llm-agents.nix";
 
     # Not `follows`-ed: its cachix cache is built against its own nixpkgs pin.
     nix-gaming.url = "github:fufexan/nix-gaming";
