@@ -63,6 +63,9 @@ in
       };
     };
 
+    # No modalias, so it's never autoloaded; Wine/Proton falls back to fsync without /dev/ntsync.
+    boot.kernelModules = [ "ntsync" ];
+
     # nix-gaming tracks osu releases within a day; nixpkgs lags by weeks.
     nixpkgs.overlays = [ inputs.nix-gaming.overlays.default ];
 
