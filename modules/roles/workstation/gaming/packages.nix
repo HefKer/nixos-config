@@ -63,6 +63,12 @@ in
       };
     };
 
+    # nix-flatpak's unit only orders after multi-user.target, so its first run at boot can race DNS.
+    systemd.services.flatpak-managed-install = {
+      wants = [ "network-online.target" ];
+      after = [ "network-online.target" ];
+    };
+
     # No modalias, so it's never autoloaded; Wine/Proton falls back to fsync without /dev/ntsync.
     boot.kernelModules = [ "ntsync" ];
 
