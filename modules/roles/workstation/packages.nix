@@ -34,6 +34,17 @@ in
     nixpkgs.overlays = [
       # Enables DRM in qutebrowser
       (final: prev: { qutebrowser = prev.qutebrowser.override { enableWideVine = true; }; })
+      # CiscoCollabHost re-execs argv[0], which execve can't resolve if it's a bare name from PATH
+      (final: prev: {
+        webex = prev.webex.overrideAttrs (old: {
+          nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ final.makeWrapper ];
+          postFixup = (old.postFixup or "") + ''
+            rm "$out/bin/webex"
+            makeWrapper "$out/opt/Webex/bin/CiscoCollabHost" "$out/bin/webex" \
+              --argv0 "$out/opt/Webex/bin/CiscoCollabHost"
+          '';
+        });
+      })
     ];
 
     environment.systemPackages = with pkgs; [
