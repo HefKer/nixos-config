@@ -3,15 +3,8 @@
   lib,
   ...
 }:
-let
-  cfg = config.custom.platforms.desktop.disks;
-in
 {
-  options.custom.platforms.desktop.disks = with lib; {
-    enable = mkEnableOption "Enable Desktop disk layout";
-  };
-
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf (config.custom.platform == "desktop") {
     fileSystems = {
       "/boot" = {
         device = "/dev/disk/by-uuid/6BD9-EC59";

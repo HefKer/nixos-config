@@ -7,11 +7,7 @@ in
   networking.hostName = hostName;
 
   custom = {
-    platforms.lenovo = {
-      disks.enable = true;
-      kernel.enable = true;
-      networking.enable = true;
-    };
+    platform = "laptop";
     roles.workstation = {
       packages.enable = true;
       chromium.enable = true;

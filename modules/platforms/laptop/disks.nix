@@ -3,15 +3,8 @@
   lib,
   ...
 }:
-let
-  cfg = config.custom.platforms.lenovo.disks;
-in
 {
-  options.custom.platforms.lenovo.disks = with lib; {
-    enable = mkEnableOption "Enable lenovo disk layout";
-  };
-
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf (config.custom.platform == "laptop") {
     fileSystems = {
       "/boot" = {
         device = "/dev/disk/by-uuid/D033-3864";

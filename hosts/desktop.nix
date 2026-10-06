@@ -7,10 +7,7 @@ in
   networking.hostName = hostName;
 
   custom = {
-    platforms.desktop = {
-      disks.enable = true;
-      kernel.enable = true;
-    };
+    platform = "desktop";
     roles.workstation = {
       packages.enable = true;
       chromium.enable = true;

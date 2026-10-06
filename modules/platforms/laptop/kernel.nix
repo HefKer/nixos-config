@@ -4,15 +4,8 @@
   pkgs,
   ...
 }:
-let
-  cfg = config.custom.platforms.lenovo.kernel;
-in
 {
-  options.custom.platforms.lenovo.kernel = with lib; {
-    enable = mkEnableOption "Enable lenovo kernel settings";
-  };
-
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf (config.custom.platform == "laptop") {
     boot = {
       initrd.availableKernelModules = [
         "xhci_pci"

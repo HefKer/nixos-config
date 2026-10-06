@@ -3,15 +3,8 @@
   lib,
   ...
 }:
-let
-  cfg = config.custom.platforms.desktop.kernel;
-in
 {
-  options.custom.platforms.desktop.kernel = with lib; {
-    enable = mkEnableOption "Enable Desktop kernel settings";
-  };
-
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf (config.custom.platform == "desktop") {
     boot.loader = {
       systemd-boot.enable = false;
       efi.canTouchEfiVariables = true;

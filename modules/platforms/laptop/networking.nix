@@ -3,15 +3,8 @@
   lib,
   ...
 }:
-let
-  cfg = config.custom.platforms.lenovo.networking;
-in
 {
-  options.custom.platforms.lenovo.networking = with lib; {
-    enable = mkEnableOption "Enable lenovo networking setup";
-  };
-
-  config = lib.mkIf cfg.enable {
+  config = lib.mkIf (config.custom.platform == "laptop") {
     networking.networkmanager = {
       ensureProfiles = {
         # Not in the repo — create it by hand with $HCC_IDENTITY and $HCC_PASSWORD.
