@@ -6,14 +6,10 @@
   ...
 }:
 let
-  cfg = config.custom.roles.workstation.development.packages;
+  cfg = config.custom.roles.workstation.development;
   llm-agents = inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
 in
 {
-  options.custom.roles.workstation.development.packages = with lib; {
-    enable = mkEnableOption "Enable development packages";
-  };
-
   config = lib.mkIf cfg.enable {
     environment.systemPackages = with pkgs; [
       # -- CLI tools ---

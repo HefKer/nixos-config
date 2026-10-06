@@ -6,14 +6,10 @@
   ...
 }:
 let
-  cfg = config.custom.roles.workstation.gaming.packages;
+  cfg = config.custom.roles.workstation.gaming;
 in
 {
   imports = [ inputs.nix-flatpak.nixosModules.nix-flatpak ];
-
-  options.custom.roles.workstation.gaming.packages = with lib; {
-    enable = mkEnableOption "Enable gaming role packages";
-  };
 
   config = lib.mkIf cfg.enable {
     /*

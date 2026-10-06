@@ -9,17 +9,11 @@ in
   custom = {
     platform = "laptop";
     roles.workstation = {
-      packages.enable = true;
-      chromium.enable = true;
-      virtualization.libvirt.enable = true;
+      enable = true;
 
-      development = {
-        packages.enable = true;
-      };
-
-      gaming = {
-        packages.enable = true;
-      };
+      development.enable = true;
+      gaming.enable = true;
+      virtualization.enable = true;
     };
   };
 }

@@ -7,13 +7,9 @@
   ...
 }:
 let
-  cfg = config.custom.roles.workstation.packages;
+  cfg = config.custom.roles.workstation;
 in
 {
-  options.custom.roles.workstation.packages = with lib; {
-    enable = mkEnableOption "Enable workstation packages";
-  };
-
   config = lib.mkIf cfg.enable {
     users.users.${consts.username}.shell = pkgs.fish;
 

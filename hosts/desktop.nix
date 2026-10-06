@@ -9,18 +9,15 @@ in
   custom = {
     platform = "desktop";
     roles.workstation = {
-      packages.enable = true;
-      chromium.enable = true;
+      enable = true;
 
       gaming = {
-        packages.enable = true;
+        enable = true;
         nvidia.enable = true;
         tablet.enable = true;
       };
 
-      development = {
-        packages.enable = true;
-      };
+      development.enable = true;
     };
   };
 }

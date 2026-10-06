@@ -6,14 +6,10 @@
   ...
 }:
 let
-  cfg = config.custom.roles.workstation.virtualization.libvirt;
+  cfg = config.custom.roles.workstation.virtualization;
   inherit (consts) username;
 in
 {
-  options.custom.roles.workstation.virtualization.libvirt = with lib; {
-    enable = mkEnableOption "libvirt/QEMU/KVM virtual machines via virt-manager";
-  };
-
   config = lib.mkIf cfg.enable {
     # libvirtd is the management daemon in front of QEMU/KVM. KVM is the
     # in-kernel hypervisor (near-native speed); QEMU emulates the rest of the

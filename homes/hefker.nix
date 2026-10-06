@@ -1,7 +1,7 @@
 { consts, lib, osConfig, ... }:
 let
   inherit (consts) username home;
-  isWorkstation = osConfig.custom.roles.workstation.packages.enable or false;
+  isWorkstation = osConfig.custom.roles.workstation.enable or false;
 in
 {
   imports =

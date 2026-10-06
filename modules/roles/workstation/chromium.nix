@@ -1,12 +1,8 @@
 { config, lib, ... }:
 let
-  cfg = config.custom.roles.workstation.chromium;
+  cfg = config.custom.roles.workstation;
 in
 {
-  options.custom.roles.workstation.chromium = with lib; {
-    enable = mkEnableOption "Chromium-based browser policies (Chromium, Chrome, Brave)";
-  };
-
   config = lib.mkIf cfg.enable {
     # Writes to all chromium-based browsers
     programs.chromium = {
