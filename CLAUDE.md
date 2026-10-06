@@ -7,7 +7,7 @@
 
 ## Module system conventions
 
-- Custom options live under `custom.*`, declared with `mkEnableOption`, gated behind `lib.mkIf cfg.enable`.
+- Custom options live under `custom.*`, gated behind `lib.mkIf`. `mkEnableOption` is the default form; the exception is `custom.platform`, an enum each host sets to exactly one hardware class. Roles and sub-roles get one switch each — see `docs/adr/0004-module-tree-layers-and-subsystems.md`.
 - `hosts/*.nix` are the **only** place options are set `enable = true`.
 - Use `consts` (from `lib/consts.nix`, passed via `specialArgs`) for username/timezone/locale — never hardcode.
 - `system.stateVersion = "25.11"` — do not change without understanding implications.
