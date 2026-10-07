@@ -3,6 +3,8 @@ let
   hostName = "desktop";
 in
 {
+  imports = [ ./disks.nix ];
+
   system.stateVersion = "25.11";
   networking.hostName = hostName;
 
