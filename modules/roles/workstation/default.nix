@@ -5,11 +5,15 @@ in
 {
   imports = [
     ./audio.nix
+    ./bluetooth.nix
     ./chromium.nix
     ./development
     ./display.nix
+    ./fonts.nix
     ./input.nix
+    ./networking.nix
     ./packages.nix
+    ./printing.nix
     ./gaming
     ./virtualization
   ];

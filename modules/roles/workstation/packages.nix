@@ -13,12 +13,6 @@ in
   config = lib.mkIf cfg.enable {
     users.users.${consts.username}.shell = pkgs.fish;
 
-    # consider moving these later
-    services = {
-      printing.enable = true;
-    };
-    networking.networkmanager.enable = true;
-
     nixpkgs.overlays = [
       # Enables DRM in qutebrowser
       (final: prev: { qutebrowser = prev.qutebrowser.override { enableWideVine = true; }; })
@@ -143,25 +137,6 @@ in
         # for rbw
         enable = true;
         pinentryPackage = pkgs.pinentry-curses;
-      };
-    };
-
-    fonts = {
-      packages = with pkgs; [
-        maple-mono.truetype
-        liberation_ttf
-        noto-fonts
-        corefonts # Arial, Times New Roman, etc.
-        vista-fonts # Calibri, Cambria, etc.
-        google-fonts # Good general coverage
-        noto-fonts-color-emoji
-        nerd-fonts.jetbrains-mono
-      ];
-
-      fontconfig.defaultFonts = {
-        sansSerif = [ "Noto Sans" ];
-        serif = [ "Noto Serif" ];
-        monospace = [ "JetBrainsMono Nerd Font" ];
       };
     };
   };

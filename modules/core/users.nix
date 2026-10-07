@@ -26,10 +26,7 @@ in
   users = {
     users.${username} = {
       isNormalUser = true;
-      extraGroups = [
-        "networkmanager"
-        "wheel"
-      ];
+      extraGroups = [ "wheel" ];
     };
   };
 }
