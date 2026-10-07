@@ -12,8 +12,8 @@ This repository is structured in a modularized format, with each directory servi
 
 - `core` contains the baseline configuration that applies to every machine.
 - `platforms` contains setup for a class of hardware (desktop, laptop); each host picks exactly one.
-- `roles` contains configurations that apply to specific types of machines — headless or workstation.
-  - Workstation is further split into different use cases: development and gaming.
+- `roles` contains configurations that apply to specific types of machines — currently just workstation.
+  - Workstation is further split into sub-roles: development, gaming and virtualization.
 
 **hosts**: Configurations for specific devices. Each host file picks the platform and roles it wants and turns them on.
 
