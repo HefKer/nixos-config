@@ -14,7 +14,6 @@
         systemd-boot.enable = true;
         efi.canTouchEfiVariables = true;
       };
-
     };
 
     hardware = {
@@ -22,7 +21,5 @@
       enableRedistributableFirmware = lib.mkDefault true;
       cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
     };
-
-    services.libinput.enable = true;
   };
 }

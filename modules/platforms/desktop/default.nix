@@ -1,6 +1,6 @@
 {
   imports = [
+    ./boot.nix
     ./graphics.nix
-    ./kernel.nix
   ];
 }

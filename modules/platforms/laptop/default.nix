@@ -1,5 +1,6 @@
 {
   imports = [
-    ./kernel.nix
+    ./boot.nix
+    ./input.nix
   ];
 }
