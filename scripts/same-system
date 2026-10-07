@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+# Usage: scripts/same-system [base-rev] [rev]
+# Compares what every nixosConfiguration builds at base-rev (default: main)
+# against rev (default: the working tree). See ADR-0004 for when a drvPath
+# change is still behavior-neutral.
+set -euo pipefail
+
+root=$(git rev-parse --show-toplevel)
+base=${1:-main}
+target=${2:-}
+
+ref_for() {
+  if [ -z "$1" ]; then
+    echo "git+file://$root"
+  else
+    echo "git+file://$root?rev=$(git -C "$root" rev-parse "$1^{commit}")"
+  fi
+}
+base_ref=$(ref_for "$base")
+target_ref=$(ref_for "$target")
+target_label=${target:-working tree}
+
+if [ -z "$target" ] && [ -n "$(git -C "$root" ls-files --others --exclude-standard -- '*.nix')" ]; then
+  echo "warning: untracked .nix files are invisible to the flake; git add them first" >&2
+fi
+
+# Sorted contents of the list-valued options a move between modules can reorder.
+lists='c: let
+  sort = builtins.sort builtins.lessThan;
+  names = map (p: p.name or "?");
+in {
+  systemPackages = sort (names c.environment.systemPackages);
+  extraGroups = builtins.mapAttrs (_: u: sort u.extraGroups) c.users.users;
+  homePackages = builtins.mapAttrs (_: u: sort (names u.home.packages)) (c.home-manager.users or { });
+}'
+
+hosts() { nix eval --json "$1#nixosConfigurations" --apply builtins.attrNames 2>/dev/null | tr -d '[]"' | tr , ' '; }
+base_hosts=$(hosts "$base_ref")
+target_hosts=$(hosts "$target_ref")
+
+status=0
+for h in $(echo "$base_hosts $target_hosts" | tr ' ' '\n' | sort -u); do
+  if ! grep -qw "$h" <<<"$base_hosts"; then echo "$h: new host (absent at $base)"; status=1; continue; fi
+  if ! grep -qw "$h" <<<"$target_hosts"; then echo "$h: removed (absent at $target_label)"; status=1; continue; fi
+
+  attr="nixosConfigurations.$h.config"
+  a=$(nix eval --raw "$base_ref#$attr.system.build.toplevel.drvPath" 2>/dev/null)
+  b=$(nix eval --raw "$target_ref#$attr.system.build.toplevel.drvPath" 2>/dev/null)
+  if [ "$a" = "$b" ]; then
+    echo "$h: identical"
+    continue
+  fi
+
+  status=1
+  la=$(nix eval --json "$base_ref#$attr" --apply "$lists" 2>/dev/null)
+  lb=$(nix eval --json "$target_ref#$attr" --apply "$lists" 2>/dev/null)
+  if [ "$la" = "$lb" ]; then
+    echo "$h: drvPath differs, but sorted systemPackages/extraGroups/home.packages match: a reorder, unless nix-diff shows changes outside those lists"
+  else
+    echo "$h: drvPath differs and sorted list contents differ:"
+    diff <(jq -S . <<<"$la") <(jq -S . <<<"$lb") | sed 's/^/    /' || true
+  fi
+  echo "  nix-diff $a $b"
+  { nix run nixpkgs#nix-diff -- --color never --skip-already-compared --context 1 "$a" "$b" 2>/dev/null |
+    grep -v '^$' | cut -c1-200 | head -40 | sed 's/^/    /'; } || true
+done
+exit $status
