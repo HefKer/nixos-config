@@ -3,7 +3,10 @@ let
   hostName = "lenovo";
 in
 {
-  imports = [ ./disks.nix ];
+  imports = [
+    ./disks.nix
+    ./networking.nix
+  ];
 
   system.stateVersion = "25.11";
   networking.hostName = hostName;
