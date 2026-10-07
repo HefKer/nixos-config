@@ -19,7 +19,6 @@ in
 
       gaming = {
         enable = true;
-        nvidia.enable = true;
         tablet.enable = true;
       };
 
