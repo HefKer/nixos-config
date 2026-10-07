@@ -29,8 +29,6 @@ in
       extraGroups = [
         "networkmanager"
         "wheel"
-        "dialout" # Rquired by CharaChorder
-        # use "tty" if "dialout" stops working
       ];
     };
   };

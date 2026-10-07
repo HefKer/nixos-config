@@ -7,6 +7,7 @@ in
     ./audio.nix
     ./chromium.nix
     ./development
+    ./input.nix
     ./packages.nix
     ./gaming
     ./virtualization

@@ -23,13 +23,6 @@
       cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
     };
 
-    services = {
-      libinput.enable = true;
-
-      xserver.xkb = {
-        layout = "us";
-        variant = "";
-      };
-    };
+    services.libinput.enable = true;
   };
 }
