@@ -52,7 +52,7 @@
           };
           modules = [
             ./modules
-            ./hosts/desktop.nix
+            ./hosts/desktop
           ];
         };
 
@@ -63,7 +63,7 @@
           };
           modules = [
             ./modules
-            ./hosts/lenovo.nix
+            ./hosts/lenovo
           ];
         };
       };
