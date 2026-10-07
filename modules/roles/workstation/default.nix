@@ -25,5 +25,11 @@ in
         "development"
         "gaming"
         "virtualization"
-      ];
+      ]
+    ++ [
+      {
+        assertion = cfg.gaming.tablet.enable -> cfg.gaming.enable;
+        message = "custom.roles.workstation.gaming.tablet.enable requires custom.roles.workstation.gaming.enable";
+      }
+    ];
 }
