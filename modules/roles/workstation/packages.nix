@@ -47,6 +47,7 @@ in
       translate-shell # `def` fish func: dict/translate lookups
       oscclip # osc-copy/osc-paste: pipe to local clipboard over SSH via OSC 52
       wiremix
+      wl-clipboard
 
       # --- System Information & Diagnostics ---
       pciutils
@@ -76,6 +77,8 @@ in
       zapzap # Whatsapp
       qbittorrent
       webex
+      czkawka
+      moonlight-qt
 
       # Image manipulation
       inkscape
@@ -133,6 +136,7 @@ in
       firefox.enable = true;
       localsend.enable = true;
       kdeconnect.enable = true;
+      obs-studio.enable = true;
       gnupg.agent = {
         # for rbw
         enable = true;

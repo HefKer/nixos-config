@@ -79,8 +79,6 @@ in
     ];
 
     programs = {
-      obs-studio.enable = true;
-
       # nix-direnv keeps dev shells rooted so GC doesn't collect them
       direnv = {
         enable = true;

@@ -10,11 +10,8 @@
     wget # nix search wget to list installed pkgs
     tree-sitter
     lsof
-    czkawka
     p7zip
     unrar
-    moonlight-qt
-    wl-clipboard
     # File conversions
     imagemagick
     pandoc
