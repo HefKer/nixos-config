@@ -79,7 +79,6 @@ in
     ];
 
     programs = {
-      niri.enable = true;
       obs-studio.enable = true;
 
       # nix-direnv keeps dev shells rooted so GC doesn't collect them

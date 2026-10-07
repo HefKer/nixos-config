@@ -7,6 +7,7 @@ in
     ./audio.nix
     ./chromium.nix
     ./development
+    ./display.nix
     ./input.nix
     ./packages.nix
     ./gaming

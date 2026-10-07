@@ -15,15 +15,7 @@ in
 
     # consider moving these later
     services = {
-      xserver.enable = true; # xkb, libinput, nvidia driver attach
       printing.enable = true;
-
-      displayManager.sddm = {
-        enable = true;
-        wayland.enable = true;
-      };
-      xserver.displayManager.lightdm.enable = lib.mkForce false;
-      gnome.gnome-keyring.enable = true; # req by niri's secret portal
     };
     networking.networkmanager.enable = true;
 
@@ -146,20 +138,11 @@ in
       starship.enable = true;
       firefox.enable = true;
       localsend.enable = true;
-      xwayland.enable = true; # required by onlyoffice
       kdeconnect.enable = true;
       gnupg.agent = {
         # for rbw
         enable = true;
         pinentryPackage = pkgs.pinentry-curses;
-      };
-      dms-shell = {
-        enable = true;
-
-        systemd = {
-          enable = true;
-          restartIfChanged = true;
-        };
       };
     };
 
@@ -180,15 +163,6 @@ in
         serif = [ "Noto Serif" ];
         monospace = [ "JetBrainsMono Nerd Font" ];
       };
-    };
-
-    environment.sessionVariables = {
-      NIXOS_OZONE_WL = "1";
-    };
-
-    hardware.graphics = {
-      enable = true;
-      enable32Bit = true;
     };
   };
 }
