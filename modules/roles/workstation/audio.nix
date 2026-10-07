@@ -11,8 +11,7 @@ in
         alsa.enable = true;
         alsa.support32Bit = true;
         pulse.enable = true;
-        # JACK apps (MIDI/adv audio); desktop-only until Phase 4 of ADR-0004.
-        jack.enable = lib.mkIf (config.custom.platform == "desktop") true;
+        jack.enable = true;
       };
     };
 
