@@ -11,11 +11,11 @@ This repository is structured in a modularized format, with each directory servi
 **modules**: Reusable chunks of configuration that can be toggled on or off.
 
 - `core` contains the baseline configuration that applies to every machine.
-- `platforms` contains setup for a class of hardware (desktop, laptop); each host picks exactly one.
+- `platforms` contains setup shared by a class of hardware (desktop, laptop); each host picks exactly one, and several hosts may share it.
 - `roles` contains configurations that apply to specific types of machines — currently just workstation.
   - Workstation is further split into sub-roles: development, gaming and virtualization.
 
-**hosts**: Configurations for specific devices. Each host file picks the platform and roles it wants and turns them on.
+**hosts**: One directory per machine. `default.nix` picks the platform and roles and turns them on; the other files hold facts unique to that one machine, such as its disk layout and site-specific wifi profiles.
 
 **lib**: Utility functions and constants used throughout the flake.
 
@@ -27,4 +27,4 @@ This repository is structured in a modularized format, with each directory servi
 
 Every toggle in this flake is a custom option under the `custom.*` namespace — `custom.platform = "laptop"`, `custom.roles.workstation.development.enable`, and so on. Modules declare their options and keep their config behind `lib.mkIf`, so nothing takes effect until a host asks for it.
 
-That makes `hosts/desktop.nix` and `hosts/lenovo.nix` the main files: they're the only place anything is switched on, so each one reads as a short description of what that machine actually is.
+That makes `hosts/desktop/default.nix` and `hosts/lenovo/default.nix` the main files: they're the only place anything is switched on, so each one reads as a short description of what that machine actually is.
