@@ -5,6 +5,8 @@ in
 {
   imports = [
     ./disks.nix
+    ./hardware.nix
+    ./input.nix
     ./networking.nix
   ];
 

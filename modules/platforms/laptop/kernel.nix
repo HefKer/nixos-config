@@ -7,16 +7,7 @@
 {
   config = lib.mkIf (config.custom.platform == "laptop") {
     boot = {
-      initrd.availableKernelModules = [
-        "xhci_pci"
-        "thunderbolt"
-        "nvme"
-        "usb_storage"
-        "sd_mod"
-      ];
-      initrd.kernelModules = [ ];
       kernelModules = [ "kvm-intel" ];
-      extraModulePackages = [ ];
       kernelPackages = pkgs.linuxPackages_latest;
 
       loader = {
@@ -45,8 +36,6 @@
       xserver.xkb = {
         layout = "us";
         variant = "";
-        # todo: replace with services.keyd for per-device remapping (see TODO.md).
-        options = lib.mkForce "caps:escape";
       };
     };
 
