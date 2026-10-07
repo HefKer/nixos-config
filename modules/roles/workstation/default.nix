@@ -4,6 +4,7 @@ let
 in
 {
   imports = [
+    ./audio.nix
     ./chromium.nix
     ./development
     ./packages.nix

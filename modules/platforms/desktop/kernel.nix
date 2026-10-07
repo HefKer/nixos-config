@@ -12,20 +12,6 @@
       enableRedistributableFirmware = lib.mkDefault true;
       cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
     };
-
-    services = {
-      # Enable sound with pipewire.
-      pulseaudio.enable = false;
-      pipewire = {
-        enable = true;
-        alsa.enable = true;
-        alsa.support32Bit = true;
-        pulse.enable = true;
-        jack.enable = true; # for JACK apps (MIDI/adv audio)
-      };
-    };
-
-    security.rtkit.enable = true;
   };
 
 }
