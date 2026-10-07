@@ -15,6 +15,7 @@ in
     ./packages.nix
     ./printing.nix
     ./gaming
+    ./local-ai
     ./virtualization
   ];
 
@@ -31,6 +32,7 @@ in
       [
         "development"
         "gaming"
+        "local-ai"
         "virtualization"
       ]
     ++ [

@@ -82,9 +82,6 @@ in
       desktop-file-utils
       cabextract
 
-      # AI - Here because my laptop is a potato with no gpu
-      lmstudio # todo: move somewhere else
-
       # Games
       # gamemoderun's LD_PRELOAD aborts bwrap on exit (FeralInteractive/gamemode#577).
       (osu-lazer-bin.override { gmrun_enable = false; })

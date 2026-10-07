@@ -23,6 +23,7 @@ in
       };
 
       development.enable = true;
+      local-ai.enable = true;
     };
   };
 }

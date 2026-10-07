@@ -13,7 +13,7 @@ This repository is structured in a modularized format, with each directory servi
 - `core` contains the baseline configuration that applies to every machine.
 - `platforms` contains setup shared by a class of hardware (desktop, laptop); each host picks exactly one, and several hosts may share it.
 - `roles` contains configurations that apply to specific types of machines — currently just workstation.
-  - Workstation is further split into sub-roles: development, gaming and virtualization.
+  - Workstation is further split into sub-roles: development, gaming, local-ai and virtualization.
 
 **hosts**: One directory per machine. `default.nix` picks the platform and roles and turns them on; the other files hold facts unique to that one machine, such as its disk layout and site-specific wifi profiles.
 
