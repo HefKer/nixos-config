@@ -110,9 +110,11 @@ in
       ranger
       rbw # rust bitwarden
       pinentry-curses
+      pinentry-qt
       python313Packages.tldextract
       python313Packages.pyperclip
       rofi
+      fuzzel
       yt-dlp
       (mpv.override {
         scripts = [
