@@ -11,8 +11,8 @@ than re-checking those by eye. The rules below are the judgement calls no check 
   headless server would also want; a hardware fact belongs to the platform; a fact true of one
   machine only belongs in its host directory.
 - Options live under `custom.*`, with config gated behind `lib.mkIf`. `mkEnableOption` is the
-  default form; `custom.platform` is the one enum. Roles and sub-roles get one switch each, never
-  one per file.
+  default form; the enums are `custom.platform` and the home layer's `custom.home.dotfiles.host`.
+  Roles and sub-roles get one switch each, never one per file.
 
 ## Behavior
 

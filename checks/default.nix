@@ -7,29 +7,33 @@
 let
   inherit (pkgs) lib;
 
-  # The link set's targets per host, exactly; extend this as packages move off stow.
+  # Each host's link set, exactly: target in $HOME -> source under the dotfiles root.
   expectedLinks = {
-    desktop = [ ".config/mpv" ];
-    lenovo = [ ".config/mpv" ];
+    desktop.".config/mpv" = "mpv/.config/mpv";
+    lenovo.".config/mpv" = "mpv/.config/mpv";
   };
 
-  # Shell lines checking one host: its targets, then where every built source links to.
+  # Shell lines checking one host, built from the home.file set home-manager actually produces.
   linkChecks =
-    host: targets:
+    host: expected:
     let
       inherit (nixosConfigurations.${host}) config;
-      root = config.home-manager.extraSpecialArgs.dotfilesRoot;
-      hm = config.home-manager.users.${consts.username};
-      inherit (hm.custom.home.dotfiles) links;
-      words = xs: lib.escapeShellArg (lib.concatStringsSep " " (lib.sort lib.lessThan xs));
+      root = lib.escapeShellArg config.home-manager.extraSpecialArgs.dotfilesRoot;
+      files = lib.filter (f: f.enable) (
+        builtins.attrValues config.home-manager.users.${consts.username}.home.file
+      );
+      pairs = lib.mapAttrsToList (t: src: "${t}=${src}") expected;
     in
     ''
-      targets ${host} ${words targets} ${words (builtins.attrNames links)}
-      root ${host} ${lib.escapeShellArg root}
+      produced=""
+      root ${host} ${root}
     ''
-    + lib.concatMapStrings (t: ''
-      link ${host} ${lib.escapeShellArg t} ${hm.home.file.${t}.source} ${lib.escapeShellArg "${root}/${links.${t}}"}
-    '') (builtins.attrNames links);
+    + lib.concatMapStrings (f: ''
+      entry ${root} ${lib.escapeShellArg f.target} ${f.source}
+    '') files
+    + ''
+      compare ${host} ${root} ${lib.escapeShellArg (lib.concatStringsSep " " (lib.sort lib.lessThan pairs))}
+    '';
 
   # Fails, printing the matches, when `search` (run from the repo root) prints anything.
   noMatches =
@@ -69,18 +73,19 @@ in
   # The flake-trap guard (ADR-0001); readlink never follows a link, so the root needn't exist.
   dotfiles = pkgs.runCommandLocal "check-dotfiles" { } ''
     fail=0
-    targets() {
-      [ "$2" = "$3" ] || { echo "$1: link targets are '$3', expected '$2'"; fail=1; }
-    }
     root() {
       case "$2" in /nix/store/*) echo "$1: dotfiles root $2 is in the store"; fail=1 ;; esac
     }
-    link() {
-      if ! actual=$(readlink "$3"); then
-        echo "$1: ~/$2 is not an out-of-store symlink: $3"
-        fail=1
-      elif [ "$actual" != "$4" ]; then
-        echo "$1: ~/$2 links to $actual, expected $4"
+    # Records target=source for every built source that is an out-of-store symlink into the root.
+    entry() {
+      if actual=$(readlink "$3") && [ "''${actual#"$1"/}" != "$actual" ]; then
+        produced="$produced $2=''${actual#"$1"/}"
+      fi
+    }
+    compare() {
+      got=$(printf '%s\n' $produced | sort | xargs)
+      if [ "$got" != "$3" ]; then
+        echo "$1: out-of-store links into $2 are '$got', expected '$3'"
         fail=1
       fi
     }
