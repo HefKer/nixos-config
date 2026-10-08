@@ -1,4 +1,4 @@
-{ ... }:
+{ consts, ... }:
 let
   hostName = "desktop";
 in
@@ -25,5 +25,10 @@ in
       development.enable = true;
       local-ai.enable = true;
     };
+  };
+
+  home-manager.users.${consts.username}.custom.home.dotfiles = {
+    enable = true;
+    host = hostName;
   };
 }

@@ -1,4 +1,4 @@
-{ ... }:
+{ consts, ... }:
 let
   hostName = "lenovo";
 in
@@ -22,5 +22,10 @@ in
       gaming.enable = true;
       virtualization.enable = true;
     };
+  };
+
+  home-manager.users.${consts.username}.custom.home.dotfiles = {
+    enable = true;
+    host = hostName;
   };
 }

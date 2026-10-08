@@ -22,7 +22,7 @@ let
     else
       config.lib.file.mkOutOfStoreSymlink "${dotfilesRoot}/${source}";
 
-  links = lib.listToAttrs (map entry [ ]);
+  links = lib.listToAttrs (map entry [ "mpv/.config/mpv" ]);
 in
 {
   options.custom.home.dotfiles = with lib; {
