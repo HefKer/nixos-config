@@ -11,6 +11,7 @@ in
 {
   imports = [
     ./modules/cli.nix
+    ./modules/dotfiles.nix
   ] # default to CLI group
   ++ lib.optional isWorkstation ./modules/gui.nix;
 
