@@ -16,7 +16,7 @@ each shell command runs in a fresh shell, so the variable is gone by the next ca
 ## Conventions
 
 - **Create**: `gh issue create --repo HefKer/nixos-issues --title "..." --body-file -` (heredoc into stdin for multi-line bodies)
-- **Read**: `gh issue view <n> --repo HefKer/nixos-issues --comments`
+- **Read**: `gh issue view <n> --repo HefKer/nixos-issues --json title,body,labels,comments --jq '.title, ([.labels[].name] | join(", ")), .body, (.comments[].body)'` (piped, `--comments` prints only the comments, without the body)
 - **List**: `gh issue list --repo HefKer/nixos-issues --state open --json number,title,body,labels,comments --jq '[.[] | {number, title, body, labels: [.labels[].name], comments: [.comments[].body]}]'`, with `--label` / `--state` / `--milestone` filters
 - **Comment**: `gh issue comment <n> --repo HefKer/nixos-issues --body "..."`
 - **Label**: `gh issue edit <n> --repo HefKer/nixos-issues --add-label "..."` / `--remove-label "..."`
@@ -61,7 +61,7 @@ Create a GitHub issue in `HefKer/nixos-issues`.
 
 ## When a skill says "fetch the relevant ticket"
 
-`gh issue view <n> --repo HefKer/nixos-issues --comments`.
+Run the **Read** command under Conventions.
 
 ## Pull requests as a triage surface
 

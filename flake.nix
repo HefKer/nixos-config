@@ -67,5 +67,12 @@
           ];
         };
       };
+
+      formatter.${system} = pkgs.nixfmt;
+
+      checks.${system} = import ./checks {
+        inherit pkgs consts;
+        src = self;
+      };
     };
 }

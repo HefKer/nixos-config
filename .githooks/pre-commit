@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Builds the flake's checks; host evaluation is left to `nix flake check` (~25s).
+set -euo pipefail
+attrs=$(nix eval --raw .#checks.x86_64-linux --apply \
+  'cs: builtins.concatStringsSep " " (map (n: ".#checks.x86_64-linux.${n}") (builtins.attrNames cs))')
+# shellcheck disable=SC2086
+nix build --no-link --quiet $attrs

@@ -1,12 +1,18 @@
-{ consts, lib, osConfig, ... }:
+{
+  consts,
+  lib,
+  osConfig,
+  ...
+}:
 let
   inherit (consts) username home;
   isWorkstation = osConfig.custom.roles.workstation.enable or false;
 in
 {
-  imports =
-    [ ./modules/cli.nix ] # default to CLI group
-    ++ lib.optional isWorkstation ./modules/gui.nix;
+  imports = [
+    ./modules/cli.nix
+  ] # default to CLI group
+  ++ lib.optional isWorkstation ./modules/gui.nix;
 
   home = {
     inherit username;

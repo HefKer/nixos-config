@@ -19,6 +19,10 @@ This repository is structured in a modularized format, with each directory servi
 
 **lib**: Utility functions and constants used throughout the flake.
 
+**checks**: Tests `nix flake check` runs on top of evaluating every host: formatting (`nix fmt`) and the module conventions. `.githooks/pre-commit` runs them on every commit once enabled with `git config core.hooksPath .githooks`.
+
+**scripts**: `same-system` proves a refactor leaves every host's build unchanged.
+
 **homes**: Home Manager — user-level packages and dotfiles.
 
 **docs**: Notes to myself. Architecture decisions, research, and things I've learned along the way. `docs/agents/` documents the workflows I use with AI coding agents — including where issues live, which is the private `nixos-issues` repo rather than this one (see `docs/adr/0002-issues-live-in-a-separate-private-repo.md`).

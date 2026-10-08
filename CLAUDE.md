@@ -2,15 +2,9 @@
 
 ## Rules
 
-- **Never apply changes to the running system.** No `nixos-rebuild`, `home-manager switch`, `nix-collect-garbage`, or writes to `/etc/nixos`. Propose and explain; let the user run it. (`nix flake check` / `nix flake update` are fine — they don't mutate the system.)
-- **Explain every change in chat** — what it does, why, which NixOS concept. Goal is the user understands the config, not just that it works. Keep code comments minimal — one line, only for a non-obvious invariant or gotcha — the full explanation belongs in the chat reply, not the file.
-
-## Module system conventions
-
-- Custom options live under `custom.*`, gated behind `lib.mkIf`. `mkEnableOption` is the default form; the exception is `custom.platform`, an enum each host sets to exactly one hardware class. Roles and sub-roles get one switch each — see `docs/adr/0004-module-tree-layers-and-subsystems.md`.
-- `hosts/*/default.nix` are the **only** place anything is switched on: every `enable = true` and the `custom.platform` choice live there. Other files in a host directory are plain config — no options, no `mkIf`.
-- Use `consts` (from `lib/consts.nix`, passed via `specialArgs`) for username/timezone/locale — never hardcode.
-- `system.stateVersion = "25.11"` — do not change without understanding implications.
+- **Never apply changes to the running system.** No `nixos-rebuild`, `home-manager switch`, `nix-collect-garbage`, or writes to `/etc/nixos`. Propose and explain; let the user run it. Evaluating and building into the store is fine: `nix flake check`, `nix flake update`, `nix eval`, `nix build --no-link`.
+- **Explain every change in chat** — what it does, why, which NixOS concept. Goal is the user understands the config, not just that it works.
+- **Verify** with `nix flake check`; a change meant to leave what gets built untouched (a move, rename or split) also runs `scripts/same-system [base-rev]`. Review against `CODING_STANDARDS.md`.
 
 ## Agent skills
 
