@@ -72,6 +72,7 @@
 
       checks.${system} = import ./checks {
         inherit pkgs consts;
+        inherit (self) nixosConfigurations;
         src = self;
       };
     };
