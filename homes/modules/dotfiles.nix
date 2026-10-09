@@ -8,7 +8,6 @@ let
   cfg = config.custom.home.dotfiles;
 
   # A bare entry's target is its source minus stow's package directory: "mpv/.config/mpv" -> .config/mpv.
-  # An entry may name a single file rather than a directory; it is linked the same way.
   stowEntry = source: {
     name = lib.concatStringsSep "/" (lib.drop 1 (lib.splitString "/" source));
     value = source;
@@ -26,7 +25,7 @@ let
     map stowEntry [
       "DankMaterialShell/.config/DankMaterialShell"
       "fish/.config/fish"
-      # The directory also holds herdr's sockets, session and logs; herdr rewrites this file in place.
+      # The directory also holds herdr's sockets, session and logs; herdr writes this file in place, not by rename.
       "herdr/.config/herdr/config.toml"
       "mpv/.config/mpv"
       "niri/.config/niri"
