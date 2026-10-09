@@ -1,4 +1,4 @@
-# CLAUDE.md
+# AGENTS.md
 
 ## Rules
 
@@ -20,7 +20,7 @@ The five canonical roles, under their canonical names. See `docs/agents/triage-l
 
 ### Domain docs
 
-Single-context: `CONTEXT.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
+Single-context: `GLOSSARY.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
 
 ## More
 

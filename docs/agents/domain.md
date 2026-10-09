@@ -5,7 +5,7 @@ codebase. Layout is **single-context**.
 
 ## Before exploring, read these
 
-- **`CONTEXT.md`** at the repo root: the glossary for how system configuration, user
+- **`GLOSSARY.md`** at the repo root: the glossary for how system configuration, user
   configuration, and hand-edited dotfiles relate.
 - **`docs/adr/`**: read the ADRs that touch the area you're about to work in.
 
@@ -17,7 +17,7 @@ a decision actually gets resolved.
 
 ```
 /
-├── CONTEXT.md
+├── GLOSSARY.md
 ├── docs/
 │   ├── adr/
 │   │   └── 0001-dotfiles-wired-by-home-manager-as-out-of-store-symlinks.md
@@ -31,7 +31,7 @@ a decision actually gets resolved.
 ## Use the glossary's vocabulary
 
 When your output names a domain concept (an issue title, a refactor proposal, a hypothesis, a
-module name), use the term as `CONTEXT.md` defines it, including the synonyms its _Avoid_
+module name), use the term as `GLOSSARY.md` defines it, including the synonyms its _Avoid_
 lines rule out — write "home layer", not "HM layer"; "host", not "box".
 
 If the concept you need isn't in the glossary, that's a signal: either you're inventing

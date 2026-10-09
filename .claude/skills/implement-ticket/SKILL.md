@@ -8,7 +8,7 @@ Implement ticket `$ARGUMENTS` from `HefKer/nixos-issues`. Instructions the user 
 the number (merge, close the issue, skip review) override the matching step below.
 
 1. **Read the ticket** with the **Read** command in `docs/agents/issue-tracker.md`, then the
-   ADRs and `CONTEXT.md` terms it names as its authority. Done when you can write its
+   ADRs and `GLOSSARY.md` terms it names as its authority. Done when you can write its
    acceptance criteria as a checklist, and know whether the ticket is **neutral** (moves,
    renames, splits: nothing built should change) or names the build differences it wants.
 2. **Branch in a new worktree** off `main`:

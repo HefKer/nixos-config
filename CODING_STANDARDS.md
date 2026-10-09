@@ -7,7 +7,7 @@ than re-checking those by eye. The rules below are the judgement calls no check 
 ## Layering
 
 - New config sits in the right layer, per the Core / Platform / Role / Sub-role / Subsystem
-  terms in `CONTEXT.md` and `docs/adr/0004-module-tree-layers-and-subsystems.md`. Core is what a
+  terms in `GLOSSARY.md` and `docs/adr/0004-module-tree-layers-and-subsystems.md`. Core is what a
   headless server would also want; a hardware fact belongs to the platform; a fact true of one
   machine only belongs in its host directory.
 - Options live under `custom.*`, with config gated behind `lib.mkIf`. `mkEnableOption` is the
@@ -25,7 +25,7 @@ than re-checking those by eye. The rules below are the judgement calls no check 
 ## Docs and comments
 
 - A change that moves or renames a file updates every doc naming the old path (`README.md`,
-  `CONTEXT.md`, `CLAUDE.md`, `docs/agents/`) in the same branch. ADRs are historical records and
-  keep their original paths.
+  `GLOSSARY.md`, `AGENTS.md`, `docs/agents/`) in the same branch. ADRs are historical
+  records and keep their original paths.
 - Code comments are one line, only for a non-obvious invariant or gotcha. The explanation of a
   change belongs in the commit message and the chat, not the file.
