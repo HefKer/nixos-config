@@ -23,9 +23,14 @@ let
 
   links = lib.listToAttrs (
     map stowEntry [
+      "DankMaterialShell/.config/DankMaterialShell"
       "fish/.config/fish"
       "mpv/.config/mpv"
+      "niri/.config/niri"
       "nvim/.config/nvim"
+      "qutebrowser/.config/qutebrowser"
+      # The parent holds history and caches, which must not enter the dotfiles root.
+      "qutebrowser/.local/share/qutebrowser/userscripts"
       "wezterm/.config/wezterm"
     ]
   );

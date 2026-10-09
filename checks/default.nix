@@ -10,16 +10,24 @@ let
   # Each host's link set, exactly: target in $HOME -> source under the dotfiles root.
   expectedLinks = {
     desktop = {
+      ".config/DankMaterialShell" = "DankMaterialShell/.config/DankMaterialShell";
       ".config/fish" = "fish/.config/fish";
       ".config/mpv" = "mpv/.config/mpv";
+      ".config/niri" = "niri/.config/niri";
       ".config/nvim" = "nvim/.config/nvim";
+      ".config/qutebrowser" = "qutebrowser/.config/qutebrowser";
       ".config/wezterm" = "wezterm/.config/wezterm";
+      ".local/share/qutebrowser/userscripts" = "qutebrowser/.local/share/qutebrowser/userscripts";
     };
     lenovo = {
+      ".config/DankMaterialShell" = "DankMaterialShell/.config/DankMaterialShell";
       ".config/fish" = "fish/.config/fish";
       ".config/mpv" = "mpv/.config/mpv";
+      ".config/niri" = "niri/.config/niri";
       ".config/nvim" = "nvim/.config/nvim";
+      ".config/qutebrowser" = "qutebrowser/.config/qutebrowser";
       ".config/wezterm" = "wezterm/.config/wezterm";
+      ".local/share/qutebrowser/userscripts" = "qutebrowser/.local/share/qutebrowser/userscripts";
     };
   };
 
