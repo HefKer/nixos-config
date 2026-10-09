@@ -9,8 +9,18 @@ let
 
   # Each host's link set, exactly: target in $HOME -> source under the dotfiles root.
   expectedLinks = {
-    desktop.".config/mpv" = "mpv/.config/mpv";
-    lenovo.".config/mpv" = "mpv/.config/mpv";
+    desktop = {
+      ".config/fish" = "fish/.config/fish";
+      ".config/mpv" = "mpv/.config/mpv";
+      ".config/nvim" = "nvim/.config/nvim";
+      ".config/wezterm" = "wezterm/.config/wezterm";
+    };
+    lenovo = {
+      ".config/fish" = "fish/.config/fish";
+      ".config/mpv" = "mpv/.config/mpv";
+      ".config/nvim" = "nvim/.config/nvim";
+      ".config/wezterm" = "wezterm/.config/wezterm";
+    };
   };
 
   # Shell lines checking one host, built from the home.file set home-manager actually produces.

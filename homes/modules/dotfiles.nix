@@ -21,7 +21,14 @@ let
     else
       config.lib.file.mkOutOfStoreSymlink "${dotfilesRoot}/${source}";
 
-  links = lib.listToAttrs (map stowEntry [ "mpv/.config/mpv" ]);
+  links = lib.listToAttrs (
+    map stowEntry [
+      "fish/.config/fish"
+      "mpv/.config/mpv"
+      "nvim/.config/nvim"
+      "wezterm/.config/wezterm"
+    ]
+  );
 in
 {
   options.custom.home.dotfiles = with lib; {
