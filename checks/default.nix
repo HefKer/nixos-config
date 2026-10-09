@@ -12,6 +12,7 @@ let
     desktop = {
       ".config/DankMaterialShell" = "DankMaterialShell/.config/DankMaterialShell";
       ".config/fish" = "fish/.config/fish";
+      ".config/herdr/config.toml" = "herdr/.config/herdr/config.toml";
       ".config/mpv" = "mpv/.config/mpv";
       ".config/niri" = "niri/.config/niri";
       ".config/nvim" = "nvim/.config/nvim";
@@ -22,6 +23,7 @@ let
     lenovo = {
       ".config/DankMaterialShell" = "DankMaterialShell/.config/DankMaterialShell";
       ".config/fish" = "fish/.config/fish";
+      ".config/herdr/config.toml" = "herdr/.config/herdr/config.toml";
       ".config/mpv" = "mpv/.config/mpv";
       ".config/niri" = "niri/.config/niri";
       ".config/nvim" = "nvim/.config/nvim";
