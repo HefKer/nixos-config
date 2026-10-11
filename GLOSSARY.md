@@ -87,7 +87,8 @@ An application that rewrites its own configuration file at runtime, typically by
 writing a temporary file and renaming it over the target. The rename destroys a
 file-level symlink, which is why such applications are linked at directory
 granularity. An application that writes its config in place, through the link,
-is not one: herdr does so, and is linked file-level.
+is not one: herdr does so, and is linked file-level. Nor is one that resolves the
+link and renames over its destination: git does so, and is linked file-level.
 _Avoid_: stateful app, self-modifying config
 
 **Drift**:
