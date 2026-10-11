@@ -35,7 +35,7 @@ let
   shared = layer [
     "DankMaterialShell/.config/DankMaterialShell"
     "fish/.config/fish"
-    # git resolves the link before its lock-and-rename, so these survive `git config --global`.
+    # The directory takes git's runtime state (credential-store's secrets, gitk's); git writes through the link.
     "git/.config/git/config"
     "git/.config/git/ignore"
     # The directory also holds herdr's sockets, session and logs; herdr writes this file in place, not by rename.
