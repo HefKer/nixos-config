@@ -24,7 +24,7 @@ let
 
   layer = entries: lib.listToAttrs (map linkEntry entries);
 
-  # A store root (a deploy-only host) gets store copies; anything else stays editable in place, deliberately (ADR-0001).
+  # A store root (a deploy-only host) gets store copies; anything else stays editable in place (ADR-0001).
   linkSource =
     source:
     if lib.hasPrefix "${builtins.storeDir}/" dotfilesRoot then
