@@ -14,6 +14,8 @@ let
       ".config/niri-host.kdl" = "niri/host/desktop.kdl";
       ".config/DankMaterialShell" = "DankMaterialShell/.config/DankMaterialShell";
       ".config/fish" = "fish/.config/fish";
+      ".config/git/config" = "git/.config/git/config";
+      ".config/git/ignore" = "git/.config/git/ignore";
       ".config/herdr/config.toml" = "herdr/.config/herdr/config.toml";
       ".config/mpv" = "mpv/.config/mpv";
       ".config/niri" = "niri/.config/niri";
@@ -26,6 +28,8 @@ let
       ".config/niri-host.kdl" = "niri/host/lenovo.kdl";
       ".config/DankMaterialShell" = "DankMaterialShell/.config/DankMaterialShell";
       ".config/fish" = "fish/.config/fish";
+      ".config/git/config" = "git/.config/git/config";
+      ".config/git/ignore" = "git/.config/git/ignore";
       ".config/herdr/config.toml" = "herdr/.config/herdr/config.toml";
       ".config/mpv" = "mpv/.config/mpv";
       ".config/niri" = "niri/.config/niri";
@@ -88,10 +92,9 @@ in
       "host files other than default.nix are plain config, with no options or mkIf:"
       "grep -rnE 'mkIf|mkOption|mkEnableOption' --include='*.nix' hosts | grep -v '/default\\.nix:'";
 
-  # The cli.nix exemption goes away once git config leaves home-manager.
   no-hardcoded-consts =
     noMatches "no-hardcoded-consts" "use consts (lib/consts.nix) instead of these literals:"
-      "grep -rnF -e '\"${consts.username}\"' -e '${consts.home}' -e '${consts.timeZone}' -e '${consts.defaultLocale}' --include='*.nix' . | grep -vE '^\\./lib/consts\\.nix:|^\\./homes/modules/cli\\.nix:[0-9]+: *name = \"${consts.username}\";'";
+      "grep -rnF -e '\"${consts.username}\"' -e '${consts.home}' -e '${consts.timeZone}' -e '${consts.defaultLocale}' --include='*.nix' . | grep -v '^\\./lib/consts\\.nix:'";
 
   # The flake-trap guard (ADR-0001); readlink never follows a link, so the root needn't exist.
   dotfiles = pkgs.runCommandLocal "check-dotfiles" { } ''

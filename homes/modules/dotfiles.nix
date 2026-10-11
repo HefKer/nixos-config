@@ -35,6 +35,9 @@ let
   shared = layer [
     "DankMaterialShell/.config/DankMaterialShell"
     "fish/.config/fish"
+    # git resolves the link before its lock-and-rename, so these survive `git config --global`.
+    "git/.config/git/config"
+    "git/.config/git/ignore"
     # The directory also holds herdr's sockets, session and logs; herdr writes this file in place, not by rename.
     "herdr/.config/herdr/config.toml"
     "mpv/.config/mpv"
