@@ -9,20 +9,20 @@ let
 
   # A bare entry's target is its source minus stow's package directory: "mpv/.config/mpv" -> .config/mpv.
   # A { source, target } pair gives one of several variants the canonical name.
-  entry =
-    e:
-    if builtins.isString e then
+  linkEntry =
+    spec:
+    if builtins.isString spec then
       {
-        name = lib.concatStringsSep "/" (lib.drop 1 (lib.splitString "/" e));
-        value = e;
+        name = lib.concatStringsSep "/" (lib.drop 1 (lib.splitString "/" spec));
+        value = spec;
       }
     else
       {
-        name = e.target;
-        value = e.source;
+        name = spec.target;
+        value = spec.source;
       };
 
-  layer = entries: lib.listToAttrs (map entry entries);
+  layer = entries: lib.listToAttrs (map linkEntry entries);
 
   # A store root (a deploy-only host) gets store copies; anything else stays editable in place.
   linkSource =

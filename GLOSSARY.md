@@ -68,7 +68,9 @@ _Avoid_: file list, mappings
 **Canonical name**:
 The target filename an application actually reads, when several interchangeable
 variants of a file exist side by side and one is chosen. The mechanism by which
-configuration varies per host without being generated.
+configuration varies per host without being generated. It is linked file-level,
+beside the application's directory link rather than inside it, since a link cannot
+be placed inside a linked directory; niri's per-host file is the case.
 
 **Out-of-store symlink**:
 A link whose chain terminates at a path inside `$HOME` rather than in the Nix
