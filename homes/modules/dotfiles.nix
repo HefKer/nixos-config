@@ -7,8 +7,7 @@
 let
   cfg = config.custom.home.dotfiles;
 
-  # A bare entry's target is its source minus its package directory: "mpv/.config/mpv" -> .config/mpv.
-  # A { source, target } pair gives one of several variants the canonical name.
+  # "mpv/.config/mpv" links to .config/mpv (package dir dropped); { source, target } names a per-host variant.
   linkEntry =
     spec:
     if builtins.isString spec then

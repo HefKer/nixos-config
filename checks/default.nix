@@ -7,8 +7,7 @@
 let
   inherit (pkgs) lib;
 
-  # Each host's link set, exactly: target in $HOME -> source under the dotfiles root.
-  # A canonical name maps to that host's variant, so a swapped or missing host layer fails here.
+  # Each host's exact link set, target in $HOME -> source under the root; a swapped host variant fails here.
   expectedLinks = {
     desktop = {
       ".config/niri-host.kdl" = "niri/host/desktop.kdl";
@@ -95,6 +94,11 @@ in
   no-hardcoded-consts =
     noMatches "no-hardcoded-consts" "use consts (lib/consts.nix) instead of these literals:"
       "grep -rnF -e '\"${consts.username}\"' -e '${consts.home}' -e '${consts.timeZone}' -e '${consts.defaultLocale}' --include='*.nix' . | grep -v '^\\./lib/consts\\.nix:'";
+
+  one-line-comments =
+    noMatches "one-line-comments"
+      "code comments are one line (CODING_STANDARDS.md); these continue one:"
+      "find . -name '*.nix' -exec awk 'FNR==1{p=0} /^[[:space:]]*#/{if(p)print FILENAME\":\"FNR\": \"$0; p=1; next} {p=0}' {} +";
 
   # The flake-trap guard (ADR-0001); readlink never follows a link, so the root needn't exist.
   dotfiles = pkgs.runCommandLocal "check-dotfiles" { } ''

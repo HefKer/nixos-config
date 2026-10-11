@@ -27,7 +27,6 @@ in
       wlr-randr # query/set output modes at runtime (resolution, position)
 
       # --- Development Tools ---
-      # GUI
       zed-editor
 
       # Compilers

@@ -34,8 +34,7 @@ in
         enable = true;
         autoStart = false;
         capSysAdmin = true; # only needed for Wayland -- omit this when using with Xorg
-        # Don't open Sunshine's ports to the whole LAN; stream over Tailscale.
-        # Flip back to true if you need LAN clients (e.g. Moonlight on the couch).
+        # Stream over Tailscale only; flip to true for LAN clients (e.g. Moonlight on the couch).
         openFirewall = false;
       };
     };
@@ -84,8 +83,7 @@ in
       cabextract
 
       # Games
-      # gamemoderun's LD_PRELOAD aborts bwrap on exit (FeralInteractive/gamemode#577).
-      (osu-lazer-bin.override { gmrun_enable = false; })
+      (osu-lazer-bin.override { gmrun_enable = false; }) # gamemoderun's LD_PRELOAD aborts bwrap on exit (FeralInteractive/gamemode#577)
       osu-stable # self-installing wine/proton wrapper; first run downloads ~400MB
 
       # Game launchers
