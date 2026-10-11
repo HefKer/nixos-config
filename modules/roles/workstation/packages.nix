@@ -38,7 +38,6 @@ in
       eza
       proton-vpn-cli
       starship
-      stow
       yazi
       python313Packages.youtube-transcript-api
       kanata
