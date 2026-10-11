@@ -76,6 +76,7 @@ in
       mangohud
       xremap
       wine
+      me3
 
       # osu-stable deps
       zenity
