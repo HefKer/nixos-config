@@ -10,7 +10,7 @@
       # A string, never a path literal: under flakes a path resolves inside the store (ADR-0001).
       dotfilesRoot = "${consts.home}/dots";
     };
-    # No backupFileExtension: a link collision must abort activation, not hide as a backup file.
+    # backupFileExtension stays unset: a link collision must abort activation, not hide as a backup file.
     users.${consts.username} = import ../../homes/hefker.nix;
   };
 }
