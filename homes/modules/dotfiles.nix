@@ -8,10 +8,21 @@ let
   cfg = config.custom.home.dotfiles;
 
   # A bare entry's target is its source minus stow's package directory: "mpv/.config/mpv" -> .config/mpv.
-  stowEntry = source: {
-    name = lib.concatStringsSep "/" (lib.drop 1 (lib.splitString "/" source));
-    value = source;
-  };
+  # A { source, target } pair gives one of several variants the canonical name.
+  entry =
+    e:
+    if builtins.isString e then
+      {
+        name = lib.concatStringsSep "/" (lib.drop 1 (lib.splitString "/" e));
+        value = e;
+      }
+    else
+      {
+        name = e.target;
+        value = e.source;
+      };
+
+  layer = entries: lib.listToAttrs (map entry entries);
 
   # A store root (a deploy-only host) gets store copies; anything else stays editable in place.
   linkSource =
@@ -21,21 +32,37 @@ let
     else
       config.lib.file.mkOutOfStoreSymlink "${dotfilesRoot}/${source}";
 
-  links = lib.listToAttrs (
-    map stowEntry [
-      "DankMaterialShell/.config/DankMaterialShell"
-      "fish/.config/fish"
-      # The directory also holds herdr's sockets, session and logs; herdr writes this file in place, not by rename.
-      "herdr/.config/herdr/config.toml"
-      "mpv/.config/mpv"
-      "niri/.config/niri"
-      "nvim/.config/nvim"
-      "qutebrowser/.config/qutebrowser"
-      # The parent holds history and caches, which must not enter the dotfiles root.
-      "qutebrowser/.local/share/qutebrowser/userscripts"
-      "wezterm/.config/wezterm"
-    ]
-  );
+  shared = layer [
+    "DankMaterialShell/.config/DankMaterialShell"
+    "fish/.config/fish"
+    # The directory also holds herdr's sockets, session and logs; herdr writes this file in place, not by rename.
+    "herdr/.config/herdr/config.toml"
+    "mpv/.config/mpv"
+    "niri/.config/niri"
+    "nvim/.config/nvim"
+    "qutebrowser/.config/qutebrowser"
+    # The parent holds history and caches, which must not enter the dotfiles root.
+    "qutebrowser/.local/share/qutebrowser/userscripts"
+    "wezterm/.config/wezterm"
+  ];
+
+  hosts = {
+    desktop = layer [
+      {
+        source = "niri/host/desktop.kdl";
+        target = ".config/niri-host.kdl";
+      }
+    ];
+    lenovo = layer [
+      {
+        source = "niri/host/lenovo.kdl";
+        target = ".config/niri-host.kdl";
+      }
+    ];
+  };
+
+  # `//`, not recursiveUpdate: a later layer's entry replaces an earlier one for the same target.
+  links = shared // hosts.${cfg.host};
 in
 {
   options.custom.home.dotfiles = with lib; {

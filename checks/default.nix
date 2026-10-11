@@ -8,8 +8,10 @@ let
   inherit (pkgs) lib;
 
   # Each host's link set, exactly: target in $HOME -> source under the dotfiles root.
+  # A canonical name maps to that host's variant, so a swapped or missing host layer fails here.
   expectedLinks = {
     desktop = {
+      ".config/niri-host.kdl" = "niri/host/desktop.kdl";
       ".config/DankMaterialShell" = "DankMaterialShell/.config/DankMaterialShell";
       ".config/fish" = "fish/.config/fish";
       ".config/herdr/config.toml" = "herdr/.config/herdr/config.toml";
@@ -21,6 +23,7 @@ let
       ".local/share/qutebrowser/userscripts" = "qutebrowser/.local/share/qutebrowser/userscripts";
     };
     lenovo = {
+      ".config/niri-host.kdl" = "niri/host/lenovo.kdl";
       ".config/DankMaterialShell" = "DankMaterialShell/.config/DankMaterialShell";
       ".config/fish" = "fish/.config/fish";
       ".config/herdr/config.toml" = "herdr/.config/herdr/config.toml";
