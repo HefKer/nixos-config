@@ -7,7 +7,7 @@
 let
   cfg = config.custom.home.dotfiles;
 
-  # A bare entry's target is its source minus stow's package directory: "mpv/.config/mpv" -> .config/mpv.
+  # A bare entry's target is its source minus its package directory: "mpv/.config/mpv" -> .config/mpv.
   # A { source, target } pair gives one of several variants the canonical name.
   linkEntry =
     spec:
@@ -24,7 +24,7 @@ let
 
   layer = entries: lib.listToAttrs (map linkEntry entries);
 
-  # A store root (a deploy-only host) gets store copies; anything else stays editable in place.
+  # A store root (a deploy-only host) gets store copies; anything else stays editable in place, deliberately (ADR-0001).
   linkSource =
     source:
     if lib.hasPrefix "${builtins.storeDir}/" dotfilesRoot then
