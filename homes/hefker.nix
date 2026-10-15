@@ -7,13 +7,15 @@
 let
   inherit (consts) username home;
   isWorkstation = osConfig.custom.roles.workstation.enable or false;
+  isDevelopment = osConfig.custom.roles.workstation.development.enable or false;
 in
 {
   imports = [
     ./modules/cli.nix
     ./modules/dotfiles.nix
   ] # default to CLI group
-  ++ lib.optional isWorkstation ./modules/gui.nix;
+  ++ lib.optional isWorkstation ./modules/gui.nix
+  ++ lib.optional isDevelopment ./modules/claude-hulio.nix;
 
   home = {
     inherit username;
