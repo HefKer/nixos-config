@@ -1,8 +1,9 @@
 # Coding standards
 
 Read at review time. `nix flake check` (the `checks/` directory) already enforces formatting,
-where `custom.*` gets switched on, plain host files, and `consts` over literals: run it rather
-than re-checking those by eye. The rules below are the judgement calls no check can make.
+where `custom.*` gets switched on, plain host files, `consts` over literals, and one-line
+comments: run it rather than re-checking those by eye. The rules below are the judgement calls
+no check can make.
 
 ## Layering
 
@@ -27,5 +28,5 @@ than re-checking those by eye. The rules below are the judgement calls no check 
 - A change that moves or renames a file updates every doc naming the old path (`README.md`,
   `GLOSSARY.md`, `AGENTS.md`, `docs/agents/`) in the same branch. ADRs are historical
   records and keep their original paths.
-- Code comments are one line, only for a non-obvious invariant or gotcha. The explanation of a
+- Code comments are only for a non-obvious invariant or gotcha. The explanation of a
   change belongs in the commit message and the chat, not the file.

@@ -11,18 +11,12 @@ let
 in
 {
   config = lib.mkIf cfg.enable {
-    # libvirtd is the management daemon in front of QEMU/KVM. KVM is the
-    # in-kernel hypervisor (near-native speed); QEMU emulates the rest of the
-    # machine (disk, nic, usb); libvirt gives them one stable API + XML config.
+    # libvirtd fronts QEMU/KVM: KVM runs the CPU in-kernel, QEMU emulates the devices, libvirt gives one API.
     virtualisation.libvirtd = {
       enable = true;
 
       qemu = {
-        # OVMF (open-source UEFI firmware for guests, incl. Secure Boot needed
-        # for Windows 11) is now shipped by default — no ovmf submodule needed.
-
-        # swtpm emulates a TPM 2.0 chip in software and hands it to the guest.
-        # Windows 11 refuses to install without a TPM 2.0 device present.
+        # OVMF (guest UEFI + Secure Boot) ships by default; swtpm adds the software TPM 2.0 Windows 11 requires.
         swtpm.enable = true;
       };
     };
@@ -36,17 +30,14 @@ in
     # Let the SPICE console forward host USB devices into the running guest.
     virtualisation.spiceUSBRedirection.enable = true;
 
-    # Membership in `libvirtd` lets the user manage the system libvirt instance
-    # (qemu:///system) without sudo. This list merges with core/users.nix.
+    # `libvirtd` membership manages qemu:///system without sudo; merges with core/users.nix.
     users.users.${username}.extraGroups = [ "libvirtd" ];
 
     environment.systemPackages = with pkgs; [
       virt-viewer # standalone SPICE/VNC console (remote-viewer)
       spice-gtk # SPICE client libs: guest clipboard + auto display resize
       virtiofsd # fast host<->guest shared folders (virtio-fs backend)
-      virtio-win # ISO of Windows virtio drivers; mount as a 2nd CD-ROM during
-      # install so Windows can see the virtio disk/nic. Path:
-      # /run/current-system/sw/share/virtio-win/virtio-win.iso
+      virtio-win # Windows virtio drivers ISO, at /run/current-system/sw/share/virtio-win/virtio-win.iso; mount during install
     ];
   };
 }

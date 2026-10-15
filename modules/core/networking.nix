@@ -4,9 +4,7 @@
     openssh = {
       enable = true;
 
-      # Don't punch port 22 through the host firewall. Tailscale SSH
-      # (services.tailscale.extraSetFlags = ["--ssh"]) handles remote access
-      # over the tailnet, so the classic daemon never needs LAN exposure.
+      # Port 22 stays closed to the LAN: Tailscale SSH (extraSetFlags = [ "--ssh" ]) handles remote access.
       openFirewall = false;
 
       settings = {

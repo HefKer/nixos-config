@@ -2,7 +2,8 @@
 # Usage: scripts/same-system [base-rev] [rev]
 # Compares what every nixosConfiguration builds at base-rev (default: main)
 # against rev (default: the working tree). See ADR-0004 for when a drvPath
-# change is still behavior-neutral.
+# change is still behavior-neutral. Exits 1 when any host differs, expected or not;
+# the per-host verdicts are repeated last, so piping through tail keeps them.
 set -euo pipefail
 
 root=$(git rev-parse --show-toplevel)
@@ -39,15 +40,17 @@ base_hosts=$(hosts "$base_ref")
 target_hosts=$(hosts "$target_ref")
 
 status=0
+verdicts=""
+verdict() { echo "$1"; verdicts+="$1"$'\n'; }
 for h in $(echo "$base_hosts $target_hosts" | tr ' ' '\n' | sort -u); do
-  if ! grep -qw "$h" <<<"$base_hosts"; then echo "$h: new host (absent at $base)"; status=1; continue; fi
-  if ! grep -qw "$h" <<<"$target_hosts"; then echo "$h: removed (absent at $target_label)"; status=1; continue; fi
+  if ! grep -qw "$h" <<<"$base_hosts"; then verdict "$h: new host (absent at $base)"; status=1; continue; fi
+  if ! grep -qw "$h" <<<"$target_hosts"; then verdict "$h: removed (absent at $target_label)"; status=1; continue; fi
 
   attr="nixosConfigurations.$h.config"
   a=$(nix eval --raw "$base_ref#$attr.system.build.toplevel.drvPath" 2>/dev/null)
   b=$(nix eval --raw "$target_ref#$attr.system.build.toplevel.drvPath" 2>/dev/null)
   if [ "$a" = "$b" ]; then
-    echo "$h: identical"
+    verdict "$h: identical"
     continue
   fi
 
@@ -55,13 +58,14 @@ for h in $(echo "$base_hosts $target_hosts" | tr ' ' '\n' | sort -u); do
   la=$(nix eval --json "$base_ref#$attr" --apply "$lists" 2>/dev/null)
   lb=$(nix eval --json "$target_ref#$attr" --apply "$lists" 2>/dev/null)
   if [ "$la" = "$lb" ]; then
-    echo "$h: drvPath differs, but sorted systemPackages/extraGroups/home.packages match: a reorder, unless nix-diff shows changes outside those lists"
+    verdict "$h: drvPath differs, but sorted systemPackages/extraGroups/home.packages match: a reorder, unless nix-diff shows changes outside those lists"
   else
-    echo "$h: drvPath differs and sorted list contents differ:"
+    verdict "$h: drvPath differs and sorted list contents differ"
     diff <(jq -S . <<<"$la") <(jq -S . <<<"$lb") | sed 's/^/    /' || true
   fi
   echo "  nix-diff $a $b"
   { nix run nixpkgs#nix-diff -- --color never --skip-already-compared --context 1 "$a" "$b" 2>/dev/null |
     grep -v '^$' | cut -c1-200 | head -40 | sed 's/^/    /'; } || true
 done
+printf -- '--- verdicts\n%s' "$verdicts"
 exit $status

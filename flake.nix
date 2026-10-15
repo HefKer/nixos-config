@@ -68,7 +68,7 @@
         };
       };
 
-      formatter.${system} = pkgs.nixfmt;
+      formatter.${system} = pkgs.nixfmt-tree;
 
       checks.${system} = import ./checks {
         inherit pkgs consts;

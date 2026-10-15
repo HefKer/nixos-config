@@ -20,8 +20,7 @@
         "flakes"
       ];
 
-      # nix-gaming ships prebuilt proton-osu/umu, llm-agents prebuilt AI tools; without these they build from source.
-      # `extra-` so these append to cache.nixos.org rather than replacing it.
+      # Prebuilt nix-gaming (proton-osu/umu) and llm-agents tools; `extra-` appends to cache.nixos.org.
       extra-substituters = [
         "https://nix-gaming.cachix.org"
         "https://cache.numtide.com"
