@@ -8,6 +8,8 @@
       modesetting.enable = true;
       nvidiaSettings = true;
       open = true;
+      # Save VRAM across suspend, else resume comes back black
+      powerManagement.enable = true;
     };
   };
 }
