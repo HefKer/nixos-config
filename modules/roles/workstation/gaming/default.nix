@@ -3,6 +3,7 @@
   imports = [
     ./packages.nix
     ./tablet.nix
+    ./wooting.nix
   ];
 
   options.custom.roles.workstation.gaming = with lib; {

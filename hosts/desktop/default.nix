@@ -20,6 +20,7 @@ in
       gaming = {
         enable = true;
         tablet.enable = true;
+        wooting.enable = true;
       };
 
       development.enable = true;
