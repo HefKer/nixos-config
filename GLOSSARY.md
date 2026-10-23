@@ -96,3 +96,24 @@ _Avoid_: stateful app, self-modifying config
 Divergence between the declared link set and what is actually on disk. Splits
 into *content drift* (tracked files changed but uncommitted) and *link drift* (a
 managed target is no longer the link that was placed).
+
+### Keyboards
+
+**Digital feature**:
+A keyboard behaviour expressible as a mapping from key events to key events,
+such as a remap, a mod-tap, or a layer. Works the same on any keyboard, so it is
+owned by the remapper rather than by any one keyboard's firmware.
+_Avoid_: software feature, macro
+
+**Onboard feature**:
+A keyboard behaviour only the keyboard's own firmware can provide: anything
+depending on how far a key is pressed, such as rapid trigger or a per-key
+actuation point, and commands to the keyboard itself, such as switching between
+its stored profiles. Stays in the firmware.
+_Avoid_: analog feature, hardware feature, firmware feature
+
+**Remapper**:
+The single owner of every digital feature, applied to every keyboard on a
+workstation except those whose output it would corrupt, such as a chording
+keyboard.
+_Avoid_: keyboard daemon, key mapper
