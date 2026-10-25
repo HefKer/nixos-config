@@ -18,7 +18,7 @@ in
     programs = {
       niri.enable = true;
       xwayland.enable = true; # required by onlyoffice
-      dms-shell = {
+      dux-shell = {
         enable = true;
 
         systemd = {
