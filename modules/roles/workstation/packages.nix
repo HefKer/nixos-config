@@ -106,6 +106,7 @@ in
 
       # qutebrowser
       qutebrowser # https://github.com/nixos/nixpkgs/issues/508998
+      nss.tools # certutil: edit QtWebEngine's ~/.pki/nssdb trust store
       ranger
       rbw # rust bitwarden
       pinentry-curses
