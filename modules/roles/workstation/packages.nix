@@ -108,10 +108,9 @@ in
       nss.tools # certutil: edit QtWebEngine's ~/.pki/nssdb trust store
       ranger
       rbw # rust bitwarden
+      inputs.qutewarden.packages.${stdenv.hostPlatform.system}.default
       pinentry-curses
       pinentry-qt
-      python313Packages.tldextract
-      python313Packages.pyperclip
       rofi
       fuzzel
       yt-dlp

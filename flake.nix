@@ -28,6 +28,12 @@
       url = "github:shreyanth-sureshkrishnaa/pyroclear";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    qutewarden = {
+      url = "github:HefKer/qutewarden";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
+    };
   };
 
   outputs =
