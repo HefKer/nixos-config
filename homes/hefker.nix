@@ -15,7 +15,10 @@ in
     ./modules/cli.nix
     ./modules/dotfiles.nix
   ] # default to CLI group
-  ++ lib.optional isWorkstation ./modules/gui.nix
+  ++ lib.optionals isWorkstation [
+    ./modules/gui.nix
+    ./modules/kanata-keymap.nix
+  ]
   ++ lib.optional isDevelopment ./modules/claude-hulio.nix
   ++ lib.optional isGaming ./modules/osu-watcher.nix;
 
