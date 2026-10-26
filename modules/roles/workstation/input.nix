@@ -74,6 +74,9 @@ in
       keyboards = instances;
     };
 
+    # The keymap viewer, for niri's Mod+/ bind; the home layer's render service draws what it shows.
+    environment.systemPackages = [ (pkgs.callPackage ../../../pkgs/kanata-keymap { }) ];
+
     # $HOME is 0700, closed to the dynamic user even with ProtectHome=read-only, so only the keymap is bound in.
     systemd.services = lib.mapAttrs' (
       name: _:
