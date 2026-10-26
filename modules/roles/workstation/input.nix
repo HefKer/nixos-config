@@ -27,25 +27,34 @@ let
     "CharaChorder CharaChorder Two Keyboard"
   ];
 
-  names = lib.concatMapStringsSep " " (name: ''"${name}"'');
+  quoted = lib.concatMapStringsSep " " (name: ''"${name}"'');
 
   # A config holds one defcfg and an included file none, so all of it lives here.
-  instance = name: port: devices: {
-    inherit port;
-    # Replaces the module's generated file, whose build-time --check can't see an include under $HOME.
-    configFile = pkgs.writeText "kanata-${name}.kbd" ''
-      (defcfg
-        ${devices}
-        process-unmapped-keys yes
-        linux-continue-if-no-devs-found yes)
+  instance =
+    name:
+    { port, devices }:
+    {
+      inherit port;
+      # Replaces the module's generated file, whose build-time --check can't see an include under $HOME.
+      configFile = pkgs.writeText "kanata-${name}.kbd" ''
+        (defcfg
+          ${devices}
+          process-unmapped-keys yes
+          linux-continue-if-no-devs-found yes)
 
-      (include ${keymapDir}/keymap.kbd)
-    '';
-  };
+        (include ${keymapDir}/keymap.kbd)
+      '';
+    };
 
-  instances = {
-    wooting = instance "wooting" 6661 "linux-dev-names-include (${names [ wooting ]})";
-    other = instance "other" 6662 "linux-dev-names-exclude (${names (wootingInterfaces ++ chorders)})";
+  instances = lib.mapAttrs instance {
+    wooting = {
+      port = 6661;
+      devices = "linux-dev-names-include (${quoted [ wooting ]})";
+    };
+    other = {
+      port = 6662;
+      devices = "linux-dev-names-exclude (${quoted (wootingInterfaces ++ chorders)})";
+    };
   };
 in
 {
