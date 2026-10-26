@@ -40,7 +40,6 @@ in
       starship
       yazi
       python313Packages.youtube-transcript-api
-      kanata
       rclone
       yq
       translate-shell # `def` fish func: dict/translate lookups
