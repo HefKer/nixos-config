@@ -5,16 +5,16 @@
 }:
 buildGoModule rec {
   pname = "skillshare";
-  version = "0.21.12";
+  version = "0.26.4";
 
   src = fetchFromGitHub {
     owner = "runkids";
     repo = "skillshare";
     rev = "v${version}";
-    hash = "sha256-CWwxrt8Ok0UL0giHDkVx47TCcJKQQx8GiDtiPVs4r8Y=";
+    hash = "sha256-MjeVg8IWQBn7hqO+X3KnhOdtMqWtm3GtEWPiMRUIuUY=";
   };
 
-  vendorHash = "sha256-9yIhL0lKTTCGuF2ClHMS7viD9g7za8EMI2Qm6zq/oVQ=";
+  vendorHash = "sha256-vZxkLUP6E+tyat87VBpW3kr+JtXJizTHmEkiJDoZzbg=";
   subPackages = [ "cmd/skillshare" ];
   ldflags = [
     "-s"
