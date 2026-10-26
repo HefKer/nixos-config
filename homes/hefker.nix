@@ -8,6 +8,7 @@ let
   inherit (consts) username home;
   isWorkstation = osConfig.custom.roles.workstation.enable or false;
   isDevelopment = osConfig.custom.roles.workstation.development.enable or false;
+  isGaming = osConfig.custom.roles.workstation.gaming.enable or false;
 in
 {
   imports = [
@@ -15,7 +16,8 @@ in
     ./modules/dotfiles.nix
   ] # default to CLI group
   ++ lib.optional isWorkstation ./modules/gui.nix
-  ++ lib.optional isDevelopment ./modules/claude-hulio.nix;
+  ++ lib.optional isDevelopment ./modules/claude-hulio.nix
+  ++ lib.optional isGaming ./modules/osu-watcher.nix;
 
   home = {
     inherit username;
