@@ -20,8 +20,12 @@ def log(*parts):
     print(*parts, flush=True)
 
 
-class Instance:
-    """One kanata TCP server, reconnected for as long as the watcher runs."""
+class KanataConnection:
+    """One kanata TCP server, reconnected for as long as the watcher runs.
+
+    `saved` is the layer to restore once osu loses focus. It outlives a
+    dropped connection, so a restore missed while disconnected still lands.
+    """
 
     def __init__(self, port, watcher):
         self.port = port
@@ -45,17 +49,36 @@ class Instance:
             self.change_layer(PASSTHROUGH)
 
     def leave(self):
-        if self.sock is not None and self.saved is not None:
+        if self.sock is not None:
+            self.restore()
+
+    def restore(self):
+        if self.saved is not None:
             self.change_layer(self.saved)
-        self.saved = None
+            self.saved = None
+
+    def greeted(self, layer):
+        # kanata greets each connection with its current layer.
+        self.current = layer
+        if not self.watcher.osu_focused:
+            self.restore()
+        elif self.saved is None and layer == PASSTHROUGH:
+            # Passthrough left by an earlier watcher: restore the start layer.
+            self.send({"RequestLayerNames": {}})
+        else:
+            if self.saved is None:
+                self.saved = layer
+            self.change_layer(PASSTHROUGH)
 
     def handle(self, message, first):
         if "LayerChange" in message:
-            self.current = message["LayerChange"]["new"]
-            # kanata greets each connection with its current layer.
-            if first and self.watcher.osu_focused:
-                self.saved = self.current
-                self.change_layer(PASSTHROUGH)
+            if first:
+                self.greeted(message["LayerChange"]["new"])
+            else:
+                self.current = message["LayerChange"]["new"]
+        elif "LayerNames" in message:
+            if self.saved is None:
+                self.saved = message["LayerNames"]["names"][0]
         elif "ConfigFileReload" in message:
             # A reload rebuilds the layout on its first layer, unannounced.
             self.send({"RequestCurrentLayerName": {}})
@@ -97,7 +120,7 @@ class Watcher:
 
     def __init__(self, app_ids, ports):
         self.app_ids = set(app_ids)
-        self.instances = [Instance(port, self) for port in ports]
+        self.instances = [KanataConnection(port, self) for port in ports]
         self.windows = {}
         self.focused = None
         self.osu_focused = False
@@ -130,9 +153,12 @@ class Watcher:
                 else:
                     instance.leave()
 
-    def run(self, niri):
+    def connect(self):
         for instance in self.instances:
             threading.Thread(target=instance.run, daemon=True).start()
+
+    def run(self, niri):
+        connected = False
         while True:
             cmd = [niri, "msg", "--json", "event-stream"]
             with subprocess.Popen(cmd, stdout=subprocess.PIPE, text=True) as p:
@@ -143,6 +169,11 @@ class Watcher:
                         continue
                     with lock:
                         self.update(event)
+                    # niri opens the stream with WindowsChanged; until then a
+                    # greeting's passthrough can't be told stale from manual.
+                    if not connected and "WindowsChanged" in event:
+                        self.connect()
+                        connected = True
             log("niri event stream ended; retrying")
             time.sleep(1)
 

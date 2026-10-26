@@ -13,10 +13,9 @@ let
     "steam_app_0"
   ];
 
-  ports = lib.mapAttrsToList (_: k: k.port) osConfig.services.kanata.keyboards;
+  ports = lib.mapAttrsToList (_: keyboard: keyboard.port) osConfig.services.kanata.keyboards;
 in
 {
-  # Switches every kanata instance to its passthrough layer while osu has focus (ADR-0005).
   systemd.user.services.osu-focus-watcher = {
     Unit = {
       Description = "Switch kanata to passthrough while osu is focused";
