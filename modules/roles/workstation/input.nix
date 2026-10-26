@@ -72,6 +72,10 @@ in
         serviceConfig = {
           ProtectHome = lib.mkForce "tmpfs";
           BindReadOnlyPaths = [ keymapDir ];
+          # Started mid-coldplug, it never grabs keyboards udev hadn't finished, nor finds its own output node.
+          ExecStartPre = "-+${config.systemd.package}/bin/udevadm settle --timeout=30";
+          Restart = "on-failure";
+          RestartSec = 1;
         };
       }
     ) instances;
