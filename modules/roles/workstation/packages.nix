@@ -81,6 +81,7 @@ in
       # Image manipulation
       inkscape
       pinta
+      imv # image viewer
 
       # Documents
       zathura
