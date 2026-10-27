@@ -16,6 +16,7 @@ let
       ".config/git/config" = "git/.config/git/config";
       ".config/git/ignore" = "git/.config/git/ignore";
       ".config/herdr/config.toml" = "herdr/.config/herdr/config.toml";
+      ".config/mimeapps.list" = "xdg/.config/mimeapps.list";
       ".config/mpv" = "mpv/.config/mpv";
       ".config/niri" = "niri/.config/niri";
       ".config/nvim" = "nvim/.config/nvim";
@@ -30,6 +31,7 @@ let
       ".config/git/config" = "git/.config/git/config";
       ".config/git/ignore" = "git/.config/git/ignore";
       ".config/herdr/config.toml" = "herdr/.config/herdr/config.toml";
+      ".config/mimeapps.list" = "xdg/.config/mimeapps.list";
       ".config/mpv" = "mpv/.config/mpv";
       ".config/niri" = "niri/.config/niri";
       ".config/nvim" = "nvim/.config/nvim";

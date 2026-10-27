@@ -46,6 +46,8 @@ let
     # The parent holds history and caches, which must not enter the dotfiles root.
     "qutebrowser/.local/share/qutebrowser/userscripts"
     "wezterm/.config/wezterm"
+    # xdg-mime writes through the link; a tool saving by rename replaces it with a file that aborts the next rebuild.
+    "xdg/.config/mimeapps.list"
   ];
 
   hosts = {
