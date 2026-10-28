@@ -77,6 +77,8 @@ in
       webex
       czkawka
       moonlight-qt
+      slack
+      ripcord # Slack + Discord client
 
       # Image manipulation
       inkscape
