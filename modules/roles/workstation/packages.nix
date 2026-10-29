@@ -85,6 +85,9 @@ in
       inkscape
       pinta
       imv # image viewer
+      wf-recorder # DMS Quick Capture's recording backend
+      psmisc # killall: how Quick Capture stops a recording
+      libnotify # notify-send: Quick Capture's recording-saved and error notifications
 
       # Documents
       zathura
