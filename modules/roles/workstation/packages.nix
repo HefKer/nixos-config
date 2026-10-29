@@ -56,6 +56,7 @@ in
       # --- Disk & Filesystem Utilities ---
       rsync
       os-prober
+      trash-cli
 
       # --- Archiving & Compression ---
       unzip
@@ -144,6 +145,23 @@ in
         # for rbw
         enable = true;
         pinentryPackage = pkgs.pinentry-curses;
+      };
+    };
+
+    systemd.user = {
+      services.trash-empty = {
+        description = "Empty trash deleted more than 30 days ago";
+        serviceConfig = {
+          Type = "oneshot";
+          ExecStart = "${pkgs.trash-cli}/bin/trash-empty 30";
+        };
+      };
+      timers.trash-empty = {
+        wantedBy = [ "timers.target" ];
+        timerConfig = {
+          OnCalendar = "daily";
+          Persistent = true;
+        };
       };
     };
   };
