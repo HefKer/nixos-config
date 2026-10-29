@@ -29,6 +29,9 @@ let
 
   quoted = lib.concatMapStringsSep " " (name: ''"${name}"'');
 
+  # Every instance's defcfg beyond its devices; kanata-test simulates with the same.
+  defcfg = "process-unmapped-keys yes";
+
   # A config holds one defcfg and an included file none, so all of it lives here.
   instance =
     name:
@@ -39,7 +42,7 @@ let
       configFile = pkgs.writeText "kanata-${name}.kbd" ''
         (defcfg
           ${devices}
-          process-unmapped-keys yes
+          ${defcfg}
           linux-continue-if-no-devs-found yes)
 
         (include ${keymapDir}/keymap.kbd)
@@ -74,8 +77,15 @@ in
       keyboards = instances;
     };
 
-    # The keymap viewer, for niri's Mod+/ bind; the home layer's render service draws what it shows.
-    environment.systemPackages = [ (pkgs.callPackage ../../../pkgs/kanata-keymap { }) ];
+    environment.systemPackages = [
+      # The keymap viewer, for niri's Mod+/ bind; the home layer's render service draws what it shows.
+      (pkgs.callPackage ../../../pkgs/kanata-keymap { })
+      # kanata-flag for niri's Mod+Shift+. bind, and the keymap's tests.
+      (pkgs.callPackage ../../../pkgs/kanata-misfires {
+        inherit keymapDir defcfg;
+        ports = lib.mapAttrs (_: instance: instance.port) instances;
+      })
+    ];
 
     # $HOME is 0700, closed to the dynamic user even with ProtectHome=read-only, so only the keymap is bound in.
     systemd.services = lib.mapAttrs' (
