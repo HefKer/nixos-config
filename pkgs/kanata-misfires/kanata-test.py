@@ -1,8 +1,9 @@
 """Test the kanata keymap in kanata's simulator.
 
 With no --fuzz, runs every case in the keymap's tests/*.sim files and exits
-non-zero when one fails; naming cases runs only those, with the simulator's
-timeline. A case is an input line, then the output it must give:
+non-zero when one fails. Naming a file (`mods`) or one case in it
+(`mods:19`, its input line) runs only those, with the simulator's timeline.
+A case is an input line, then the output it must give:
 
     # Opposite-hand roll at 120 wpm.
     type: for wpm=120 hold=150
@@ -28,13 +29,14 @@ from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-SIM = "@sim@"  # noqa: E501
-DEFCFG = "@defcfg@"
-KEYMAP_DIR = "@keymapDir@"  # noqa: E501
-WORD_LISTS = "@wordLists@".split()  # noqa: E501
+SIM = @sim@  # noqa: E501
+DEFCFG = @defcfg@
+KEYMAP_DIR = @keymapDir@  # noqa: E501
+WORD_LISTS = @wordLists@  # noqa: E501
 
 IDLE = 500
 SETTLE = 1000
+OPTIONS = {"wpm", "hold"}
 
 MODS = {
     "LCtrl": "C", "RCtrl": "C",
@@ -116,7 +118,7 @@ def render(out):
             text.append(CHARS[name][bool(mods)])
         else:
             key = CHARS[name][0] if name in CHARS else name.lower()
-            text.append(chord(mods, key))
+            text.append(chord(mods, "spc" if key == " " else key))
     return "".join(text)
 
 
@@ -138,11 +140,15 @@ def roll(timed):
     return events
 
 
+def interval(wpm):
+    """Milliseconds between presses, at five characters a word."""
+    return 60000 / (5 * wpm)
+
+
 def synthesise(text, wpm, hold):
-    interval = 12000 / wpm
     timed = []
     for i, c in enumerate(text):
-        press = round(i * interval)
+        press = round(i * interval(wpm))
         timed.append((press, press + hold, KEYS[c]))
     return roll(separate_repeats(timed))
 
@@ -185,14 +191,17 @@ def parse_cases(path):
     return cases
 
 
+def is_option(word):
+    name, eq, value = word.partition("=")
+    return name in OPTIONS and eq and value.isdigit()
+
+
 def case_events(where, kind, spec):
     if kind == "in":
         return [f"t:{IDLE}", *spec.split(), f"t:{SETTLE}"]
     words = shlex.split(spec)
-    opts = dict(w.split("=", 1) for w in words if "=" in w)
-    text = " ".join(w for w in words if "=" not in w)
-    if unknown := set(opts) - {"wpm", "hold"}:
-        sys.exit(f"{where}: unknown option {', '.join(sorted(unknown))}")
+    opts = dict(w.split("=", 1) for w in words if is_option(w))
+    text = " ".join(w for w in words if not is_option(w))
     if bad := set(text) - set(KEYS):
         sys.exit(f"{where}: can't type {''.join(sorted(bad))!r}")
     return synthesise(
@@ -211,9 +220,13 @@ def timeline(stderr):
 
 def run_cases(keymap_dir, names):
     files = sorted((keymap_dir / "tests").glob("*.sim"))
+    picked = {}
+    for name in names:
+        stem, _, line = name.partition(":")
+        picked.setdefault(stem, set()).add(line)
     if names:
-        files = [f for f in files if f.stem in names]
-        if missing := set(names) - {f.stem for f in files}:
+        files = [f for f in files if f.stem in picked]
+        if missing := set(picked) - {f.stem for f in files}:
             sys.exit(f"no such case file: {', '.join(sorted(missing))}")
     if not files:
         sys.exit(f"no case files in {keymap_dir}/tests")
@@ -222,6 +235,9 @@ def run_cases(keymap_dir, names):
         cfg = config(tmp, keymap_dir)
         for f in files:
             for i, (where, kind, spec, want) in enumerate(parse_cases(f)):
+                lines = picked.get(f.stem, {""})
+                if "" not in lines and where.split(":")[1] not in lines:
+                    continue
                 total += 1
                 events = case_events(where, kind, spec)
                 out, stderr = simulate(cfg, events, tmp, f"{f.stem}-{i}")
@@ -235,6 +251,8 @@ def run_cases(keymap_dir, names):
                 if names:
                     print("     " + " ".join(events))
                     print(timeline(stderr) + "\n")
+    if not total:
+        sys.exit(f"no case starts on the line given: {' '.join(names)}")
     print(f"{total - failed}/{total} cases pass")
     return 1 if failed else 0
 
@@ -250,14 +268,13 @@ def load_words(paths):
 
 
 def fuzz_events(words, wpm, rng):
-    base = 12000 / wpm
     timed = []
     now = 0.0
     for c in " ".join(words) + " ":
         press = round(now)
         hold = round(rng.uniform(60, 140))
         timed.append((press, press + hold, KEYS[c]))
-        now += base * rng.uniform(0.6, 1.4)
+        now += interval(wpm) * rng.uniform(0.6, 1.4)
     return roll(separate_repeats(timed))
 
 
@@ -272,11 +289,13 @@ def mismatches(want, got):
 
 
 def bigram(want, got):
+    """The first wrong key and the key typed before it."""
+    want, got = " " + want, " " + got
     i = next(
         (i for i, (a, b) in enumerate(zip(want, got)) if a != b),
         min(len(want), len(got)),
     )
-    return want[max(i - 1, 0):i + 1] or "∅"
+    return want[max(i - 1, 0):i + 1].replace(" ", "␣")
 
 
 def fuzz(keymap_dir, paths, speeds, seed, batch):
@@ -295,13 +314,16 @@ def fuzz(keymap_dir, paths, speeds, seed, batch):
         cfg = config(tmp, keymap_dir)
         with ThreadPoolExecutor() as pool:
             outs = list(pool.map(
-                lambda ij: simulate(cfg, ij[1][2], tmp, f"fuzz-{ij[0]}")[0],
-                enumerate(jobs),
+                lambda n, job: simulate(cfg, job[2], tmp, f"fuzz-{n}")[0],
+                range(len(jobs)), jobs,
             ))
     wrong = defaultdict(list)
     per_speed = defaultdict(int)
     for (wpm, chunk, _), out in zip(jobs, outs):
-        for want, got in mismatches(chunk, render(out).split(" ")[:-1]):
+        typed = render(out).split(" ")
+        if typed[-1] == "":
+            typed.pop()
+        for want, got in mismatches(chunk, typed):
             per_speed[wpm] += 1
             wrong[bigram(want, got)].append((wpm, want, got))
     for wpm in speeds:

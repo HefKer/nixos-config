@@ -2,6 +2,7 @@
   callPackage,
   coreutils,
   fuzzel,
+  kanata,
   gawk,
   git,
   jq,
@@ -11,15 +12,12 @@
   ttyper,
   writers,
   writeShellApplication,
-  # The directory holding keymap.kbd, misfires.md and tests/.
   keymapDir,
-  # Instance name to TCP port, for the layer each was on.
   ports,
-  # The options every instance's defcfg shares, so a test sees what they do.
   defcfg,
 }:
 let
-  sim = callPackage ../kanata-sim { };
+  sim = callPackage ../kanata-sim { inherit kanata; };
 
   flag = writeShellApplication {
     name = "kanata-flag";
@@ -52,8 +50,11 @@ let
         name: port: ''layers+=" ${name}=$(layer ${toString port})"''
       ) ports}
 
-      rev=$(git -C "$keymap_dir" rev-parse --short HEAD 2>/dev/null) || rev="?"
-      git -C "$keymap_dir" diff --quiet HEAD -- keymap.kbd 2>/dev/null || rev+="-dirty"
+      if rev=$(git -C "$keymap_dir" rev-parse --short HEAD 2>/dev/null); then
+        git -C "$keymap_dir" diff --quiet HEAD -- keymap.kbd || rev+="-dirty"
+      else
+        rev="?"
+      fi
 
       entry="- $(date '+%F %H:%M') · meant \`$meant\` · got \`$got\` · layers$layers · keymap $rev"
 
@@ -75,14 +76,14 @@ let
   };
 
   test = writers.writePython3Bin "kanata-test" { } (
-    lib.replaceStrings
-      [ "@sim@" "@defcfg@" "@keymapDir@" "@wordLists@" ]
-      [
+    lib.replaceStrings [ "@sim@" "@defcfg@" "@keymapDir@" "@wordLists@" ]
+      # JSON strings and lists are Python literals.
+      (map builtins.toJSON [
         (lib.getExe sim)
         defcfg
         keymapDir
-        "${ttyper.src}/resources/runtime/language/english1000"
-      ]
+        [ "${ttyper.src}/resources/runtime/language/english1000" ]
+      ])
       (builtins.readFile ./kanata-test.py)
   );
 

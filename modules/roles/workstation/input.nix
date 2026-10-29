@@ -83,6 +83,7 @@ in
       # kanata-flag for niri's Mod+Shift+. bind, and the keymap's tests.
       (pkgs.callPackage ../../../pkgs/kanata-misfires {
         inherit keymapDir defcfg;
+        kanata = config.services.kanata.package;
         ports = lib.mapAttrs (_: instance: instance.port) instances;
       })
     ];
