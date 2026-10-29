@@ -32,9 +32,11 @@ in
 
       sunshine = {
         enable = true;
+        # Without CUDA the build gets no driver runpath, libcuda.so.1 never loads and NVENC falls back to libx264.
+        package = pkgs.sunshine.override { cudaSupport = true; };
         autoStart = false;
         capSysAdmin = true; # only needed for Wayland -- omit this when using with Xorg
-        # Stream over Tailscale only; flip to true for LAN clients (e.g. Moonlight on the couch).
+        # Stream over Tailscale only (ports opened on tailscale0 below); flip to true for LAN clients.
         openFirewall = false;
       };
     };
@@ -57,6 +59,27 @@ in
         binfmt = true;
       };
     };
+
+    # Tailscale SSH is answered inside tailscaled, but Sunshine's ports go through the NixOS firewall; offsets mirror the module's.
+    networking.firewall.interfaces.${config.services.tailscale.interfaceName} =
+      let
+        sunshinePorts = map (offset: config.services.sunshine.settings.port + offset);
+      in
+      {
+        allowedTCPPorts = sunshinePorts [
+          (-5)
+          0
+          1
+          21
+        ];
+        allowedUDPPorts = sunshinePorts [
+          9
+          10
+          11
+          13
+          21
+        ];
+      };
 
     # nix-flatpak's unit only orders after multi-user.target, so its first run at boot can race DNS.
     systemd.services.flatpak-managed-install = {
