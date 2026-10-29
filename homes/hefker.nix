@@ -18,6 +18,7 @@ in
   ++ lib.optionals isWorkstation [
     ./modules/gui.nix
     ./modules/kanata-keymap.nix
+    ./modules/udiskie.nix
   ]
   ++ lib.optional isDevelopment ./modules/claude-hulio.nix
   ++ lib.optional isGaming ./modules/osu-watcher.nix;
