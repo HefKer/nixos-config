@@ -12,6 +12,7 @@ in
 {
   config = lib.mkIf cfg.enable {
     users.users.${consts.username}.shell = pkgs.fish;
+    environment.localBinInPath = true;
 
     nixpkgs.overlays = [
       # Enables DRM in qutebrowser

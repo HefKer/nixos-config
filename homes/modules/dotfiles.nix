@@ -48,6 +48,14 @@ let
     "wezterm/.config/wezterm"
     # xdg-mime writes through the link; a tool saving by rename replaces it with a file that aborts the next rebuild.
     "xdg/.config/mimeapps.list"
+    {
+      source = "scripts/qute-sandbox";
+      target = ".local/bin/qute-sandbox";
+    }
+    {
+      source = "scripts/session-find";
+      target = ".local/bin/session-find";
+    }
   ];
 
   hosts = {

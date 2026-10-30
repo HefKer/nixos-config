@@ -22,6 +22,8 @@ let
       ".config/nvim" = "nvim/.config/nvim";
       ".config/qutebrowser" = "qutebrowser/.config/qutebrowser";
       ".config/wezterm" = "wezterm/.config/wezterm";
+      ".local/bin/qute-sandbox" = "scripts/qute-sandbox";
+      ".local/bin/session-find" = "scripts/session-find";
       ".local/share/qutebrowser/userscripts" = "qutebrowser/.local/share/qutebrowser/userscripts";
     };
     lenovo = {
@@ -37,6 +39,8 @@ let
       ".config/nvim" = "nvim/.config/nvim";
       ".config/qutebrowser" = "qutebrowser/.config/qutebrowser";
       ".config/wezterm" = "wezterm/.config/wezterm";
+      ".local/bin/qute-sandbox" = "scripts/qute-sandbox";
+      ".local/bin/session-find" = "scripts/session-find";
       ".local/share/qutebrowser/userscripts" = "qutebrowser/.local/share/qutebrowser/userscripts";
     };
   };
