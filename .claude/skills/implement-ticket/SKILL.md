@@ -1,7 +1,6 @@
 ---
 name: implement-ticket
 description: "Implement one HefKer/nixos-issues ticket on a new branch, verified and reviewed, ready to merge."
-disable-model-invocation: true
 ---
 
 Implement ticket `$ARGUMENTS` from `HefKer/nixos-issues`. Instructions the user gives alongside
