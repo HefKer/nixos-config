@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
-# Builds the flake's checks; host evaluation is left to `nix flake check` (~25s).
+# Builds the flake's checks on the staged files alone, so unstaged edits can't pass or fail a commit;
+# host evaluation is left to `nix flake check` (~25s).
 set -euo pipefail
-attrs=$(nix eval --raw .#checks.x86_64-linux --apply \
-  'cs: builtins.concatStringsSep " " (map (n: ".#checks.x86_64-linux.${n}") (builtins.attrNames cs))')
+tree=$(mktemp -d)
+trap 'rm -rf "$tree"' EXIT
+git checkout-index -a --prefix="$tree/"
+attrs=$(nix eval --raw "path:$tree#checks.x86_64-linux" --apply \
+  "cs: builtins.concatStringsSep \" \" (map (n: \"path:$tree#checks.x86_64-linux.\${n}\") (builtins.attrNames cs))")
 # shellcheck disable=SC2086
 nix build --no-link --quiet $attrs
