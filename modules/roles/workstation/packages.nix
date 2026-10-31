@@ -144,7 +144,13 @@ in
       firefox.enable = true;
       localsend.enable = true;
       kdeconnect.enable = true;
-      obs-studio.enable = true;
+      obs-studio = {
+        enable = true;
+        plugins = with pkgs.obs-studio-plugins; [
+          obs-backgroundremoval
+          obs-pipewire-audio-capture
+        ];
+      };
       gnupg.agent = {
         # for rbw
         enable = true;

@@ -1,7 +1,15 @@
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 {
   config = lib.mkIf (config.custom.platform == "desktop") {
     services.xserver.videoDrivers = [ "nvidia" ]; # "amdgpu" when I become chad
+
+    # Without the driver runpath OBS can't load libnvidia-encode, so NVENC is missing
+    programs.obs-studio.package = pkgs.obs-studio.override { cudaSupport = true; };
 
     # Enable renderer
     hardware.nvidia = {
