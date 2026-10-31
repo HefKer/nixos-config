@@ -22,6 +22,8 @@ let
       ".config/nvim" = "nvim/.config/nvim";
       ".config/qutebrowser" = "qutebrowser/.config/qutebrowser";
       ".config/wezterm" = "wezterm/.config/wezterm";
+      ".config/xdg-desktop-portal-termfilechooser" =
+        "xdg-desktop-portal-termfilechooser/.config/xdg-desktop-portal-termfilechooser";
       ".local/bin/qute-sandbox" = "scripts/qute-sandbox";
       ".local/bin/session-find" = "scripts/session-find";
       ".local/share/qutebrowser/userscripts" = "qutebrowser/.local/share/qutebrowser/userscripts";
@@ -39,6 +41,8 @@ let
       ".config/nvim" = "nvim/.config/nvim";
       ".config/qutebrowser" = "qutebrowser/.config/qutebrowser";
       ".config/wezterm" = "wezterm/.config/wezterm";
+      ".config/xdg-desktop-portal-termfilechooser" =
+        "xdg-desktop-portal-termfilechooser/.config/xdg-desktop-portal-termfilechooser";
       ".local/bin/qute-sandbox" = "scripts/qute-sandbox";
       ".local/bin/session-find" = "scripts/session-find";
       ".local/share/qutebrowser/userscripts" = "qutebrowser/.local/share/qutebrowser/userscripts";

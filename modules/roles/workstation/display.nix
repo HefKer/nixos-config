@@ -1,4 +1,9 @@
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 let
   cfg = config.custom.roles.workstation;
 in
@@ -28,8 +33,16 @@ in
       };
     };
 
+    xdg.portal = {
+      extraPortals = [ pkgs.xdg-desktop-portal-termfilechooser ];
+      config.niri."org.freedesktop.impl.portal.FileChooser" = "termfilechooser";
+    };
+
     environment.sessionVariables = {
       NIXOS_OZONE_WL = "1";
+      # Outside a sandbox GTK3, Firefox and Qt open their own file dialogs instead of the portal's
+      GTK_USE_PORTAL = "1";
+      QT_QPA_PLATFORMTHEME = "xdgdesktopportal";
     };
 
     hardware.graphics = {
