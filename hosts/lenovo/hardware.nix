@@ -1,3 +1,4 @@
+{ pkgs, ... }:
 {
   boot = {
     initrd.availableKernelModules = [
@@ -10,4 +11,6 @@
     initrd.kernelModules = [ ];
     extraModulePackages = [ ];
   };
+
+  hardware.graphics.extraPackages = [ pkgs.intel-media-driver ];
 }
