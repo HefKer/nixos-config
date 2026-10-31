@@ -13,6 +13,7 @@ let
       ".config/niri-host.kdl" = "niri/host/desktop.kdl";
       ".config/DankMaterialShell" = "DankMaterialShell/.config/DankMaterialShell";
       ".config/fish" = "fish/.config/fish";
+      ".config/fuzzel" = "fuzzel/.config/fuzzel";
       ".config/git/config" = "git/.config/git/config";
       ".config/git/ignore" = "git/.config/git/ignore";
       ".config/herdr/config.toml" = "herdr/.config/herdr/config.toml";
@@ -32,6 +33,7 @@ let
       ".config/niri-host.kdl" = "niri/host/lenovo.kdl";
       ".config/DankMaterialShell" = "DankMaterialShell/.config/DankMaterialShell";
       ".config/fish" = "fish/.config/fish";
+      ".config/fuzzel" = "fuzzel/.config/fuzzel";
       ".config/git/config" = "git/.config/git/config";
       ".config/git/ignore" = "git/.config/git/ignore";
       ".config/herdr/config.toml" = "herdr/.config/herdr/config.toml";
