@@ -11,6 +11,9 @@ let
 in
 {
   config = lib.mkIf cfg.enable {
+    # A stable path for skills bundled with packages; a store path changes on every upgrade.
+    environment.pathsToLink = [ "/share/skills" ];
+
     environment.systemPackages = with pkgs; [
       # -- CLI tools ---
       gh
