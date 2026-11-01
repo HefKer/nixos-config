@@ -35,6 +35,7 @@ in
 
       # AI (llm-agents.nix updates daily; nixpkgs lags by days to weeks)
       llm-agents.claude-code
+      sox # claude-code's /voice records through it
       llm-agents.opencode
       llm-agents.herdr
       llm-agents.collie
