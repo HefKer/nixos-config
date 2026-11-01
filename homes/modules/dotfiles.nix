@@ -40,6 +40,8 @@ let
     "git/.config/git/ignore"
     # The directory also holds herdr's sockets, session and logs; herdr writes this file in place, not by rename.
     "herdr/.config/herdr/config.toml"
+    # The directory also holds hunk's state.json and extensions; hunk saves view preferences through the link.
+    "hunk/.config/hunk/config.toml"
     "mpv/.config/mpv"
     "niri/.config/niri"
     "nvim/.config/nvim"
