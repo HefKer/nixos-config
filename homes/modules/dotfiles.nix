@@ -32,6 +32,7 @@ let
       config.lib.file.mkOutOfStoreSymlink "${dotfilesRoot}/${source}";
 
   shared = layer [
+    "btop/.config/btop"
     "DankMaterialShell/.config/DankMaterialShell"
     "fastfetch/.config/fastfetch"
     "fish/.config/fish"
