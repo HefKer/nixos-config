@@ -97,6 +97,27 @@ Divergence between the declared link set and what is actually on disk. Splits
 into *content drift* (tracked files changed but uncommitted) and *link drift* (a
 managed target is no longer the link that was placed).
 
+### Sync
+
+**Peer**:
+A device that shares synced folders. Every host that syncs is a peer, but a peer
+need not be a host: the phone is one and is not built from this flake.
+_Avoid_: node, client
+
+**Hub**:
+A planned always-on peer that the others sync through, so two peers need not be
+online together.
+_Avoid_: sync server, central node
+
+**Personal folder**:
+A synced folder of files the user authors or keeps. Everything syncs except what
+is excluded.
+_Avoid_: data folder
+
+**App-state folder**:
+A synced folder an application writes. Nothing syncs except what is named.
+_Avoid_: config folder
+
 ### Keyboards
 
 **Digital feature**:
