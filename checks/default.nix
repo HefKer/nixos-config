@@ -24,6 +24,7 @@ let
       ".config/niri" = "niri/.config/niri";
       ".config/nvim" = "nvim/.config/nvim";
       ".config/qutebrowser" = "qutebrowser/.config/qutebrowser";
+      ".config/starship.toml" = "starship/.config/starship.toml";
       ".config/wezterm" = "wezterm/.config/wezterm";
       ".config/xdg-desktop-portal-termfilechooser" =
         "xdg-desktop-portal-termfilechooser/.config/xdg-desktop-portal-termfilechooser";
@@ -46,6 +47,7 @@ let
       ".config/niri" = "niri/.config/niri";
       ".config/nvim" = "nvim/.config/nvim";
       ".config/qutebrowser" = "qutebrowser/.config/qutebrowser";
+      ".config/starship.toml" = "starship/.config/starship.toml";
       ".config/wezterm" = "wezterm/.config/wezterm";
       ".config/xdg-desktop-portal-termfilechooser" =
         "xdg-desktop-portal-termfilechooser/.config/xdg-desktop-portal-termfilechooser";
