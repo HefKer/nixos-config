@@ -118,6 +118,10 @@ in
       nss.tools # certutil: edit QtWebEngine's ~/.pki/nssdb trust store
       ranger
       rbw # rust bitwarden
+      # Editing secrets, keyed through rbw
+      sops
+      age
+      ssh-to-age
       inputs.qutewarden.packages.${stdenv.hostPlatform.system}.default
       pinentry-curses
       pinentry-qt
