@@ -33,6 +33,7 @@ let
 
   shared = layer [
     "DankMaterialShell/.config/DankMaterialShell"
+    "fastfetch/.config/fastfetch"
     "fish/.config/fish"
     "fuzzel/.config/fuzzel"
     # The directory takes git's runtime state (credential-store's secrets, gitk's); git writes through the link.

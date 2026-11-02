@@ -12,6 +12,7 @@ let
     desktop = {
       ".config/niri-host.kdl" = "niri/host/desktop.kdl";
       ".config/DankMaterialShell" = "DankMaterialShell/.config/DankMaterialShell";
+      ".config/fastfetch" = "fastfetch/.config/fastfetch";
       ".config/fish" = "fish/.config/fish";
       ".config/fuzzel" = "fuzzel/.config/fuzzel";
       ".config/git/config" = "git/.config/git/config";
@@ -33,6 +34,7 @@ let
     lenovo = {
       ".config/niri-host.kdl" = "niri/host/lenovo.kdl";
       ".config/DankMaterialShell" = "DankMaterialShell/.config/DankMaterialShell";
+      ".config/fastfetch" = "fastfetch/.config/fastfetch";
       ".config/fish" = "fish/.config/fish";
       ".config/fuzzel" = "fuzzel/.config/fuzzel";
       ".config/git/config" = "git/.config/git/config";
