@@ -1,0 +1,15 @@
+keys:
+  - &user age1z7jhvunk47gc00yt8mvrhr0uk8yg667mut8rl5f2e8qh4pzp3e2s3k8l5u
+  - &desktop age1xq8srzkfl2sqfyh8gg0thjg3um3ey0gzz89ew3cdfse6xz2hvf4swn5u6u
+  - &lenovo age1ktc4f6d0dqsklp6utw5xr87786gth2vjdwq8tzukqgdtufupvqtssq7qfc
+
+creation_rules:
+  - path_regex: ^secrets/desktop\.yaml$
+    key_groups:
+      - age: [*user, *desktop]
+  - path_regex: ^secrets/lenovo\.yaml$
+    key_groups:
+      - age: [*user, *lenovo]
+  - path_regex: ^secrets/shared\.yaml$
+    key_groups:
+      - age: [*user, *desktop, *lenovo]
