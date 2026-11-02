@@ -51,10 +51,11 @@ Nix cannot check this. The links point outside the store, so the build succeeds 
 
 A new host must be able to read its secrets **before its first rebuild that needs one**, and Nix can't check this either: the build succeeds, then decryption fails at activation. From a machine that holds the user's age key:
 
-1. Read the host's public key: `ssh-to-age -i /etc/ssh/ssh_host_ed25519_key.pub` on the new host.
+1. Read the host's public key on the new host, which has no `ssh-to-age` yet: `nix run nixpkgs#ssh-to-age -- -i /etc/ssh/ssh_host_ed25519_key.pub`.
 2. Add it to `.sops.yaml`, with a path rule for `secrets/<host>.yaml` and in the `secrets/shared.yaml` rule.
-3. Re-encrypt for the new recipient list: `SOPS_AGE_KEY_CMD="rbw get sops-age-key" sops updatekeys secrets/shared.yaml`, likewise for the host's file.
-4. Commit, then run `nixos-rebuild` on the new host.
+3. Create the host's own file: `echo '{}' > secrets/<host>.yaml && sops encrypt -i secrets/<host>.yaml`.
+4. Re-encrypt the shared file for the new recipient list: `SOPS_AGE_KEY_CMD="rbw get sops-age-key" sops updatekeys secrets/shared.yaml`.
+5. Commit, then run `nixos-rebuild` on the new host.
 
 ## Secrets
 
