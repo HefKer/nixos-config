@@ -17,6 +17,10 @@
     pandoc
     ffmpeg
     poppler-utils # pdftotext, pdfinfo, pdftoppm, ...
+    # Editing secrets
+    sops
+    age
+    ssh-to-age
   ];
 
   programs = {
