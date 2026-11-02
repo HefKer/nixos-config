@@ -10,7 +10,8 @@ because issues describe machines, a home network, a hardware inventory and a
 backup topology, and publishing is one-way: flipping a repo private later does
 not retract what was already indexed.
 
-Nothing in the public config is a credential. SSH is keys-only with
+Nothing in the public config is a plaintext credential (ciphertext since
+[ADR-0006](0006-secrets-are-sops-encrypted-in-the-public-repo.md)). SSH is keys-only with
 `openFirewall = false` and root login off, remote access is Tailscale-only, and
 the one WPA-EAP identity lives outside the repo. What the public tree leaks is a
 *profile*, not a secret, and a profile only becomes targetable when joined to a

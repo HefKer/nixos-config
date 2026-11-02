@@ -117,3 +117,22 @@ The single owner of every digital feature, applied to every keyboard on a
 workstation except those whose output it would corrupt, such as a chording
 keyboard.
 _Avoid_: keyboard daemon, key mapper
+
+### Secrets
+
+**Secret**:
+A value whose disclosure grants access, such as a password or an API key. Never
+present in the Nix store in plaintext; configuration refers to it only by the
+path where it appears at runtime.
+_Avoid_: credential, env file
+
+**Recipient**:
+A key that can decrypt a given secret: the host that consumes it, plus the
+user's own. Being a recipient is what authorises a host to read a secret.
+_Avoid_: reader, owner
+
+**Profile**:
+What a configuration reveals about a setup without granting access to it, such
+as which services run or which provider holds the backups. Publishing it is
+accepted; publishing a secret in plaintext is not.
+_Avoid_: metadata, fingerprint
