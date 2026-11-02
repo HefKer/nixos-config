@@ -11,6 +11,7 @@ let
   expectedLinks = {
     desktop = {
       ".config/niri-host.kdl" = "niri/host/desktop.kdl";
+      ".config/atuin" = "atuin/.config/atuin";
       ".config/btop" = "btop/.config/btop";
       ".config/DankMaterialShell" = "DankMaterialShell/.config/DankMaterialShell";
       ".config/fastfetch" = "fastfetch/.config/fastfetch";
@@ -35,6 +36,7 @@ let
     };
     lenovo = {
       ".config/niri-host.kdl" = "niri/host/lenovo.kdl";
+      ".config/atuin" = "atuin/.config/atuin";
       ".config/btop" = "btop/.config/btop";
       ".config/DankMaterialShell" = "DankMaterialShell/.config/DankMaterialShell";
       ".config/fastfetch" = "fastfetch/.config/fastfetch";

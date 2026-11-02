@@ -32,6 +32,8 @@ let
       config.lib.file.mkOutOfStoreSymlink "${dotfilesRoot}/${source}";
 
   shared = layer [
+    # The directory holds only config and themes; history and keys live in ~/.local/share/atuin.
+    "atuin/.config/atuin"
     "btop/.config/btop"
     "DankMaterialShell/.config/DankMaterialShell"
     "fastfetch/.config/fastfetch"
