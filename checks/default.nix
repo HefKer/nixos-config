@@ -116,6 +116,37 @@ in
       "code comments are one line (CODING_STANDARDS.md); these continue one:"
       "find . -name '*.nix' -exec awk 'FNR==1{p=0} /^[[:space:]]*#/{if(p)print FILENAME\":\"FNR\": \"$0; p=1; next} {p=0}' {} +";
 
+  # filestatus trusts the sops metadata, so values are inspected too; only key paths are printed, never values.
+  secrets-encrypted =
+    pkgs.runCommandLocal "check-secrets-encrypted"
+      {
+        nativeBuildInputs = [
+          pkgs.sops
+          pkgs.yq-go
+        ];
+      }
+      ''
+        cd ${src}
+        fail=0
+        while IFS= read -r f; do
+          if ! sops filestatus "$f" 2>/dev/null | grep -q '"encrypted":true'; then
+            echo "$f: not sops-encrypted"
+            fail=1
+            continue
+          fi
+          if ! plain=$(yq 'del(.sops) | .. | select(tag != "!!map" and tag != "!!seq") | select(tag != "!!str" or (test("^ENC\\[AES256_GCM,") | not)) | path | join(".")' "$f" 2>/dev/null); then
+            echo "$f: not readable as yaml"
+            fail=1
+          elif [ -n "$plain" ]; then
+            echo "$f: plaintext values under:"
+            echo "$plain"
+            fail=1
+          fi
+        done < <(find secrets ! -type d)
+        if [ "$fail" != 0 ]; then exit 1; fi
+        touch $out
+      '';
+
   # The flake-trap guard (ADR-0001); readlink never follows a link, so the root needn't exist.
   dotfiles = pkgs.runCommandLocal "check-dotfiles" { } ''
     fail=0
