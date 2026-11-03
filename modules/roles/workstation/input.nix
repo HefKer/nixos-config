@@ -59,6 +59,20 @@ let
       devices = "linux-dev-names-exclude (${quoted (wootingInterfaces ++ chorders)})";
     };
   };
+
+  units = lib.mapAttrsToList (name: _: "kanata-${name}.service") instances;
+
+  restart = pkgs.writeShellApplication {
+    name = "kanata-restart";
+    runtimeInputs = [ pkgs.libnotify ];
+    text = ''
+      if systemctl restart ${lib.escapeShellArgs units}; then
+        notify-send -a kanata "Kanata restarted"
+      else
+        notify-send -u critical -a kanata "Kanata failed to restart" "journalctl -eu kanata-wooting"
+      fi
+    '';
+  };
 in
 {
   config = lib.mkIf cfg.enable {
@@ -86,7 +100,20 @@ in
         kanata = config.services.kanata.package;
         ports = lib.mapAttrs (_: instance: instance.port) instances;
       })
+      # For niri's Mod+Shift+Backspace bind, after kanata hangs and gets killed.
+      restart
     ];
+
+    # Lets the bind start the system units without a password prompt.
+    security.polkit.extraConfig = ''
+      polkit.addRule(function(action, subject) {
+        if (action.id == "org.freedesktop.systemd1.manage-units"
+            && ${builtins.toJSON units}.indexOf(action.lookup("unit")) >= 0
+            && subject.user == "${consts.username}") {
+          return polkit.Result.YES;
+        }
+      });
+    '';
 
     # $HOME is 0700, closed to the dynamic user even with ProtectHome=read-only, so only the keymap is bound in.
     systemd.services = lib.mapAttrs' (
