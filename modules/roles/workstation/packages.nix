@@ -91,6 +91,8 @@ in
       wf-recorder # DMS Quick Capture's recording backend
       psmisc # killall: how Quick Capture stops a recording
       libnotify # notify-send: Quick Capture's recording-saved and error notifications
+      (tesseract.override { enableLanguages = [ "eng" ]; }) # Quick Capture's OCR tool (O in the editor) only reads English
+      zbar # zbarimg: Quick Capture's QR scanner
 
       # Documents
       zathura
