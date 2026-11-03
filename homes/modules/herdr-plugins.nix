@@ -9,6 +9,7 @@ let
     plugins = map (name: pkgs.callPackage ../../pkgs/${name} { }) [
       "herdr-hunk-diff"
       "herdr-lazygit"
+      "herdr-yazi"
       "smart-splits-backend-herdr"
     ];
   };
