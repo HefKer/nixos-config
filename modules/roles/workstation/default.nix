@@ -14,6 +14,7 @@ in
     ./networking.nix
     ./packages.nix
     ./printing.nix
+    ./reboot-notify.nix
     ./storage.nix
     ./gaming
     ./local-ai
