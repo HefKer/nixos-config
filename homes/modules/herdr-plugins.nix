@@ -7,6 +7,7 @@
 let
   sync = pkgs.callPackage ../../pkgs/herdr-plugins-sync {
     plugins = map (name: pkgs.callPackage ../../pkgs/${name} { }) [
+      "herdr-floax"
       "herdr-hunk-diff"
       "herdr-lazygit"
       "herdr-yazi"
