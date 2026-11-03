@@ -68,6 +68,7 @@ in
       # Other Langs/Tools
       yaml-language-server
       markdownlint-cli2
+      marksman
       vscode-json-languageserver
       vscode-langservers-extracted
 

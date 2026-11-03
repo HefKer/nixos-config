@@ -21,6 +21,7 @@ let
       ".config/git/ignore" = "git/.config/git/ignore";
       ".config/herdr/config.toml" = "herdr/.config/herdr/config.toml";
       ".config/hunk/config.toml" = "hunk/.config/hunk/config.toml";
+      ".config/marksman" = "marksman/.config/marksman";
       ".config/mimeapps.list" = "xdg/.config/mimeapps.list";
       ".config/mpv" = "mpv/.config/mpv";
       ".config/niri" = "niri/.config/niri";
@@ -46,6 +47,7 @@ let
       ".config/git/ignore" = "git/.config/git/ignore";
       ".config/herdr/config.toml" = "herdr/.config/herdr/config.toml";
       ".config/hunk/config.toml" = "hunk/.config/hunk/config.toml";
+      ".config/marksman" = "marksman/.config/marksman";
       ".config/mimeapps.list" = "xdg/.config/mimeapps.list";
       ".config/mpv" = "mpv/.config/mpv";
       ".config/niri" = "niri/.config/niri";
