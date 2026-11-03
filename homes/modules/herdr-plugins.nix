@@ -6,7 +6,10 @@
 }:
 let
   sync = pkgs.callPackage ../../pkgs/herdr-plugins-sync {
-    plugins = [ (pkgs.callPackage ../../pkgs/herdr-hunk-diff { }) ];
+    plugins = map (name: pkgs.callPackage ../../pkgs/${name} { }) [
+      "herdr-hunk-diff"
+      "smart-splits-backend-herdr"
+    ];
   };
 in
 {
