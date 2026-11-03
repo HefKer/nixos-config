@@ -20,6 +20,8 @@ let
       ".config/git/config" = "git/.config/git/config";
       ".config/git/ignore" = "git/.config/git/ignore";
       ".config/herdr/config.toml" = "herdr/.config/herdr/config.toml";
+      ".config/herdr/plugins/config/jhochenbaum.hunkdiff" =
+        "herdr/.config/herdr/plugins/config/jhochenbaum.hunkdiff";
       ".config/hunk/config.toml" = "hunk/.config/hunk/config.toml";
       ".config/marksman" = "marksman/.config/marksman";
       ".config/mimeapps.list" = "xdg/.config/mimeapps.list";
@@ -46,6 +48,8 @@ let
       ".config/git/config" = "git/.config/git/config";
       ".config/git/ignore" = "git/.config/git/ignore";
       ".config/herdr/config.toml" = "herdr/.config/herdr/config.toml";
+      ".config/herdr/plugins/config/jhochenbaum.hunkdiff" =
+        "herdr/.config/herdr/plugins/config/jhochenbaum.hunkdiff";
       ".config/hunk/config.toml" = "hunk/.config/hunk/config.toml";
       ".config/marksman" = "marksman/.config/marksman";
       ".config/mimeapps.list" = "xdg/.config/mimeapps.list";
