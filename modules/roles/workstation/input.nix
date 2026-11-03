@@ -66,10 +66,15 @@ let
     name = "kanata-restart";
     runtimeInputs = [ pkgs.libnotify ];
     text = ''
-      if systemctl restart ${lib.escapeShellArgs units}; then
-        notify-send -a kanata "Kanata restarted"
+      failed=()
+      # One unit per call: a multi-unit job carries no unit for the polkit rule to match.
+      for unit in ${lib.escapeShellArgs units}; do
+        systemctl restart "$unit" || failed+=("$unit")
+      done
+      if ((''${#failed[@]})); then
+        notify-send -u critical -a kanata "Kanata failed to restart" "''${failed[*]}"
       else
-        notify-send -u critical -a kanata "Kanata failed to restart" "journalctl -eu kanata-wooting"
+        notify-send -a kanata "Kanata restarted"
       fi
     '';
   };
