@@ -80,7 +80,6 @@ in
       czkawka
       moonlight-qt
       slack
-      ripcord # Slack + Discord client
       # meme-pick and meme-add, for niri's Mod+M and Mod+Shift+M binds.
       (callPackage ../../../pkgs/memes { library = "${consts.home}/memes"; })
 

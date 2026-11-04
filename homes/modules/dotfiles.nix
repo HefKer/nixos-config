@@ -36,6 +36,11 @@ let
     "atuin/.config/atuin"
     "btop/.config/btop"
     "DankMaterialShell/.config/DankMaterialShell"
+    # The shell reads ~/.config/dms, but its regenerated nvim colorscheme reads this path.
+    {
+      source = "DankMaterialShell/.config/DankMaterialShell";
+      target = ".config/Dux Shell";
+    }
     "fastfetch/.config/fastfetch"
     "fish/.config/fish"
     "fuzzel/.config/fuzzel"

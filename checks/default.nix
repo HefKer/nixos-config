@@ -14,6 +14,7 @@ let
       ".config/atuin" = "atuin/.config/atuin";
       ".config/btop" = "btop/.config/btop";
       ".config/DankMaterialShell" = "DankMaterialShell/.config/DankMaterialShell";
+      ".config/Dux Shell" = "DankMaterialShell/.config/DankMaterialShell";
       ".config/fastfetch" = "fastfetch/.config/fastfetch";
       ".config/fish" = "fish/.config/fish";
       ".config/fuzzel" = "fuzzel/.config/fuzzel";
@@ -42,6 +43,7 @@ let
       ".config/atuin" = "atuin/.config/atuin";
       ".config/btop" = "btop/.config/btop";
       ".config/DankMaterialShell" = "DankMaterialShell/.config/DankMaterialShell";
+      ".config/Dux Shell" = "DankMaterialShell/.config/DankMaterialShell";
       ".config/fastfetch" = "fastfetch/.config/fastfetch";
       ".config/fish" = "fish/.config/fish";
       ".config/fuzzel" = "fuzzel/.config/fuzzel";
@@ -86,7 +88,7 @@ let
       entry ${root} ${lib.escapeShellArg f.target} ${f.source}
     '') files
     + ''
-      compare ${host} ${root} ${lib.escapeShellArg (lib.concatStringsSep " " (lib.sort lib.lessThan pairs))}
+      compare ${host} ${root} ${lib.escapeShellArg (lib.concatStringsSep "\n" (lib.sort lib.lessThan pairs))}
     '';
 
   # Fails, printing the matches, when `search` (run from the repo root) prints anything.
@@ -168,11 +170,11 @@ in
     # Records target=source for every built source that is an out-of-store symlink into the root.
     entry() {
       if actual=$(readlink "$3") && [ "''${actual#"$1"/}" != "$actual" ]; then
-        produced="$produced $2=''${actual#"$1"/}"
+        produced="$produced$2=''${actual#"$1"/}"$'\n'
       fi
     }
     compare() {
-      got=$(printf '%s\n' $produced | sort | xargs)
+      got=$(printf '%s' "$produced" | sort)
       if [ "$got" != "$3" ]; then
         echo "$1: out-of-store links into $2 are '$got', expected '$3'"
         fail=1
