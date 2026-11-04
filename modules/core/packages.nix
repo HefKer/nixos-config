@@ -17,6 +17,10 @@
     pandoc
     ffmpeg
     poppler-utils # pdftotext, pdfinfo, pdftoppm, ...
+    # snacks.image in nvim: PDFs, LaTeX math, Mermaid diagrams
+    ghostscript
+    tectonic
+    mermaid-cli
   ];
 
   programs = {
