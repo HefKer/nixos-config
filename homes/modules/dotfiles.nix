@@ -65,6 +65,8 @@ let
     # xdg-mime writes through the link; a tool saving by rename replaces it with a file that aborts the next rebuild.
     "xdg/.config/mimeapps.list"
     "xdg-desktop-portal-termfilechooser/.config/xdg-desktop-portal-termfilechooser"
+    # The directory takes `ya pkg`'s package.toml, plugins and flavors, so installed packages land in the repo.
+    "yazi/.config/yazi"
     {
       source = "scripts/qute-sandbox";
       target = ".local/bin/qute-sandbox";
