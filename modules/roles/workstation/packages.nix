@@ -87,7 +87,7 @@ in
       inkscape
       pinta
       imv # image viewer
-      wf-recorder # DMS Quick Capture's recording backend
+      wf-recorder # DMS Quick Capture's fallback recording backend, behind gpu-screen-recorder below
       psmisc # killall: how Quick Capture stops a recording
       libnotify # notify-send: Quick Capture's recording-saved and error notifications
       (tesseract.override { enableLanguages = [ "eng" ]; }) # Quick Capture's OCR tool (O in the editor) only reads English
@@ -151,6 +151,7 @@ in
       firefox.enable = true;
       localsend.enable = true;
       kdeconnect.enable = true;
+      gpu-screen-recorder.enable = true; # Quick Capture's preferred backend; unlike wf-recorder it records a whole monitor without asking which
       obs-studio = {
         enable = true;
         plugins = with pkgs.obs-studio-plugins; [
