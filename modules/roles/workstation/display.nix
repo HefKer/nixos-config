@@ -33,6 +33,9 @@ in
       };
     };
 
+    # The portal Qt theme ignores GTK's icon theme, so the bar's tray icons fall back to hicolor
+    systemd.user.services.dms.environment.QS_ICON_THEME = "Papirus-Dark";
+
     xdg.portal = {
       extraPortals = [ pkgs.xdg-desktop-portal-termfilechooser ];
       config.niri."org.freedesktop.impl.portal.FileChooser" = "termfilechooser";

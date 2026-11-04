@@ -5,7 +5,7 @@
   gtk = {
     enable = true;
     colorScheme = "dark";
-    # Qt apps read this too (QT_QPA_PLATFORMTHEME=gtk3); a name with no installed theme blanks every icon.
+    # A name with no installed theme blanks every icon; DMS's tray gets it via QS_ICON_THEME.
     iconTheme = {
       package = pkgs.papirus-icon-theme;
       name = "Papirus-Dark";
