@@ -24,6 +24,7 @@ let
       ".config/herdr/plugins/config/jhochenbaum.hunkdiff" =
         "herdr/.config/herdr/plugins/config/jhochenbaum.hunkdiff";
       ".config/hunk/config.toml" = "hunk/.config/hunk/config.toml";
+      ".config/lazygit/config.yml" = "lazygit/.config/lazygit/config.yml";
       ".config/marksman" = "marksman/.config/marksman";
       ".config/mimeapps.list" = "xdg/.config/mimeapps.list";
       ".config/mpv" = "mpv/.config/mpv";
@@ -55,6 +56,7 @@ let
       ".config/herdr/plugins/config/jhochenbaum.hunkdiff" =
         "herdr/.config/herdr/plugins/config/jhochenbaum.hunkdiff";
       ".config/hunk/config.toml" = "hunk/.config/hunk/config.toml";
+      ".config/lazygit/config.yml" = "lazygit/.config/lazygit/config.yml";
       ".config/marksman" = "marksman/.config/marksman";
       ".config/mimeapps.list" = "xdg/.config/mimeapps.list";
       ".config/mpv" = "mpv/.config/mpv";

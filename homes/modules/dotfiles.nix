@@ -52,6 +52,8 @@ let
     "herdr/.config/herdr/plugins/config/jhochenbaum.hunkdiff"
     # The directory also holds hunk's state.json and extensions; hunk saves view preferences through the link.
     "hunk/.config/hunk/config.toml"
+    # The directory also holds lazygit's state.yml and PR cache; lazygit never writes config.yml.
+    "lazygit/.config/lazygit/config.yml"
     "marksman/.config/marksman"
     "mpv/.config/mpv"
     "niri/.config/niri"
