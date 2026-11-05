@@ -155,6 +155,11 @@ together](#how-it-fits-together) for what that means when you copy one.
   [`modules/core/reboot-required.nix`](modules/core/reboot-required.nix),
   [`modules/roles/workstation/reboot-notify.nix`](modules/roles/workstation/reboot-notify.nix) ·
   [0891279](https://github.com/HefKer/nixos-config/commit/0891279)
+- <a id="summon"></a>**Summon an app from anywhere.** `summon <app-id>
+  <command>` focuses the app's most recently focused window across workspaces
+  and monitors, cycles through its others on repeats in the order the cycle
+  began with, and launches it if none is open; bound to niri's Mod+Alt keys.
+  [`pkgs/summon/`](pkgs/summon/)
 - <a id="yazi-picker"></a>**yazi as the system file picker.** Uses
   xdg-desktop-portal-termfilechooser on niri, with the environment variables
   that make unsandboxed GTK, Firefox and Qt apps actually use the portal.

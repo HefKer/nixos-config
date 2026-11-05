@@ -84,6 +84,8 @@ in
       slack
       # meme-pick and meme-add, for niri's Mod+M and Mod+Shift+M binds.
       (callPackage ../../../pkgs/memes { library = "${consts.home}/memes"; })
+      # Focuses or launches an app, cycling its windows on repeats, for niri's Mod+Alt summon binds.
+      (callPackage ../../../pkgs/summon { })
 
       # Image manipulation
       inkscape

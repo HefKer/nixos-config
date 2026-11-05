@@ -167,6 +167,8 @@ in
         touch $out
       '';
 
+  summon = (pkgs.callPackage ../pkgs/summon { }).tests;
+
   # The flake-trap guard (ADR-0001); readlink never follows a link, so the root needn't exist.
   dotfiles = pkgs.runCommandLocal "check-dotfiles" { } ''
     fail=0
