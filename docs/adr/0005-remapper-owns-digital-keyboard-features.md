@@ -30,6 +30,10 @@ profiles are reset to stock remaps and differ only in analog settings.
   0.5 ms added over the Wooting's raw device. Past that, the Wooting gets its
   own kanata instance (it does anyway) and the watcher stops it while osu has
   focus, so the keyboard reaches the system untouched.
+- Other games get a game layer instead: stock keys with no tap-hold, plus
+  arrows on the right-hand modifier cluster. The same watcher, now the game
+  focus watcher, maps each app-id to a layer: osu's to passthrough, Steam's
+  `steam_app_` ids and a list of other games to the game layer.
 - Chording keyboards (the CharaChorder) are excluded by device name: their
   output is bursts of keystrokes that tap-hold keys would corrupt.
 - The keymap is a dotfile, linked out-of-store, so the kanata service's
