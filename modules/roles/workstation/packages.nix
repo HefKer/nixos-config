@@ -86,6 +86,10 @@ in
       (callPackage ../../../pkgs/memes { library = "${consts.home}/memes"; })
       # window-pick, for niri's Mod+P: fuzzel over every open window.
       (callPackage ../../../pkgs/window-pick { })
+      # Focuses or launches an app, cycling its windows on repeats, for niri's Mod+Alt summon binds.
+      (callPackage ../../../pkgs/summon { })
+      # For niri's per-window volume binds, on kanata's Fn2 a/s/d.
+      (callPackage ../../../pkgs/window-volume { niri = config.programs.niri.package; })
 
       # Image manipulation
       inkscape
