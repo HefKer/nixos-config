@@ -84,6 +84,8 @@ in
       slack
       # meme-pick and meme-add, for niri's Mod+M and Mod+Shift+M binds.
       (callPackage ../../../pkgs/memes { library = "${consts.home}/memes"; })
+      # For niri's per-window volume binds, on kanata's Fn2 a/s/d.
+      (callPackage ../../../pkgs/window-volume { niri = config.programs.niri.package; })
 
       # Image manipulation
       inkscape
