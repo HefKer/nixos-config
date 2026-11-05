@@ -40,6 +40,8 @@ in
       proton-vpn-cli
       starship
       yazi
+      mediainfo # yazi's "Show media info" opener
+      exiftool # yazi's "Show EXIF" opener
       python313Packages.youtube-transcript-api
       rclone
       yq
