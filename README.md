@@ -167,6 +167,10 @@ together](#how-it-fits-together) for what that means when you copy one.
   copies the pick as a file reference that Discord, Signal and WhatsApp accept.
   [`pkgs/memes/`](pkgs/memes/) ·
   [b50e756](https://github.com/HefKer/nixos-config/commit/b50e756)
+- <a id="window-pick"></a>**A picker over every open niri window.** `window-pick`
+  lists all windows across workspaces and monitors in fuzzel, most recently
+  focused first with their app icons, searchable by title or app-id, and
+  focuses the pick. [`pkgs/window-pick/`](pkgs/window-pick/)
 - <a id="removable-drives"></a>**Removable drives mounted as you.** udisks2
   and a udiskie user service, so FAT and exFAT files aren't owned by root.
   [`modules/roles/workstation/storage.nix`](modules/roles/workstation/storage.nix),

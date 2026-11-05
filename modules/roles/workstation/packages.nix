@@ -84,6 +84,8 @@ in
       slack
       # meme-pick and meme-add, for niri's Mod+M and Mod+Shift+M binds.
       (callPackage ../../../pkgs/memes { library = "${consts.home}/memes"; })
+      # window-pick, for niri's Mod+P: fuzzel over every open window.
+      (callPackage ../../../pkgs/window-pick { })
 
       # Image manipulation
       inkscape
