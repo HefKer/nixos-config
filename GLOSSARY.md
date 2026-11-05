@@ -139,6 +139,30 @@ workstation except those whose output it would corrupt, such as a chording
 keyboard.
 _Avoid_: keyboard daemon, key mapper
 
+**Passthrough layer**:
+The remapper layer in which every key is stock, for a game that needs keys
+unprocessed (osu). Switched on while such a game has focus.
+_Avoid_: game mode, bypass
+
+**Game layer**:
+The remapper layer for every other game: stock keys plus arrows on the
+right-hand modifier cluster. Switched on while a game has focus. Distinct from
+the passthrough layer, which changes nothing.
+_Avoid_: gaming layer, passthrough
+
+**Summon**:
+Bringing a specific app to focus from anywhere: its most recently focused
+window on the first press, the next of its windows on each repeat, a new one
+if none is open. Distinct from spawning, which always opens a new window.
+_Avoid_: launch, focus-or-spawn
+
+**Shell bind**:
+A bind whose action belongs to the desktop shell (launcher, clipboard,
+notifications, media, volume, lock) rather than to the window manager. Owned
+and edited by the shell; window-manager binds and personal binds are owned by
+the user's own config.
+_Avoid_: DMS bind, system bind
+
 ### Secrets
 
 **Secret**:
