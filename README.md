@@ -1,10 +1,193 @@
-# NixOS Configuration
+# nixos-config
 
-My beginner [NixOS](https://nixos.org/) configuration. NixOS is a declarative Linux distribution — meaning that every system setting and program installation is written in code using the Nix programming language. With the power of Nix, this entire system configuration can be ported to another computer in a matter of minutes.
+The [NixOS](https://nixos.org/) flake behind my two machines, `desktop` and
+`lenovo`: [niri] + [DankMaterialShell], [kanata] on every keyboard, and
+[herdr] for coding agents. The application configs themselves live in
+[dots]; this repo installs the packages and places those files.
 
-Two machines are built from this flake: `desktop` and `lenovo`.
+[niri]: https://github.com/YaLTeR/niri
+[DankMaterialShell]: https://github.com/AvengeMedia/DankMaterialShell
+[kanata]: https://github.com/jtroo/kanata
+[herdr]: https://herdr.dev
+[dots]: https://github.com/HefKer/dots
 
-## Config Structure
+Feel free to take whatever's useful. The **Worth stealing** list below has one
+entry per feature, linked to the file it lives in and the commit that added it.
+The commit message says why it's built that way.
+
+## Highlights
+
+- **[`same-system`][same-system]**: proves a refactor changes nothing any host
+  builds
+- **[Dotfiles as out-of-store symlinks][dotfiles-links]**: edit in place with
+  no rebuild, with [a flake check][dotfiles-check] that each host gets exactly
+  the links it should
+- **[kanata misfire tooling][kanata-misfires]**: flag a home-row-mod misfire
+  from a bind, then replay and fuzz the keymap in kanata's own simulator
+- **[Reboot-required warning][reboot-required]**: says when the kernel or
+  initrd changed under you, at switch time and as a notification
+- **[herdr plugins from Nix][herdr-plugins]**: packaged plugins merged into a
+  registry herdr rewrites itself
+
+[same-system]: #same-system
+[dotfiles-links]: #dotfiles-links
+[dotfiles-check]: #dotfiles-check
+[kanata-misfires]: #kanata-misfires
+[reboot-required]: #reboot-required
+[herdr-plugins]: #herdr-plugins
+
+## Worth stealing
+
+Each entry is self-contained enough to copy on its own. Its links point to the
+file as it is now and to the commit that added it, which explains why. Options
+sit under my `custom.*` namespace; see [How it fits
+together](#how-it-fits-together) for what that means when you copy one.
+
+### Repo tooling
+
+- <a id="same-system"></a>**Prove a refactor is a no-op.** `scripts/same-system
+  [base] [rev]` evaluates every host at both revisions and reports each as
+  identical, a reorder (same sorted package and group lists) or different.
+  [`scripts/same-system`](scripts/same-system) ·
+  [5b35dde](https://github.com/HefKer/nixos-config/commit/5b35dde),
+  [db8c9e8](https://github.com/HefKer/nixos-config/commit/db8c9e8)
+- <a id="convention-checks"></a>**Conventions as flake checks.** Grep-based
+  checks fail `nix flake check` when a `custom.*` switch is set outside a host
+  file, a host file declares options, a literal duplicates `lib/consts.nix`, or
+  a comment runs past one line. [`checks/default.nix`](checks/default.nix) ·
+  [81de6a9](https://github.com/HefKer/nixos-config/commit/81de6a9),
+  [75cefaa](https://github.com/HefKer/nixos-config/commit/75cefaa)
+- <a id="pre-commit"></a>**Pre-commit on the staged files only.** The hook
+  exports the index with `git checkout-index` and builds the checks from that,
+  so an unstaged edit (yours, or another agent's in the same tree) can't pass
+  or fail the commit. [`.githooks/pre-commit`](.githooks/pre-commit) ·
+  [1b6af37](https://github.com/HefKer/nixos-config/commit/1b6af37),
+  [06a77f1](https://github.com/HefKer/nixos-config/commit/06a77f1)
+
+### Dotfile links
+
+- <a id="dotfiles-links"></a>**Out-of-store symlinks with host layers.**
+  Entries like `"mpv/.config/mpv"` link to `~/.config/mpv` from the dotfiles
+  repo, so edits apply without a rebuild. A shared layer plus a per-host one
+  gives each machine its own file at one canonical name (`niri-host.kdl`).
+  [`homes/modules/dotfiles.nix`](homes/modules/dotfiles.nix) ·
+  [3c4de7a](https://github.com/HefKer/nixos-config/commit/3c4de7a),
+  [bc28c66](https://github.com/HefKer/nixos-config/commit/bc28c66)
+- <a id="dotfiles-check"></a>**Check the link set home-manager actually
+  produces.** Each host's `home.file` is compared to an expected list, and
+  every link must point outside the store, so a swapped host variant or a
+  forgotten entry fails the flake check.
+  [`checks/default.nix`](checks/default.nix) ·
+  [af5d3d4](https://github.com/HefKer/nixos-config/commit/af5d3d4),
+  [895f32f](https://github.com/HefKer/nixos-config/commit/895f32f)
+- <a id="no-backups"></a>**Fail on collisions instead of hiding them.** No
+  `backupFileExtension`, so a file in the way of a link aborts activation
+  rather than turning into a forgotten `.hm-bak`.
+  [`modules/core/home-manager.nix`](modules/core/home-manager.nix) ·
+  [a1619fc](https://github.com/HefKer/nixos-config/commit/a1619fc)
+
+### Keyboard (kanata)
+
+- <a id="kanata-instances"></a>**One kanata per keyboard, keymap from
+  dotfiles.** Two instances share one `keymap.kbd` read from `$HOME` through a
+  read-only bind, so live-reload works without a rebuild. They wait for udev's
+  coldplug and restart on failure, and a polkit rule lets a bind restart them
+  without a password.
+  [`modules/roles/workstation/input.nix`](modules/roles/workstation/input.nix) ·
+  [c5c429b](https://github.com/HefKer/nixos-config/commit/c5c429b),
+  [31150ef](https://github.com/HefKer/nixos-config/commit/31150ef),
+  [f11861b](https://github.com/HefKer/nixos-config/commit/f11861b)
+- <a id="kanata-misfires"></a>**Catch and test home-row-mod misfires.**
+  `kanata-flag` asks through fuzzel what you meant and what came out, and logs
+  it with each instance's layer and the keymap's git rev. `kanata-test` replays
+  `.sim` cases, or fuzzes word lists as fast rolls, in a simulator built from
+  the same kanata the service runs.
+  [`pkgs/kanata-misfires/`](pkgs/kanata-misfires/),
+  [`pkgs/kanata-sim/`](pkgs/kanata-sim/) ·
+  [2b71808](https://github.com/HefKer/nixos-config/commit/2b71808),
+  [7cbf756](https://github.com/HefKer/nixos-config/commit/7cbf756)
+- <a id="kanata-keymap"></a>**A keymap viewer that redraws itself.** A path
+  unit watches `keymap.kbd` and redraws it as an SVG with keymap-drawer, and a
+  bind toggles it in swayimg.
+  [`homes/modules/kanata-keymap.nix`](homes/modules/kanata-keymap.nix),
+  [`pkgs/kanata-keymap/`](pkgs/kanata-keymap/) ·
+  [ad8ab11](https://github.com/HefKer/nixos-config/commit/ad8ab11)
+- <a id="osu-passthrough"></a>**Passthrough while a game has focus.** A user
+  service follows niri's event stream and switches every kanata instance to a
+  passthrough layer over TCP while osu! is focused, restoring the previous layer
+  after. [`homes/modules/osu-watcher.nix`](homes/modules/osu-watcher.nix),
+  [`pkgs/osu-focus-watcher/`](pkgs/osu-focus-watcher/) ·
+  [22545a7](https://github.com/HefKer/nixos-config/commit/22545a7)
+
+### Coding agents
+
+- <a id="herdr-plugins"></a>**herdr plugins packaged in Nix.** Plugins are
+  built into the store and merged into herdr's `plugins.json` at activation,
+  since herdr rewrites that file itself. The merge validates every entry first,
+  because one bad entry makes herdr drop them all.
+  [`homes/modules/herdr-plugins.nix`](homes/modules/herdr-plugins.nix),
+  [`pkgs/herdr-plugins-sync/`](pkgs/herdr-plugins-sync/) ·
+  [df23f3c](https://github.com/HefKer/nixos-config/commit/df23f3c)
+- <a id="claude-second-account"></a>**A second Claude Code account sharing
+  your setup.** Links the read-only pieces (skills, commands, agents,
+  keybindings, `CLAUDE.md`) from `~/.claude` into a second config dir, leaving
+  everything Claude writes per-account.
+  [`homes/modules/claude-hulio.nix`](homes/modules/claude-hulio.nix) ·
+  [35bca13](https://github.com/HefKer/nixos-config/commit/35bca13)
+- <a id="package-skills"></a>**Skills bundled with packages.** Linking
+  `/share/skills` into the system profile gives skills that ship with packages
+  (like hunk's) a path that survives upgrades.
+  [`modules/roles/workstation/development/packages.nix`](modules/roles/workstation/development/packages.nix) ·
+  [2f0f5eb](https://github.com/HefKer/nixos-config/commit/2f0f5eb)
+- <a id="hunk-extensions"></a>**Pinned, patched hunk extensions.** Fetches an
+  extension at a commit, patches it, and places `installed/` as one store
+  directory, since hunk skips symlinked extension folders.
+  [`homes/modules/hunk-extensions.nix`](homes/modules/hunk-extensions.nix) ·
+  [0baa182](https://github.com/HefKer/nixos-config/commit/0baa182)
+
+### Desktop
+
+- <a id="reboot-required"></a>**Know when to reboot.** Compares the kernel,
+  initrd and kernel modules against `/run/booted-system`, printing a warning
+  during the switch and sending a desktop notification whenever
+  `/run/current-system` changes.
+  [`pkgs/reboot-required/`](pkgs/reboot-required/),
+  [`modules/core/reboot-required.nix`](modules/core/reboot-required.nix),
+  [`modules/roles/workstation/reboot-notify.nix`](modules/roles/workstation/reboot-notify.nix) ·
+  [0891279](https://github.com/HefKer/nixos-config/commit/0891279)
+- <a id="yazi-picker"></a>**yazi as the system file picker.** Uses
+  xdg-desktop-portal-termfilechooser on niri, with the environment variables
+  that make unsandboxed GTK, Firefox and Qt apps actually use the portal.
+  [`modules/roles/workstation/display.nix`](modules/roles/workstation/display.nix) ·
+  [255b483](https://github.com/HefKer/nixos-config/commit/255b483)
+- <a id="memes"></a>**A meme library with a picker.** `meme-add` saves a URL,
+  file or the clipboard into `~/memes` (Tenor and Giphy as looping mp4s), named
+  by tags asked through fuzzel. `meme-pick` shows thumbnails in fuzzel and
+  copies the pick as a file reference that Discord, Signal and WhatsApp accept.
+  [`pkgs/memes/`](pkgs/memes/) ·
+  [b50e756](https://github.com/HefKer/nixos-config/commit/b50e756)
+- <a id="removable-drives"></a>**Removable drives mounted as you.** udisks2
+  and a udiskie user service, so FAT and exFAT files aren't owned by root.
+  [`modules/roles/workstation/storage.nix`](modules/roles/workstation/storage.nix),
+  [`homes/modules/udiskie.nix`](homes/modules/udiskie.nix) ·
+  [ea64d1a](https://github.com/HefKer/nixos-config/commit/ea64d1a)
+
+### Secret management
+
+- <a id="secrets"></a>**sops-nix in a public repo.** One encrypted file per
+  host plus a shared one. Hosts decrypt with their SSH host key and you with
+  an age key kept in Bitwarden, and a flake check fails on any plaintext.
+  [`modules/core/secrets.nix`](modules/core/secrets.nix),
+  [`.sops.yaml`](.sops.yaml),
+  [`checks/default.nix`](checks/default.nix) ·
+  [d16d4f7](https://github.com/HefKer/nixos-config/commit/d16d4f7),
+  [f91c2ca](https://github.com/HefKer/nixos-config/commit/f91c2ca)
+
+## How this repo is wired
+
+The rest is for me and for agents working in this repo.
+
+### Config Structure
 
 This repository is structured in a modularized format, with each directory serving a specific purpose:
 
@@ -29,25 +212,25 @@ This repository is structured in a modularized format, with each directory servi
 
 **docs**: Notes to myself. Architecture decisions, research, and things I've learned along the way. `docs/agents/` documents the workflows I use with AI coding agents — including where issues live, which is the private `nixos-issues` repo rather than this one (see `docs/adr/0002-issues-live-in-a-separate-private-repo.md`).
 
-## How it fits together
+### How it fits together
 
 Every toggle in this flake is a custom option under the `custom.*` namespace — `custom.platform = "laptop"`, `custom.roles.workstation.development.enable`, and so on. Modules declare their options and keep their config behind `lib.mkIf`, so nothing takes effect until a host asks for it.
 
 That makes `hosts/desktop/default.nix` and `hosts/lenovo/default.nix` the main files: they're the only place anything is switched on, so each one reads as a short description of what that machine actually is.
 
-## Dotfiles
+### Dotfiles
 
 Application config — fish, niri, nvim, wezterm and the rest — is not in this repository. It lives as ordinary hand-edited files in the dotfiles root, `~/dots`, a repository of its own. `homes/modules/dotfiles.nix` declares the **link set**: which paths under the dotfiles root appear where in `$HOME`, with a per-host layer on top of a shared one.
 
 The links are **out-of-store symlinks**, deliberately. Editing a dotfile takes effect straight away, with no rebuild, and applications that rewrite their own config keep working. The cost is that `flake.lock` does not pin dotfile content, so a rollback restores the links but not the files they point at. Store copies were considered and rejected for machines I sit at — don't "fix" this by pointing the links at store copies. The reasoning is in [ADR-0001](docs/adr/0001-dotfiles-wired-by-home-manager-as-out-of-store-symlinks.md), and the vocabulary (dotfiles root, link set, write-back application, drift) in [GLOSSARY.md](GLOSSARY.md).
 
-### Bootstrapping a new machine
+#### Bootstrapping a new machine
 
 The dotfiles root must exist **before the first rebuild**. Syncthing is what puts it there: share `~/dots` to the new machine and let it finish syncing, then run `nixos-rebuild`.
 
 Nix cannot check this. The links point outside the store, so the build succeeds and activation places them whether or not their targets exist. If `~/dots` is missing, every link dangles silently and the applications fail obscurely — starting with defaults or erroring on a config they can't read — rather than the rebuild failing loudly. If something looks unconfigured after a fresh install, check `ls -L ~/.config/<app>` first.
 
-### Making a new host a recipient
+#### Making a new host a recipient
 
 A new host must be able to read its secrets **before its first rebuild that needs one**, and Nix can't check this either: the build succeeds, then decryption fails at activation. From a machine that holds the user's age key:
 
@@ -57,7 +240,7 @@ A new host must be able to read its secrets **before its first rebuild that need
 4. Re-encrypt the shared file for the new recipient list: `SOPS_AGE_KEY_CMD="rbw get sops-age-key" sops updatekeys secrets/shared.yaml`.
 5. Commit, then run `nixos-rebuild` on the new host.
 
-## Secrets
+### Secrets
 
 Secrets live in `secrets/` as ciphertext: `secrets/<host>.yaml` for one machine, `secrets/shared.yaml` for all of them. `modules/core/secrets.nix` imports sops-nix, which decrypts them at activation to `/run/secrets`, outside the Nix store. Each host decrypts with an age key derived from its SSH host key; the user is a recipient of everything through an age key kept in Bitwarden, so no machine's disk has to survive. Only secrets that can be rotated belong here, because git history keeps every encrypted version for good. The reasoning is in [ADR-0006](docs/adr/0006-secrets-are-sops-encrypted-in-the-public-repo.md).
 

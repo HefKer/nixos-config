@@ -6,6 +6,7 @@
 - **Explain every change in chat** — what it does, why, which NixOS concept. Goal is the user understands the config, not just that it works.
 - **Verify** with `nix flake check`; a change meant to leave what gets built untouched (a move, rename or split) also runs `scripts/same-system [base-rev]`. Review against `CODING_STANDARDS.md`.
 - **Commit small sets of changes straight to `main`.** Branch for anything larger.
+- **The repo is public; features are shared through `README.md`'s Worth stealing list.** A commit that adds something reusable adds its entry in the same commit, in the existing entries' format with the anchor, linking only the file, since the commit has no hash yet.
 
 ## Agent skills
 
