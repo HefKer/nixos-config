@@ -176,6 +176,11 @@ together](#how-it-fits-together) for what that means when you copy one.
   lists all windows across workspaces and monitors in fuzzel, most recently
   focused first with their app icons, searchable by title or app-id, and
   focuses the pick. [`pkgs/window-pick/`](pkgs/window-pick/)
+- <a id="window-volume"></a>**Volume keys for the focused window.**
+  `window-volume up|down|mute` finds the PipeWire streams of the app in niri's
+  focused window, including browsers' and Electron's child processes, and steps
+  or mutes only those; with nothing playing it says so in a notification.
+  [`pkgs/window-volume/`](pkgs/window-volume/)
 - <a id="removable-drives"></a>**Removable drives mounted as you.** udisks2
   and a udiskie user service, so FAT and exFAT files aren't owned by root.
   [`modules/roles/workstation/storage.nix`](modules/roles/workstation/storage.nix),
