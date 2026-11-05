@@ -31,6 +31,7 @@ let
       ".config/nvim" = "nvim/.config/nvim";
       ".config/qutebrowser" = "qutebrowser/.config/qutebrowser";
       ".config/starship.toml" = "starship/.config/starship.toml";
+      ".config/swayimg" = "swayimg/.config/swayimg";
       ".config/wezterm" = "wezterm/.config/wezterm";
       ".config/xdg-desktop-portal-termfilechooser" =
         "xdg-desktop-portal-termfilechooser/.config/xdg-desktop-portal-termfilechooser";
@@ -61,6 +62,7 @@ let
       ".config/nvim" = "nvim/.config/nvim";
       ".config/qutebrowser" = "qutebrowser/.config/qutebrowser";
       ".config/starship.toml" = "starship/.config/starship.toml";
+      ".config/swayimg" = "swayimg/.config/swayimg";
       ".config/wezterm" = "wezterm/.config/wezterm";
       ".config/xdg-desktop-portal-termfilechooser" =
         "xdg-desktop-portal-termfilechooser/.config/xdg-desktop-portal-termfilechooser";

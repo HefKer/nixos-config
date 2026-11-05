@@ -61,6 +61,7 @@ let
     "qutebrowser/.local/share/qutebrowser/userscripts"
     # starship reads one file directly in ~/.config, so the link is the file, not a directory.
     "starship/.config/starship.toml"
+    "swayimg/.config/swayimg"
     "wezterm/.config/wezterm"
     # xdg-mime writes through the link; a tool saving by rename replaces it with a file that aborts the next rebuild.
     "xdg/.config/mimeapps.list"
