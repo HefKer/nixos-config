@@ -190,4 +190,11 @@ in
     if [ "$fail" != 0 ]; then exit 1; fi
     touch $out
   '';
+
+  game-focus-watcher =
+    pkgs.runCommandLocal "check-game-focus-watcher" { nativeBuildInputs = [ pkgs.python3 ]; }
+      ''
+        python3 ${../pkgs/game-focus-watcher/test.py} ${../pkgs/game-focus-watcher/game-focus-watcher.py}
+        touch $out
+      '';
 }

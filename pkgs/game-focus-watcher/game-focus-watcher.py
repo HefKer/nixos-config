@@ -1,18 +1,20 @@
-"""Switch every kanata instance to passthrough while an osu window has focus.
+"""Switch every kanata instance to a game's layer while that game has focus.
 
-Reads niri's event stream for focus changes and keeps a TCP connection to
-each kanata instance. On losing focus it restores the layer the instance had
-before osu took it, so a manual passthrough or Fn Lock survives a session.
+Each --layer PATTERN LAYER maps app-ids matching the regex PATTERN (whole
+app-id) to LAYER; the first match wins. Reads niri's event stream for focus
+changes and keeps a TCP connection to each kanata instance. On losing focus it
+restores the layer the instance had before the game took it, so a manual
+passthrough or Fn Lock survives a session.
 """
 
 import argparse
 import json
+import re
 import socket
 import subprocess
 import threading
 import time
 
-PASSTHROUGH = "passthrough"
 lock = threading.Lock()
 
 
@@ -23,7 +25,7 @@ def log(*parts):
 class KanataConnection:
     """One kanata TCP server, reconnected for as long as the watcher runs.
 
-    `saved` is the layer to restore once osu loses focus. It outlives a
+    `saved` is the layer to restore once the game loses focus. It outlives a
     dropped connection, so a restore missed while disconnected still lands.
     """
 
@@ -43,10 +45,12 @@ class KanataConnection:
     def change_layer(self, layer):
         self.send({"ChangeLayer": {"new": layer}})
 
-    def enter(self):
+    def enter(self, layer):
         if self.sock is not None:
-            self.saved = self.current
-            self.change_layer(PASSTHROUGH)
+            # Kept across a move between games: the user's layer comes back.
+            if self.saved is None:
+                self.saved = self.current
+            self.change_layer(layer)
 
     def leave(self):
         if self.sock is not None:
@@ -60,15 +64,16 @@ class KanataConnection:
     def greeted(self, layer):
         # kanata greets each connection with its current layer.
         self.current = layer
-        if not self.watcher.osu_focused:
+        target = self.watcher.target
+        if target is None:
             self.restore()
-        elif self.saved is None and layer == PASSTHROUGH:
-            # Passthrough left by an earlier watcher: restore the start layer.
+        elif self.saved is None and layer in self.watcher.layers:
+            # A game layer left by an earlier watcher: restore the start layer.
             self.send({"RequestLayerNames": {}})
         else:
             if self.saved is None:
                 self.saved = layer
-            self.change_layer(PASSTHROUGH)
+            self.change_layer(target)
 
     def handle(self, message, first):
         if "LayerChange" in message:
@@ -79,13 +84,18 @@ class KanataConnection:
         elif "LayerNames" in message:
             if self.saved is None:
                 self.saved = message["LayerNames"]["names"][0]
+            self.follow_target()
         elif "ConfigFileReload" in message:
             # A reload rebuilds the layout on its first layer, unannounced.
             self.send({"RequestCurrentLayerName": {}})
         elif "CurrentLayerName" in message:
             self.current = message["CurrentLayerName"]["name"]
-            if self.watcher.osu_focused and self.current != PASSTHROUGH:
-                self.change_layer(PASSTHROUGH)
+            self.follow_target()
+
+    def follow_target(self):
+        target = self.watcher.target
+        if target is not None and self.current != target:
+            self.change_layer(target)
 
     def run(self):
         delay = 0.1
@@ -118,12 +128,21 @@ class KanataConnection:
 class Watcher:
     """Tracks niri's focused window and drives every instance from it."""
 
-    def __init__(self, app_ids, ports):
-        self.app_ids = set(app_ids)
+    def __init__(self, rules, ports):
+        self.rules = [(re.compile(pattern), layer) for pattern, layer in rules]
+        self.layers = {layer for _, layer in rules}
         self.instances = [KanataConnection(port, self) for port in ports]
         self.windows = {}
         self.focused = None
-        self.osu_focused = False
+        self.target = None
+
+    def layer_for(self, app_id):
+        if app_id is None:
+            return None
+        for pattern, layer in self.rules:
+            if pattern.fullmatch(app_id):
+                return layer
+        return None
 
     def update(self, event):
         if "WindowsChanged" in event:
@@ -143,13 +162,13 @@ class Watcher:
             self.focused = event["WindowFocusChanged"]["id"]
         else:
             return
-        osu = self.windows.get(self.focused) in self.app_ids
-        if osu != self.osu_focused:
-            self.osu_focused = osu
-            log("osu focused" if osu else "osu unfocused")
+        target = self.layer_for(self.windows.get(self.focused))
+        if target != self.target:
+            self.target = target
+            log(f"game focused: {target}" if target else "game unfocused")
             for instance in self.instances:
-                if osu:
-                    instance.enter()
+                if target:
+                    instance.enter(target)
                 else:
                     instance.leave()
 
@@ -170,7 +189,7 @@ class Watcher:
                     with lock:
                         self.update(event)
                     # niri opens the stream with WindowsChanged; until then a
-                    # greeting's passthrough can't be told stale from manual.
+                    # greeting's game layer can't be told stale from manual.
                     if not connected and "WindowsChanged" in event:
                         self.connect()
                         connected = True
@@ -181,10 +200,16 @@ class Watcher:
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--niri", default="niri")
-    parser.add_argument("--app-id", action="append", required=True)
+    parser.add_argument(
+        "--layer",
+        nargs=2,
+        action="append",
+        required=True,
+        metavar=("PATTERN", "LAYER"),
+    )
     parser.add_argument("--port", action="append", type=int, required=True)
     args = parser.parse_args()
-    Watcher(args.app_id, args.port).run(args.niri)
+    Watcher(args.layer, args.port).run(args.niri)
 
 
 if __name__ == "__main__":

@@ -5,20 +5,38 @@
   ...
 }:
 let
-  watcher = pkgs.callPackage ../../pkgs/osu-focus-watcher { };
+  watcher = pkgs.callPackage ../../pkgs/game-focus-watcher { };
 
   # From `niri msg windows` with each running; umu gives osu!stable, like any game without a Steam ID, steam_app_0.
-  appIds = [
+  osu = [
     "osu!"
     "steam_app_0"
   ];
+  # Games outside Steam, which have no steam_app_ id.
+  nonSteamGames = [ ];
+  # App-id regexes (whole app-id) to kanata layers; the first match wins, so osu's steam_app_0 comes before Steam's.
+  layers =
+    map (id: [
+      (lib.escapeRegex id)
+      "passthrough"
+    ]) osu
+    ++ [
+      [
+        "steam_app_.*"
+        "game"
+      ]
+    ]
+    ++ map (id: [
+      (lib.escapeRegex id)
+      "game"
+    ]) nonSteamGames;
 
   ports = lib.mapAttrsToList (_: keyboard: keyboard.port) osConfig.services.kanata.keyboards;
 in
 {
-  systemd.user.services.osu-focus-watcher = {
+  systemd.user.services.game-focus-watcher = {
     Unit = {
-      Description = "Switch kanata to passthrough while osu is focused";
+      Description = "Switch kanata to a game's layer while that game is focused";
       PartOf = [ "graphical-session.target" ];
       After = [ "graphical-session.target" ];
     };
@@ -29,10 +47,7 @@ in
           "--niri"
           (lib.getExe osConfig.programs.niri.package)
         ]
-        ++ lib.concatMap (id: [
-          "--app-id"
-          id
-        ]) appIds
+        ++ lib.concatMap (layer: [ "--layer" ] ++ layer) layers
         ++ lib.concatMap (port: [
           "--port"
           (toString port)

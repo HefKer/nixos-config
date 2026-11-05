@@ -112,11 +112,12 @@ together](#how-it-fits-together) for what that means when you copy one.
   [`homes/modules/kanata-keymap.nix`](homes/modules/kanata-keymap.nix),
   [`pkgs/kanata-keymap/`](pkgs/kanata-keymap/) ·
   [ad8ab11](https://github.com/HefKer/nixos-config/commit/ad8ab11)
-- <a id="osu-passthrough"></a>**Passthrough while a game has focus.** A user
-  service follows niri's event stream and switches every kanata instance to a
-  passthrough layer over TCP while osu! is focused, restoring the previous layer
-  after. [`homes/modules/osu-watcher.nix`](homes/modules/osu-watcher.nix),
-  [`pkgs/osu-focus-watcher/`](pkgs/osu-focus-watcher/) ·
+- <a id="osu-passthrough"></a>**A keyboard layer per focused game.** A user
+  service follows niri's event stream and switches every kanata instance over
+  TCP to the layer an app-id regex maps it to, passthrough for osu! and a game
+  layer for Steam games, restoring the previous layer after.
+  [`homes/modules/game-focus-watcher.nix`](homes/modules/game-focus-watcher.nix),
+  [`pkgs/game-focus-watcher/`](pkgs/game-focus-watcher/) ·
   [22545a7](https://github.com/HefKer/nixos-config/commit/22545a7)
 
 ### Coding agents
