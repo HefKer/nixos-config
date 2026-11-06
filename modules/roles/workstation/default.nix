@@ -14,6 +14,7 @@ in
     ./networking.nix
     ./packages.nix
     ./printing.nix
+    ./rebuild-notify.nix
     ./reboot-notify.nix
     ./spotify.nix
     ./storage.nix

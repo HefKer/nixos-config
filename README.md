@@ -161,6 +161,11 @@ together](#how-it-fits-together) for what that means when you copy one.
   [`modules/core/reboot-required.nix`](modules/core/reboot-required.nix),
   [`modules/roles/workstation/reboot-notify.nix`](modules/roles/workstation/reboot-notify.nix) ·
   [0891279](https://github.com/HefKer/nixos-config/commit/0891279)
+- <a id="rebuild-notify"></a>**Notify when a rebuild finishes.** A
+  high-priority `nixos-rebuild` wrapper runs the real one, then sends a
+  notification with the action, duration and, on failure, the exit code,
+  reaching the invoking user's session bus even under `sudo`.
+  [`modules/roles/workstation/rebuild-notify.nix`](modules/roles/workstation/rebuild-notify.nix)
 - <a id="health"></a>**Probes for silent breakage.** A daily user timer runs
   every `custom.health.probes.<name>` script (link drift, Syncthing conflict
   files, failed units) into `~/.local/state/health/findings`, notifying only
