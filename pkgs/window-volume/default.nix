@@ -1,4 +1,5 @@
 {
+  gawk,
   jq,
   libnotify,
   niri,
@@ -9,6 +10,7 @@
 writeShellApplication {
   name = "window-volume";
   runtimeInputs = [
+    gawk
     jq
     libnotify
     niri
@@ -74,5 +76,14 @@ writeShellApplication {
         wpctl set-volume --limit 1.0 "$id" "$step"
       done
     fi
+
+    # Shows the new level, replacing the last one so repeated presses don't stack popups.
+    level=$(wpctl get-volume "''${streams[0]}")
+    percent=$(awk '{ printf "%d", $2 * 100 + 0.5 }' <<<"$level")
+    body="$percent%"
+    [[ $level == *MUTED* ]] && body="Muted"
+    idfile=''${XDG_RUNTIME_DIR:-/tmp}/window-volume.id
+    replace=$(cat "$idfile" 2>/dev/null || echo 0)
+    notify-send -a window-volume -t 1500 -h "int:value:$percent" -p -r "$replace" "$app volume" "$body" >"$idfile"
   '';
 }
