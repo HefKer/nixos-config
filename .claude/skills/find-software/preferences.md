@@ -1,0 +1,58 @@
+# Software preferences
+
+The criteria `find-software` judges every candidate by. Each entry carries the example that
+showed it; add new ones the same way.
+
+## Dealbreakers
+
+One failure rules the candidate out.
+
+- **X11-only.** Both hosts run niri (Wayland); XWayland is tolerated only where nothing else
+  exists (`xwayland-satellite` is installed solely for onlyoffice).
+- **Telemetry that cannot be turned off.**
+- **Big privacy or security concerns**, judged by this checklist, each answered in the write-up:
+  - telemetry on by default, and whether it can be disabled
+  - where data lives (local or vendor cloud), and whether it's end-to-end encrypted
+  - ownership: acquisitions, VC pivots, ad business
+  - security history: recent CVEs and how they were handled
+  - supply chain: sole maintainer, `curl | sh` installs, unsigned binaries, stale nixpkgs package
+  - permissions requested (Flatpak, Android), where relevant
+- **Data that can't leave.** The data must be exportable in an open or documented
+  format, or already stored that way. Obsidian passes: plain markdown on disk.
+- **Too expensive to justify the price.** No fixed ceiling: weigh the price (yearly for
+  subscriptions) against the best free option and what the money buys. A subscription that
+  holds data hostage weighs heavily against.
+
+## Soft ranking
+
+Highest first.
+
+1. **TUI > keyboard-driven GUI > mouse GUI.** The TUIs already in use: `impala` (wifi),
+   `bluetui`, `wiremix`, `kalker`, `yazi`, `btop`; the GUIs are keyboard-first: qutebrowser,
+   zathura, fuzzel pickers.
+2. **FOSS**, strongly preferred. Proprietary passes on merit: Obsidian is one of the best
+   apps around, keeps files local, and has a great community and developers.
+3. **Agent-drivable.** Agents can read and change its state: plain files (Obsidian's
+   markdown), a CLI (Obsidian's), or an API. A GUI-only app with a binary store ranks lowest.
+4. **Wayland/niri-native**: layer-shell where it applies, no XWayland.
+5. **Light**: native code (Rust, Go, C, Zig) over Electron or web wrappers. The Electron
+   Spotify client is too bulky (HefKer/nixos-issues#14).
+6. **Plain-text config** that can live in the `dots` repo.
+7. **Fits the theme and vim-style binds.**
+8. **Maintained and popular**, with a good community and developers.
+
+## Cloud dependency
+
+Always state what breaks if the vendor's cloud disappears. Acceptable when the cloud is the
+point (Spotify, Slack); counts against when incidental (a notes app that needs a login).
+
+## Self-hosted
+
+The homelab runs mostly on NixOS.
+
+- Delivery: a NixOS module in nixpkgs > an OCI container > anything else, unless
+  `.scratch/homelab/issues/08-service-delivery-pattern.md` has decided otherwise.
+- Runs on aarch64 (Raspberry Pi 4); idle RAM noted.
+- Backups: where state lives, and whether it snapshots cleanly.
+- LAN-only works; cloud dependency judged as above.
+- Rui's config breaks ties.
