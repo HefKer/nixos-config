@@ -22,6 +22,9 @@ One failure rules the candidate out.
 - **Too expensive to justify the price.** No fixed ceiling: weigh the price (yearly for
   subscriptions) against the best free option and what the money buys. A subscription that
   holds data hostage weighs heavily against.
+- **A browser or tab held open all day to host one app.** The main browser is qutebrowser,
+  with tabs kept organized; a Spotify web player in its own Brave window, or a pinned tab,
+  was turned down (HefKer/nixos-issues#14).
 
 ## Soft ranking
 
