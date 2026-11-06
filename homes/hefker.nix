@@ -17,6 +17,7 @@ in
   ] # default to CLI group
   ++ lib.optionals isWorkstation [
     ./modules/gui.nix
+    ./modules/health.nix
     ./modules/kanata-keymap.nix
     ./modules/udiskie.nix
   ]

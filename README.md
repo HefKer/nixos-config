@@ -161,6 +161,13 @@ together](#how-it-fits-together) for what that means when you copy one.
   [`modules/core/reboot-required.nix`](modules/core/reboot-required.nix),
   [`modules/roles/workstation/reboot-notify.nix`](modules/roles/workstation/reboot-notify.nix) ·
   [0891279](https://github.com/HefKer/nixos-config/commit/0891279)
+- <a id="health"></a>**Probes for silent breakage.** A daily user timer runs
+  every `custom.health.probes.<name>` script (link drift, Syncthing conflict
+  files, failed units) into `~/.local/state/health/findings`, notifying only
+  for findings the last run didn't have. `health` re-runs them, and `health
+  --greeting` prints a one-line count for a shell greeting.
+  [`homes/modules/health.nix`](homes/modules/health.nix),
+  [`pkgs/health/`](pkgs/health/)
 - <a id="summon"></a>**Summon an app from anywhere.** `summon <app-id>
   <command>` focuses the app's most recently focused window across workspaces
   and monitors, cycles through its others on repeats in the order the cycle
