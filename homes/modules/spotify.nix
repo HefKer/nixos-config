@@ -19,6 +19,8 @@ in
       keyboardShortcut
       shuffle
     ];
+    # For browsing only: what it installs lives in Spotify's localStorage; keepers move to enabledExtensions.
+    enabledCustomApps = with spicePkgs.apps; [ marketplace ];
   };
 
   # Soloist: this host as a headless Spotify Connect speaker; soloist-mpris shows it to DMS and the media keys.
