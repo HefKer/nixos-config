@@ -181,3 +181,15 @@ What a configuration reveals about a setup without granting access to it, such
 as which services run or which provider holds the backups. Publishing it is
 accepted; publishing a secret in plaintext is not.
 _Avoid_: metadata, fingerprint
+
+### Health
+
+**Probe**:
+A periodic check for one class of silent breakage, such as link drift or a
+sync-conflict file. Reports nothing when all is well.
+_Avoid_: health check, monitor, test
+
+**Finding**:
+One instance of breakage a probe reports, open until a later run no longer
+reports it.
+_Avoid_: alert, warning, issue
