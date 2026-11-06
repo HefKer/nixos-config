@@ -25,9 +25,23 @@ in
       madeForYouShortcut
       aiBandBlocker
       copyLyrics
+      history
+      playNext
+      showQueueDuration
+      volumePercentage
+      lastfm
     ];
-    # For browsing only: what it installs lives in Spotify's localStorage; keepers move to enabledExtensions.
-    enabledCustomApps = with spicePkgs.apps; [ marketplace ];
+    enabledSnippets = with spicePkgs.snippets; [
+      hideWhatsNewButton
+      hideAudiobooksButton
+      hidePodcastButton
+    ];
+    enabledCustomApps = with spicePkgs.apps; [
+      # For browsing only: what it installs lives in Spotify's localStorage; keepers move to enabledExtensions.
+      marketplace
+      historyInSidebar
+      betterLibrary
+    ];
   };
 
   # Soloist: this host as a headless Spotify Connect speaker; soloist-mpris shows it to DMS and the media keys.
