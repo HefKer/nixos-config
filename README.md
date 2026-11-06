@@ -179,7 +179,8 @@ together](#how-it-fits-together) for what that means when you copy one.
 - <a id="window-volume"></a>**Volume keys for the focused window.**
   `window-volume up|down|mute` finds the PipeWire streams of the app in niri's
   focused window, including browsers' and Electron's child processes, and steps
-  or mutes only those; with nothing playing it says so in a notification.
+  or mutes only those, showing the new level in a DMS toast, which
+  do-not-disturb leaves alone.
   [`pkgs/window-volume/`](pkgs/window-volume/)
 - <a id="removable-drives"></a>**Removable drives mounted as you.** udisks2
   and a udiskie user service, so FAT and exFAT files aren't owned by root.

@@ -1,7 +1,6 @@
 {
   gawk,
   jq,
-  libnotify,
   niri,
   pipewire,
   wireplumber,
@@ -12,12 +11,17 @@ writeShellApplication {
   runtimeInputs = [
     gawk
     jq
-    libnotify
     niri
     pipewire
     wireplumber
   ];
   text = ''
+    # DMS toasts rather than notifications: they show under do-not-disturb, and dismissing the last one keeps repeats from queueing.
+    toast() {
+      dms ipc call toast dismiss window-volume >/dev/null
+      dms ipc call toast "$1" "$2" "" "" window-volume >/dev/null
+    }
+
     case ''${1-} in
       up) step=5%+ ;;
       down) step=5%- ;;
@@ -58,7 +62,7 @@ writeShellApplication {
     fi
 
     if [ ''${#streams[@]} -eq 0 ]; then
-      notify-send -a window-volume "No audio to change" "$app isn't playing anything."
+      toast warnWith "$app isn't playing anything"
       exit 0
     fi
 
@@ -77,13 +81,8 @@ writeShellApplication {
       done
     fi
 
-    # Shows the new level, replacing the last one so repeated presses don't stack popups.
     level=$(wpctl get-volume "''${streams[0]}")
     percent=$(awk '{ printf "%d", $2 * 100 + 0.5 }' <<<"$level")
-    body="$percent%"
-    [[ $level == *MUTED* ]] && body="Muted"
-    idfile=''${XDG_RUNTIME_DIR:-/tmp}/window-volume.id
-    replace=$(cat "$idfile" 2>/dev/null || echo 0)
-    notify-send -a window-volume -t 1500 -h "int:value:$percent" -p -r "$replace" "$app volume" "$body" >"$idfile"
+    if [[ $level == *MUTED* ]]; then toast infoWith "$app: muted"; else toast infoWith "$app: $percent%"; fi
   '';
 }
