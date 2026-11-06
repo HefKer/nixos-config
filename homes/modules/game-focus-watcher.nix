@@ -30,6 +30,11 @@ let
       (lib.escapeRegex id)
       "game"
     ]) nonSteamGames;
+  # The keymap's layer-while-held layers, never taken for the layer to restore.
+  heldLayers = [
+    "fn1"
+    "fn2"
+  ];
 
   ports = lib.mapAttrsToList (_: keyboard: keyboard.port) osConfig.services.kanata.keyboards;
 in
@@ -48,6 +53,10 @@ in
           (lib.getExe osConfig.programs.niri.package)
         ]
         ++ lib.concatMap (layer: [ "--layer" ] ++ layer) layers
+        ++ lib.concatMap (layer: [
+          "--held-layer"
+          layer
+        ]) heldLayers
         ++ lib.concatMap (port: [
           "--port"
           (toString port)

@@ -4,7 +4,10 @@ Each --layer PATTERN LAYER maps app-ids matching the regex PATTERN (whole
 app-id) to LAYER; the first match wins. Reads niri's event stream for focus
 changes and keeps a TCP connection to each kanata instance. On losing focus it
 restores the layer the instance had before the game took it, so a manual
-passthrough or Fn Lock survives a session.
+passthrough survives a session. Each --held-layer names a layer a key only
+holds on, like Fn1 under Caps; it's never the one restored, since a held
+layer restored with ChangeLayer stays on after the key is released. A locked
+Fn layer is indistinguishable from a held one, so a game session ends it.
 """
 
 import argparse
@@ -27,6 +30,8 @@ class KanataConnection:
 
     `saved` is the layer to restore once the game loses focus. It outlives a
     dropped connection, so a restore missed while disconnected still lands.
+    `base` is the last layer seen that isn't held: what `current` falls back
+    to once every layer key is released.
     """
 
     def __init__(self, port, watcher):
@@ -34,7 +39,13 @@ class KanataConnection:
         self.watcher = watcher
         self.sock = None
         self.current = None
+        self.base = None
         self.saved = None
+
+    def track(self, layer):
+        self.current = layer
+        if layer not in self.watcher.held:
+            self.base = layer
 
     def send(self, message):
         try:
@@ -49,7 +60,7 @@ class KanataConnection:
         if self.sock is not None:
             # Kept across a move between games: the user's layer comes back.
             if self.saved is None:
-                self.saved = self.current
+                self.saved = self.base
             self.change_layer(layer)
 
     def leave(self):
@@ -63,16 +74,17 @@ class KanataConnection:
 
     def greeted(self, layer):
         # kanata greets each connection with its current layer.
-        self.current = layer
+        self.track(layer)
         target = self.watcher.target
         if target is None:
             self.restore()
-        elif self.saved is None and layer in self.watcher.layers:
-            # A game layer left by an earlier watcher: restore the start layer.
+        elif self.saved is None and self.base in self.watcher.layers | {None}:
+            # A game layer left by an earlier watcher, or a held layer hiding
+            # what's under it: restore the start layer.
             self.send({"RequestLayerNames": {}})
         else:
             if self.saved is None:
-                self.saved = layer
+                self.saved = self.base
             self.change_layer(target)
 
     def handle(self, message, first):
@@ -80,7 +92,7 @@ class KanataConnection:
             if first:
                 self.greeted(message["LayerChange"]["new"])
             else:
-                self.current = message["LayerChange"]["new"]
+                self.track(message["LayerChange"]["new"])
         elif "LayerNames" in message:
             if self.saved is None:
                 self.saved = message["LayerNames"]["names"][0]
@@ -89,7 +101,7 @@ class KanataConnection:
             # A reload rebuilds the layout on its first layer, unannounced.
             self.send({"RequestCurrentLayerName": {}})
         elif "CurrentLayerName" in message:
-            self.current = message["CurrentLayerName"]["name"]
+            self.track(message["CurrentLayerName"]["name"])
             self.follow_target()
 
     def follow_target(self):
@@ -121,6 +133,7 @@ class KanataConnection:
             with lock:
                 self.sock = None
                 self.current = None
+                self.base = None
             sock.close()
             log(f"kanata:{self.port}: disconnected")
 
@@ -128,9 +141,10 @@ class KanataConnection:
 class Watcher:
     """Tracks niri's focused window and drives every instance from it."""
 
-    def __init__(self, rules, ports):
+    def __init__(self, rules, ports, held=()):
         self.rules = [(re.compile(pattern), layer) for pattern, layer in rules]
         self.layers = {layer for _, layer in rules}
+        self.held = set(held)
         self.instances = [KanataConnection(port, self) for port in ports]
         self.windows = {}
         self.focused = None
@@ -207,9 +221,10 @@ def main():
         required=True,
         metavar=("PATTERN", "LAYER"),
     )
+    parser.add_argument("--held-layer", action="append", default=[])
     parser.add_argument("--port", action="append", type=int, required=True)
     args = parser.parse_args()
-    Watcher(args.layer, args.port).run(args.niri)
+    Watcher(args.layer, args.port, args.held_layer).run(args.niri)
 
 
 if __name__ == "__main__":
