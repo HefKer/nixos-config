@@ -64,6 +64,9 @@ let
     # starship reads one file directly in ~/.config, so the link is the file, not a directory.
     "starship/.config/starship.toml"
     "swayimg/.config/swayimg"
+    # The directory also holds session data and the DMS-generated themes/; Vesktop and Vencord write these in place, not by rename.
+    "vesktop/.config/vesktop/settings.json"
+    "vesktop/.config/vesktop/settings"
     "wezterm/.config/wezterm"
     # xdg-mime writes through the link; a tool saving by rename replaces it with a file that aborts the next rebuild.
     "xdg/.config/mimeapps.list"

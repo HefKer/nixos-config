@@ -33,6 +33,8 @@ let
       ".config/qutebrowser" = "qutebrowser/.config/qutebrowser";
       ".config/starship.toml" = "starship/.config/starship.toml";
       ".config/swayimg" = "swayimg/.config/swayimg";
+      ".config/vesktop/settings.json" = "vesktop/.config/vesktop/settings.json";
+      ".config/vesktop/settings" = "vesktop/.config/vesktop/settings";
       ".config/wezterm" = "wezterm/.config/wezterm";
       ".config/xdg-desktop-portal-termfilechooser" =
         "xdg-desktop-portal-termfilechooser/.config/xdg-desktop-portal-termfilechooser";
@@ -65,6 +67,8 @@ let
       ".config/qutebrowser" = "qutebrowser/.config/qutebrowser";
       ".config/starship.toml" = "starship/.config/starship.toml";
       ".config/swayimg" = "swayimg/.config/swayimg";
+      ".config/vesktop/settings.json" = "vesktop/.config/vesktop/settings.json";
+      ".config/vesktop/settings" = "vesktop/.config/vesktop/settings";
       ".config/wezterm" = "wezterm/.config/wezterm";
       ".config/xdg-desktop-portal-termfilechooser" =
         "xdg-desktop-portal-termfilechooser/.config/xdg-desktop-portal-termfilechooser";
