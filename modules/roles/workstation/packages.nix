@@ -73,7 +73,6 @@ in
       teams-for-linux
       zoom-us
       super-productivity
-      spotify
       cheese
       kdePackages.kdeconnect-kde
       zapzap # Whatsapp
