@@ -25,6 +25,12 @@ Choose software for the user the same way every time: **dealbreakers** first, th
    - Cut to **3–5 finalists**; every other candidate goes on the rejected list with its reason.
    - `nix build --no-link nixpkgs#<pkg>` (or the flake's package) each finalist; record
      whether it builds.
+   - **Smoke-test** the top pick before the write-up: its core job (play a track, sync a
+     file) on the user's own account and hardware. Run it headless with a debug log (`timeout
+     45 script -qc "<cmd>" /dev/null`) and read the log, or hand the user the command and wait
+     for the result. A failure moves it to Rejected and the next finalist gets tested. Delete
+     the logs afterwards, since they can hold tokens. (spotatui built and logged in but
+     couldn't play: the user's account hit librespot's audio-key block.)
 3. **Write up** in `docs/research/<topic>.md`, in this order:
    - **Verdict** first: the pick, and the one-line reason.
    - A table: finalists × dealbreakers and soft-ranking criteria.
