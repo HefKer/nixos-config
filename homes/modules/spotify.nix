@@ -37,7 +37,7 @@ in
         pkgs.writeShellScript "soloist-wait-online" ''
           end=$(( $(${pkgs.coreutils}/bin/date +%s) + 120 ))
           while [ "$(${pkgs.coreutils}/bin/date +%s)" -lt "$end" ]; do
-            ${pkgs.coreutils}/bin/timeout 3 ${pkgs.glibc.bin}/bin/getent ahosts apresolve.spotify.com >/dev/null && exit 0
+            ${pkgs.coreutils}/bin/timeout 3 ${pkgs.getent}/bin/getent ahosts apresolve.spotify.com >/dev/null && exit 0
             sleep 2
           done
         ''
