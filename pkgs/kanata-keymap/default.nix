@@ -33,7 +33,9 @@ let
       tmp=$(mktemp -d)
       trap 'rm -rf "$tmp"' EXIT
       # keymap-drawer picks its layout by the key names in defsrc and deflayermap, and its 60% has grv where the Wooting has esc; an alias definition is followed by "(".
-      sed 's/^\(\s*\)esc \(\s*[^ (]\)/\1grv \2/' "$keymap_dir/keymap.kbd" > "$tmp/keymap.kbd"
+      sed 's/^\(\s*\)esc \(\s*[^ (]\)/\1grv \2/' "$keymap_dir/keymap.kbd" |
+        # The Wooting's keys right of space are ralt rctl menu Fn, where the 60% has ralt rmet menu rctl; layer keys follow two spaces.
+        sed -E 's/(^|  )rctl /\1@swap@ /g; s/(^|  )rmet /\1rctl /g; s/@swap@/rmet/g' > "$tmp/keymap.kbd"
       keymap -c "$keymap_dir/keymap-drawer.yaml" parse -k "$tmp/keymap.kbd" -o "$tmp/keymap.yaml"
       keymap -c "$keymap_dir/keymap-drawer.yaml" draw -j ${layout} "$tmp/keymap.yaml" -o "$tmp/keymap.svg"
       mkdir -p "$(dirname "$svg")"
