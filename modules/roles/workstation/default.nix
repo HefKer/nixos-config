@@ -15,6 +15,7 @@ in
     ./packages.nix
     ./printing.nix
     ./reboot-notify.nix
+    ./spotify.nix
     ./storage.nix
     ./gaming
     ./local-ai
