@@ -63,6 +63,11 @@ together](#how-it-fits-together) for what that means when you copy one.
   or fail the commit. [`.githooks/pre-commit`](.githooks/pre-commit) ·
   [1b6af37](https://github.com/HefKer/nixos-config/commit/1b6af37),
   [06a77f1](https://github.com/HefKer/nixos-config/commit/06a77f1)
+- <a id="link-drift"></a>**Catch link collisions before a switch.** With
+  `backupFileExtension` unset, a real file where Home Manager wants a link
+  aborts activation. `scripts/link-drift [host]` evaluates the host's
+  `home.file` targets and lists any in `$HOME` that aren't Home Manager's
+  links. [`scripts/link-drift`](scripts/link-drift)
 
 ### Dotfile links
 
@@ -220,7 +225,7 @@ This repository is structured in a modularized format, with each directory servi
 
 **checks**: Tests `nix flake check` runs on top of evaluating every host: formatting (`nix fmt`) and the module conventions. `.githooks/pre-commit` runs them on every commit once enabled with `git config core.hooksPath .githooks`.
 
-**scripts**: `same-system` proves a refactor leaves every host's build unchanged.
+**scripts**: `same-system` proves a refactor leaves every host's build unchanged; `link-drift` lists files in `$HOME` that would block Home Manager's links.
 
 **homes**: Home Manager — the home layer. It *wires* dotfiles into `$HOME`; it does not hold them. Their content lives in a separate dotfiles root, and packages stay at the system layer, in `modules`. See [Dotfiles](#dotfiles).
 

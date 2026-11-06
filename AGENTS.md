@@ -2,7 +2,7 @@
 
 ## Rules
 
-- **Never apply changes to the running system.** No `nixos-rebuild`, `home-manager switch`, `nix-collect-garbage`, or writes to `/etc/nixos`. Propose and explain; let the user run it. Evaluating and building into the store is fine: `nix flake check`, `nix flake update`, `nix eval`, `nix build --no-link`.
+- **Never apply changes to the running system.** No `nixos-rebuild`, `home-manager switch`, `nix-collect-garbage`, or writes to `/etc/nixos`. Propose and explain; let the user run it. Moving a file Home Manager doesn't manage out of a link's way (`scripts/link-drift` lists them) into a dated backup is fine. Evaluating and building into the store is fine: `nix flake check`, `nix flake update`, `nix eval`, `nix build --no-link`.
 - **Explain every change in chat** — what it does, why, which NixOS concept. Goal is the user understands the config, not just that it works.
 - **Verify** with `nix flake check`; a change meant to leave what gets built untouched (a move, rename or split) also runs `scripts/same-system [base-rev]`. Review against `CODING_STANDARDS.md`.
 - **Commit small sets of changes straight to `main`.** Branch for anything larger.

@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Usage: scripts/link-drift [host]
+# Lists home.file targets in this machine's $HOME that aren't Home Manager's links: a real file or a
+# foreign symlink there aborts activation (backupFileExtension is unset) or is config gone unmanaged.
+# host defaults to this machine; the link set comes from the working tree. Exits 1 on any finding.
+set -euo pipefail
+
+root=$(git rev-parse --show-toplevel)
+host=${1:-$(hostname)}
+user=$(id -un)
+
+if [ -n "$(git -C "$root" ls-files --others --exclude-standard -- '*.nix')" ]; then
+  echo "warning: untracked .nix files are invisible to the flake; git add them first" >&2
+fi
+
+targets=$(nix eval --raw "git+file://$root#nixosConfigurations.$host.config.home-manager.users.$user.home.file" \
+  --apply 'fs: builtins.concatStringsSep "\n" (map (f: f.target) (builtins.filter (f: f.enable) (builtins.attrValues fs)))')
+
+status=0
+while IFS= read -r t; do
+  p="$HOME/$t"
+  if [ -L "$p" ]; then
+    dest=$(readlink "$p")
+    case "$dest" in /nix/store/*) continue ;; esac
+    echo "$p: symlink to $dest"
+  elif [ -d "$p" ]; then
+    echo "$p: directory"
+  elif [ -e "$p" ]; then
+    echo "$p: file"
+  else
+    continue
+  fi
+  status=1
+done <<<"$targets"
+exit $status

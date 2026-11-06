@@ -7,9 +7,11 @@ Implement ticket `$ARGUMENTS` from `HefKer/nixos-issues`. Instructions the user 
 the number (merge, close the issue, skip review) override the matching step below.
 
 1. **Read the ticket** with the **Read** command in `docs/agents/issue-tracker.md`, then the
-   ADRs and `GLOSSARY.md` terms it names as its authority. Done when you can write its
-   acceptance criteria as a checklist, and know whether the ticket is **neutral** (moves,
-   renames, splits: nothing built should change) or names the build differences it wants.
+   ADRs and `GLOSSARY.md` terms it names as its authority, plus every ADR in `docs/adr/`
+   covering the files or subsystem it touches. Where the ticket contradicts an ADR, stop and
+   ask the user which wins before coding. Done when you can write its acceptance criteria as a
+   checklist, and know whether the ticket is **neutral** (moves, renames, splits: nothing built
+   should change) or names the build differences it wants.
 2. **Branch in a new worktree** off `main`:
    `git worktree add -b <type>/<slug> /home/hefker/nixos/<slug> main`, and work only there.
 3. **Commit in chunks**, one reviewable step each, the message ending
@@ -23,5 +25,7 @@ the number (merge, close the issue, skip review) override the matching step belo
    re-run the step-3 checks on it.
 6. **Hand back**: the branch and its commits, each acceptance criterion with its evidence, the
    `same-system` result per host, the review outcome, and what the user still has to run on
-   the machine (`nixos-rebuild`, reboots). Leave merging and closing the issue to the user
+   the machine (`nixos-rebuild`, reboots). When the branch changes the link set, run
+   `scripts/link-drift` from the worktree and list each path it reports with the `mv` that
+   clears it. Leave merging and closing the issue to the user
    unless they asked for it.
