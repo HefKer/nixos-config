@@ -15,9 +15,16 @@ in
   programs.spicetify = {
     enable = true;
     wayland = true;
+    theme = spicePkgs.themes.text;
+    colorScheme = "EverforestDarkHard";
     enabledExtensions = with spicePkgs.extensions; [
       keyboardShortcut
       shuffle
+      beautifulLyrics
+      wikify
+      madeForYouShortcut
+      aiBandBlocker
+      copyLyrics
     ];
     # For browsing only: what it installs lives in Spotify's localStorage; keepers move to enabledExtensions.
     enabledCustomApps = with spicePkgs.apps; [ marketplace ];
