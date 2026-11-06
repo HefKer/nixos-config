@@ -30,6 +30,27 @@ in
       showQueueDuration
       volumePercentage
       lastfm
+      sortPlay
+      songStats
+      fullAlbumDate
+      {
+        name = "spicetify-personal-song-stats.js";
+        src = pkgs.fetchFromGitHub {
+          owner = "rollecode";
+          repo = "spicetify-personal-song-stats";
+          rev = "1ab6c40b48b59e4df83fe9bda1160f6f74192aa7";
+          hash = "sha256-A4/rmQX+SouUZ2wQUxEwz0QFEPhXb//b2PDezCN/jCM=";
+        };
+      }
+      {
+        name = "lastfmLoved.js";
+        src = pkgs.fetchFromGitHub {
+          owner = "rollecode";
+          repo = "spicetify-lastfm-loved";
+          rev = "004cd8d7ca9768f62a81af7800258d615208f5eb";
+          hash = "sha256-Rqxi/AFcx7v4C+qoGSAoFwu4QDmj89Ew37P5i1oDbHU=";
+        };
+      }
     ];
     enabledSnippets = with spicePkgs.snippets; [
       hideWhatsNewButton
