@@ -23,6 +23,7 @@ let
       ".config/herdr/config.toml" = "herdr/.config/herdr/config.toml";
       ".config/herdr/plugins/config/jhochenbaum.hunkdiff" =
         "herdr/.config/herdr/plugins/config/jhochenbaum.hunkdiff";
+      ".config/herdr-auto-title/config.env" = "herdr/.config/herdr-auto-title/config.env";
       ".config/hunk/config.toml" = "hunk/.config/hunk/config.toml";
       ".config/lazygit/config.yml" = "lazygit/.config/lazygit/config.yml";
       ".config/marksman" = "marksman/.config/marksman";
@@ -57,6 +58,7 @@ let
       ".config/herdr/config.toml" = "herdr/.config/herdr/config.toml";
       ".config/herdr/plugins/config/jhochenbaum.hunkdiff" =
         "herdr/.config/herdr/plugins/config/jhochenbaum.hunkdiff";
+      ".config/herdr-auto-title/config.env" = "herdr/.config/herdr-auto-title/config.env";
       ".config/hunk/config.toml" = "hunk/.config/hunk/config.toml";
       ".config/lazygit/config.yml" = "lazygit/.config/lazygit/config.yml";
       ".config/marksman" = "marksman/.config/marksman";
