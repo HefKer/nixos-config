@@ -15,7 +15,11 @@ let
       exit "$(cat "$PROBES/${name}.exit" 2>/dev/null || echo 0)"
     '';
 
-  fakeNotify = writeShellScriptBin "notify-send" ''echo "$*" >>"$LOG"'';
+  # Logs each notification, or fails while $PROBES/notify-fails exists, as with no notification daemon up.
+  fakeNotify = writeShellScriptBin "notify-send" ''
+    if [ -e "$PROBES/notify-fails" ]; then exit 1; fi
+    echo "$*" >>"$LOG"
+  '';
 
   health = callPackage ./. {
     libnotify = fakeNotify;
@@ -57,16 +61,24 @@ runCommandLocal "health-tests"
     expect "$(health)" "a x" "a finding is prefixed with its probe"
     expect "$(health --greeting)" "⚠ 1 health finding — run 'health'" "greeting counts one"
 
-    : >"$findings"
     health --notify
     health --notify
-    expect "$(wc -l <"$LOG")" 1 "the same finding on two runs notifies once"
+    expect "$(wc -l <"$LOG")" 1 "the same finding on two runs notifies once, though a manual run saw it first"
+    expect "$(cat "$LOG")" "-a health 1 new health finding a x" "the notification names the finding"
 
     : >"$PROBES/a"
     health --notify
     echo x >"$PROBES/a"
     health --notify
     expect "$(wc -l <"$LOG")" 2 "a finding that clears and returns notifies again"
+
+    echo y >"$PROBES/a"
+    touch "$PROBES/notify-fails"
+    health --notify 2>/dev/null
+    rm "$PROBES/notify-fails"
+    health --notify
+    expect "$(wc -l <"$LOG")" 3 "a failed notification is retried on the next run"
+    echo x >"$PROBES/a"
 
     echo 3 >"$PROBES/b.exit"
     expect "$(health)" $'a x\nb probe exited 3' "a failing probe is a finding"

@@ -1,6 +1,8 @@
 {
   lib,
+  coreutils,
   findutils,
+  gnugrep,
   systemd,
   writeShellApplication,
   writeText,
@@ -12,6 +14,7 @@
     targets:
     writeShellApplication {
       name = "health-probe-link-drift";
+      runtimeInputs = [ coreutils ];
       text = ''
         while IFS= read -r t; do
           p=$HOME/$t
@@ -39,8 +42,9 @@
     ];
     text = ''
       config=
-      for c in "''${XDG_STATE_HOME:-$HOME/.local/state}/syncthing/config.xml" \
-        "''${XDG_CONFIG_HOME:-$HOME/.config}/syncthing/config.xml"; do
+      # Syncthing's own order: the legacy config dir wins when it holds a config.
+      for c in "''${XDG_CONFIG_HOME:-$HOME/.config}/syncthing/config.xml" \
+        "''${XDG_STATE_HOME:-$HOME/.local/state}/syncthing/config.xml"; do
         if [ -f "$c" ]; then
           config=$c
           break
@@ -65,7 +69,10 @@
     ignoreUnits:
     writeShellApplication {
       name = "health-probe-failed-units";
-      runtimeInputs = [ systemd ];
+      runtimeInputs = [
+        gnugrep
+        systemd
+      ];
       text = ''
         report() {
           local scope=$1 unit

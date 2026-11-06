@@ -17,6 +17,7 @@ writeShellApplication {
     export LC_ALL=C
     state=''${XDG_STATE_HOME:-$HOME/.local/state}/health
     findings=$state/findings
+    notified=$state/notified
 
     usage() {
       echo "usage: health [--greeting | --notify]" >&2
@@ -51,7 +52,6 @@ writeShellApplication {
     mkdir -p "$state"
     exec 9>"$state/lock"
     flock 9
-    [ -e "$findings" ] || : >"$findings"
     next=$(mktemp "$state/.findings.XXXXXX")
     trap 'rm -f "$next"' EXIT
 
@@ -63,13 +63,17 @@ writeShellApplication {
     )}
     } | sort -u >"$next"
 
+    # Compared against the last set a notification went out for, so a failed send retries and a manual run doesn't swallow one.
     if [ "$mode" = --notify ]; then
-      new=$(comm -13 <(sort -u "$findings") "$next")
+      [ -e "$notified" ] || : >"$notified"
+      new=$(comm -13 "$notified" "$next")
+      sent=1
       if [ -n "$new" ]; then
         n=$(wc -l <<<"$new")
-        notify-send -a health "$n new health finding(s)" "$(head -n 5 <<<"$new")" ||
-          echo "health: notify-send failed" >&2
+        if [ "$n" = 1 ]; then noun=finding; else noun=findings; fi
+        notify-send -a health "$n new health $noun" "$(head -n 5 <<<"$new")" || sent=0
       fi
+      if [ "$sent" = 1 ]; then cp "$next" "$notified"; else echo "health: notify-send failed; retrying next run" >&2; fi
     fi
 
     mv "$next" "$findings"
