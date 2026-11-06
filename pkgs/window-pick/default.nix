@@ -25,10 +25,24 @@ writeShellApplication {
     mapfile -t ids < <(jq -r --argjson ws "$workspaces" "$rows | .id" <<<"$windows")
     [ "''${#ids[@]}" -gt 0 ] || exit 0
 
+    # Icons come from each app's .desktop Icon=, which can differ from its app-id (spotify-client).
+    IFS=: read -ra dirs <<<"''${XDG_DATA_HOME:-$HOME/.local/share}:''${XDG_DATA_DIRS:-/usr/share}"
+    icons='{}'
+    while read -r app; do
+      icon=$app
+      for d in "''${dirs[@]}"; do
+        if [ -f "$d/applications/$app.desktop" ]; then
+          icon=$(sed -n 's/^Icon=//p' "$d/applications/$app.desktop" | head -n1)
+          break
+        fi
+      done
+      icons=$(jq --arg k "$app" --arg v "''${icon:-$app}" '. + {($k): $v}' <<<"$icons")
+    done < <(jq -r '[.[].app_id // empty] | unique[]' <<<"$windows")
+
     # Fuzzel's dmenu reads "text\0icon\x1fname" per line, so each row gets its app's icon.
-    i=$(jq -j --argjson ws "$workspaces" "$rows"' |
+    i=$(jq -j --argjson ws "$workspaces" --argjson icons "$icons" "$rows"' |
           "\(.title // "")  ·  \(.app_id // "")  ·  \($where[.workspace_id | tostring] // "")"
-          + "\u0000icon\u001f\(.app_id // "")\n"' <<<"$windows" |
+          + "\u0000icon\u001f\($icons[.app_id // ""] // .app_id // "")\n"' <<<"$windows" |
       fuzzel --dmenu --index --prompt "window: ") || exit 0
     # Text typed without a match comes back as -1.
     if [[ $i =~ ^[0-9]+$ ]] && ((i < ''${#ids[@]})); then
