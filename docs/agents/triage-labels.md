@@ -14,6 +14,3 @@ label strings used in this repo's tracker. They are identical — the labels exi
 
 When a skill mentions a role ("apply the AFK-ready triage label"), use the label string from
 the right-hand column.
-
-In the local markdown efforts that `issue-tracker.md` keeps under `.scratch/`, the same
-strings are the value of the `Status:` line.

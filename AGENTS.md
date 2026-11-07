@@ -13,7 +13,7 @@
 ### Issue tracker
 
 Issues live in the **separate private repo `HefKer/nixos-issues`**, so every `gh` command
-needs `--repo HefKer/nixos-issues`; efforts about the homelab stay as markdown in `.scratch/`.
+needs `--repo HefKer/nixos-issues`, homelab included.
 See `docs/agents/issue-tracker.md`.
 
 ### Triage labels

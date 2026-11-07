@@ -6,12 +6,12 @@ description: Find, compare and shortlist software against the user's preferences
 Choose software for the user the same way every time: **dealbreakers** first, then the
 **soft ranking**, both in [`preferences.md`](preferences.md). Read it before anything else.
 
-1. **Frame the need.** Start from the issue (`docs/agents/issue-tracker.md` → Read), the
-   `.scratch/homelab/issues/NN` ticket, or the user's words. Done when you can state: the
-   job the software does, the app it replaces (if any) and why that one falls short, the
-   candidates already named, and whether it is **desktop** or **self-hosted**. In the homelab
-   effort, `.scratch/homelab/map.md`'s standing preferences and its decided tickets override
-   `preferences.md` where they conflict.
+1. **Frame the need.** Start from the issue (`docs/agents/issue-tracker.md` → Read) or the
+   user's words. Done when you can state: the job the software does, the app it replaces (if
+   any) and why that one falls short, the candidates already named, and whether it is
+   **desktop** or **self-hosted**. In the homelab effort, the standing preferences of its map
+   (`HefKer/nixos-issues#88`) and its decided tickets override `preferences.md` where they
+   conflict.
 2. **Research** with `/research`, handing the background agent this file's criteria and
    `preferences.md` along with the question. Its brief:
    - Search wide: nixpkgs (mcp-nixos), upstream repos (commit activity, open issues),
@@ -43,7 +43,6 @@ Choose software for the user the same way every time: **dealbreakers** first, th
 4. **Report back.**
    - GH issue: comment the verdict, finalists and trial commands, linking the doc; set its
      label to `ready-for-human` (the user tries the finalists next).
-   - Homelab ticket: add the verdict and doc link to the `.scratch/homelab/issues/NN` file.
    - In chat: the verdict, finalists and trial commands.
 5. **Learn from the verdict.** When the user reports back on a trial, propose an edit to
    `preferences.md` for any preference their verdict revealed, with the example that showed

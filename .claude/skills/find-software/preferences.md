@@ -57,7 +57,7 @@ point (Spotify, Slack); counts against when incidental (a notes app that needs a
 The homelab runs mostly on NixOS.
 
 - Delivery: a NixOS module in nixpkgs > an OCI container > anything else, unless
-  `.scratch/homelab/issues/08-service-delivery-pattern.md` has decided otherwise.
+  `HefKer/nixos-issues#96` (service delivery pattern) has decided otherwise.
 - Runs on aarch64 (Raspberry Pi 4); idle RAM noted.
 - Backups: where state lives, and whether it snapshots cleanly.
 - LAN-only works; cloud dependency judged as above.

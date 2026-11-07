@@ -52,11 +52,12 @@ second column would appear, so they are the half worth closing.
 - `grep -r .scratch/` no longer finds every ticket on a topic; that becomes
   `gh issue list --search`, a network round-trip, and issue bodies no longer sit
   on disk beside the code they describe.
-- **Efforts about the homelab stay in `.scratch/`**, permanently and including
+- ~~**Efforts about the homelab stay in `.scratch/`**, permanently and including
   after Forgejo exists. Notes about infrastructure have to stay readable while
   that infrastructure is down, half-built, or being reinstalled, which is
-  precisely when they are wanted. A tracker hosted on the homelab cannot
-  describe its own bootstrap.
+  precisely when they are wanted.~~ Reversed 2026-11-07; see the Status log. A
+  tracker hosted on the homelab cannot describe its own bootstrap — still true,
+  and the question to reopen before any move to Forgejo.
 - ~~The 26 pre-existing local tickets are not migrated yet, so both places are
   live until they are.~~ Resolved 2026-09-12; see the Status log.
 
@@ -91,3 +92,26 @@ alternatives: keep the tracker as the source of truth and generate the markdown
 from it on a schedule, so the offline copy is a rendering rather than a second
 original. That is a decision about duplication, staleness and which side wins a
 conflict, and it is not taken here — see `HefKer/nixos-issues#31`.
+
+### 2026-11-07 — the homelab moves into the tracker
+
+The 14 files in `.scratch/homelab/` became issues `#88`–`#101` under milestone
+`homelab`: the map as a `wayfinder:map` issue, each ticket a sub-issue with its
+`Blocked by:` lines as dependency edges. This reverses the Consequences bullet
+that kept homelab efforts in `.scratch/` permanently.
+
+That bullet bundled two arguments. **Availability** — notes must be readable
+while the homelab is down — does not hold against GitHub: the homelab cannot
+take GitHub down, and if a homelab change takes the home network down, phone
+data still reaches the tracker. **Bootstrap circularity** — a tracker hosted on
+the homelab cannot describe its own rebuild — is still true, but applies only to
+the deferred Forgejo option; it is the question to reopen if that move happens.
+Privacy was never the obstacle: homelab tickets are the same class of content
+this private repo was created for.
+
+The originals, both these and the 2026-09-12 batch formerly in
+`~/nixos/.archive/scratch/`, are now committed under `.archive/` in
+`HefKer/nixos-issues` itself, giving them history without a folder outside any
+repo. `.scratch/` now holds no tickets. This also closes the "homelab tickets
+are still unbacked" question above, and with it the motivation for
+`HefKer/nixos-issues#31`.

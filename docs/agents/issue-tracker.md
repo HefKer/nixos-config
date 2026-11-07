@@ -35,25 +35,19 @@ the issue yourself with `gh issue close`, quoting the commit SHA.
 The backlink renders as a dead reference to anyone without access to the private repo, so a
 public commit message can carry the issue number without leaking its contents.
 
-## Efforts that stay local
+## No efforts stay local
 
-Keep an effort whose subject **is** the homelab in `.scratch/<effort>/` as markdown, per the
-conventions below. Notes about infrastructure must stay readable while that infrastructure
-is down, half-built, or being reinstalled — which is exactly when they are needed.
-`.scratch/homelab/` is the standing case.
+Every effort lives in `HefKer/nixos-issues`, the homelab included (migrated 2026-11-07,
+milestone `homelab`, map `#88`). `.scratch/` holds no tickets, only throwaway scripts and
+logs, so it is never a place to look for work.
 
-The pre-split efforts have all been migrated (2026-09-12), so `.scratch/` is no longer a
-second place to look: `HefKer/nixos-issues` is the only tracker, and `.scratch/homelab/` the
-only live markdown effort. The migrated originals are kept as dead copies in
-`~/nixos/.archive/scratch/` — see the README there for the file-to-issue mapping.
+The homelab was once kept local so its notes stayed readable while the homelab was down.
+That only bites a tracker hosted *on* the homelab; GitHub stays reachable over phone data.
+If the tracker ever moves to a self-hosted Forgejo, the argument returns — see ADR-0002.
 
-Local conventions: one directory per effort, `PRD.md` for the spec, issues as
-`issues/<NN>-<slug>.md` numbered from `01`, a `Status:` line near the top carrying a role
-string from `triage-labels.md`, a `Blocked by: NN, NN` line for edges, and conversation
-appended under a `## Comments` heading.
-
-Note that `.scratch/` is untracked — a global ignore rule covers it — so it lives on one
-machine with no backup. That asymmetry is the reason everything else moved to GitHub.
+The pre-migration markdown originals are frozen in the git tree of `HefKer/nixos-issues`
+itself, under `.archive/`, with the file-to-issue mapping in `.archive/README.md`. Nothing
+reads them.
 
 ## When a skill says "publish to the issue tracker"
 
