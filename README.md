@@ -233,6 +233,16 @@ together](#how-it-fits-together) for what that means when you copy one.
   decrypt. [`homes/modules/spotify.nix`](homes/modules/spotify.nix),
   [`pkgs/soloist-mpris/`](pkgs/soloist-mpris/)
 
+### Sync
+
+- <a id="syncthing"></a>**Syncthing with no first-scan gap.** One table of
+  peers and folder rows builds every host's devices and folders, and each
+  folder's whole `.stignore` is composed from shared lists and written by
+  activation before the service starts, since `ignorePatterns` only lands
+  after the first scan. App-state folders sync only named paths, and the
+  host's identity comes from sops.
+  [`homes/modules/syncthing/`](homes/modules/syncthing/)
+
 ### Secret management
 
 - <a id="secrets"></a>**sops-nix in a public repo.** One encrypted file per
@@ -287,9 +297,15 @@ The links are **out-of-store symlinks**, deliberately. Editing a dotfile takes e
 
 #### Bootstrapping a new machine
 
-The dotfiles root must exist **before the first rebuild**. Syncthing is what puts it there: share `~/dots` to the new machine and let it finish syncing, then run `nixos-rebuild`.
+The flake declares Syncthing, so the dotfiles root arrives **after** the first rebuild, not before it. In order:
 
-Nix cannot check this. The links point outside the store, so the build succeeds and activation places them whether or not their targets exist. If `~/dots` is missing, every link dangles silently and the applications fail obscurely — starting with defaults or erroring on a config they can't read — rather than the rebuild failing loudly. If something looks unconfigured after a fresh install, check `ls -L ~/.config/<app>` first.
+1. Make the host a recipient (below).
+2. Generate its Syncthing identity: `nix run nixpkgs#syncthing -- generate --home="$(mktemp -d)"` prints the device ID and writes `cert.pem` and `key.pem`. Put the two files in `secrets/<host>.yaml` as `syncthing-cert` and `syncthing-key` (`SOPS_AGE_KEY_CMD="rbw get sops-age-key" sops secrets/<host>.yaml`), then delete the directory.
+3. Add the host to `peers` in `homes/modules/syncthing/table.nix`, with that device ID and its Tailscale address, and to the folder rows it should take. Commit.
+4. Rebuild an existing peer, so it knows the new device.
+5. Rebuild the new host. Syncthing starts, connects and pulls its folders.
+
+The links resolve once `~/dots` has synced. Nix cannot check this. The links point outside the store, so the build succeeds and activation places them whether or not their targets exist. Until `~/dots` arrives, every link dangles silently and the applications fail obscurely — starting with defaults or erroring on a config they can't read — rather than the rebuild failing loudly. If something looks unconfigured after a fresh install, check `ls -L ~/.config/<app>` first.
 
 #### Making a new host a recipient
 
@@ -306,3 +322,11 @@ A new host must be able to read its secrets **before its first rebuild that need
 Secrets live in `secrets/` as ciphertext: `secrets/<host>.yaml` for one machine, `secrets/shared.yaml` for all of them. `modules/core/secrets.nix` imports sops-nix, which decrypts them at activation to `/run/secrets`, outside the Nix store. Each host decrypts with an age key derived from its SSH host key; the user is a recipient of everything through an age key kept in Bitwarden, so no machine's disk has to survive. Only secrets that can be rotated belong here, because git history keeps every encrypted version for good. The reasoning is in [ADR-0006](docs/adr/0006-secrets-are-sops-encrypted-in-the-public-repo.md).
 
 Edit a file with `SOPS_AGE_KEY_CMD="rbw get sops-age-key" sops secrets/shared.yaml`, and declare `sops.secrets.<name>` next to the module that consumes it. `nix flake check` fails on any file in `secrets/` that isn't encrypted.
+
+### Sync
+
+Syncthing runs as a home-manager user service on every workstation, from `homes/modules/syncthing/`. `table.nix` holds the peers and one row per folder naming the peers it is shared with; a host builds only the rows that include it, and only the devices those rows name. Devices and folders added through the web UI are deleted on the next start (`overrideDevices`, `overrideFolders`), so a new share is a new row.
+
+A **personal folder** syncs everything except what `ignores.nix` excludes; an **app-state folder** (a row with `only`) syncs nothing but the paths it names. Every `.stignore` is generated whole, key material first and never deletable, and written by activation before the service starts, so a new host's first scan already has its rules. The reasoning is in [ADR-0007](docs/adr/0007-flake-generates-every-stignore.md), and the vocabulary (peer, hub, personal and app-state folder) in [GLOSSARY.md](GLOSSARY.md). Changing a rule takes a rebuild on each host; editing a `.stignore` by hand is overwritten.
+
+Each host's identity (`cert.pem`, `key.pem`) is a sops secret, so its device ID survives a reinstall. Old versions of changed and deleted files are kept per folder under `~/.local/state/syncthing/versions/`.

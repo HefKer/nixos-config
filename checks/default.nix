@@ -201,6 +201,24 @@ in
     touch $out
   '';
 
+  syncthing-peers =
+    let
+      table = import ../homes/modules/syncthing/table.nix;
+      unknown = lib.concatLists (
+        lib.mapAttrsToList (
+          folder: row: map (peer: "${folder}: ${peer}") (lib.filter (peer: !table.peers ? ${peer}) row.peers)
+        ) table.folders
+      );
+    in
+    pkgs.runCommandLocal "check-syncthing-peers" { } ''
+      ${lib.optionalString (unknown != [ ]) ''
+        echo "Syncthing folder rows name peers missing from the peer table:"
+        echo ${lib.escapeShellArg (lib.concatLines unknown)}
+        exit 1
+      ''}
+      touch $out
+    '';
+
   game-focus-watcher =
     pkgs.runCommandLocal "check-game-focus-watcher" { nativeBuildInputs = [ pkgs.python3 ]; }
       ''

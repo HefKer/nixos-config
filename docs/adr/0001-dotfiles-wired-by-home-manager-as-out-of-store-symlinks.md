@@ -42,7 +42,10 @@ a fresh machine.
   dotfiles repository by design. That is accepted; it is contained with
   ignore rules, not by changing the link granularity.
 - Nix cannot verify the target exists. On a fresh host the links dangle until
-  Syncthing has replicated the dotfiles root, so cloning or syncing it is a
-  documented bootstrap step.
+  Syncthing has replicated the dotfiles root. Syncthing is itself declared by
+  the flake (ADR-0007), so the documented bootstrap order is: make the host a
+  sops recipient, generate and commit its Syncthing identity, rebuild an
+  existing peer, rebuild the new host, and the links resolve once the root
+  arrives.
 - The dotfiles content is not pinned by `flake.lock`, so a rollback restores the
   link set but not the files it points at.
