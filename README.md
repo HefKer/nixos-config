@@ -189,11 +189,6 @@ together](#how-it-fits-together) for what that means when you copy one.
   copies the pick as a file reference that Discord, Signal and WhatsApp accept.
   [`pkgs/memes/`](pkgs/memes/) ·
   [b50e756](https://github.com/HefKer/nixos-config/commit/b50e756)
-- <a id="cast-chooser"></a>**Screen sharing on niri that an app can aim.**
-  ScreenCast goes through xdg-desktop-portal-wlr, whose chooser is
-  `cast-chooser`: a fuzzel menu of monitors, left to right, unless a one-shot
-  `$XDG_RUNTIME_DIR/xdpw-cast-target` names one, which it takes with no dialog.
-  [`pkgs/cast-chooser/`](pkgs/cast-chooser/)
 - <a id="window-pick"></a>**A picker over every open niri window.** `window-pick`
   lists all windows across workspaces and monitors in fuzzel, most recently
   focused first with their app icons, searchable by title or app-id, and
