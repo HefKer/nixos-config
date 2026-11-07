@@ -130,13 +130,19 @@ in
       peers = workstations;
     };
 
+    # Transcripts, nested in .claude (which ignores the path) so conflict copies are kept, not dropped as app state.
+    ".claude projects" = {
+      id = "j2elg-en973";
+      path = ".claude/projects";
+      peers = workstations;
+    };
+
     # App-state folders: only the named paths sync.
     ".claude" = {
       id = "awqza-4tmhz";
       path = ".claude";
       peers = workstations;
       syncOnly = [
-        "projects"
         "sessions"
         "file-history"
         "plugins/installed_plugins.json"

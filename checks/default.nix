@@ -124,9 +124,10 @@ in
     touch $out
   '';
 
+  # Health probes are contributions any module adds next to what it checks, not switches.
   custom-set-only-in-hosts =
     noMatches "custom-set-only-in-hosts" "custom.* is switched on only in hosts/*/default.nix:"
-      "grep -rnE '^\\s*custom(\\.[A-Za-z.-]+)?\\s*=' --include='*.nix' . | grep -vE '^\\./hosts/[^/]+/default\\.nix:'";
+      "grep -rnE '^\\s*custom(\\.[A-Za-z.-]+)?\\s*=' --include='*.nix' . | grep -vE '^\\./hosts/[^/]+/default\\.nix:|^[^:]+:[0-9]+:\\s*custom\\.health\\.probes\\.'";
 
   hosts-are-plain =
     noMatches "hosts-are-plain"
@@ -176,6 +177,8 @@ in
   summon = (pkgs.callPackage ../pkgs/summon { }).tests;
 
   health = pkgs.callPackage ../pkgs/health/tests.nix { };
+
+  sync-resolve = pkgs.callPackage ../pkgs/sync-resolve/tests.nix { };
 
   # The flake-trap guard (ADR-0001); readlink never follows a link, so the root needn't exist.
   dotfiles = pkgs.runCommandLocal "check-dotfiles" { } ''
