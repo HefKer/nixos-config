@@ -189,6 +189,13 @@ together](#how-it-fits-together) for what that means when you copy one.
   copies the pick as a file reference that Discord, Signal and WhatsApp accept.
   [`pkgs/memes/`](pkgs/memes/) ·
   [b50e756](https://github.com/HefKer/nixos-config/commit/b50e756)
+- <a id="share-cast-target"></a>**Unattended screen sharing on niri.**
+  `share-cast-target` waits for the GNOME portal's Share Screen dialog and
+  picks niri's Dynamic Cast Target by keyboard (wtype), checking the dialog
+  still has focus before every key, then aims it with the niri action it was
+  given (`share-cast-target set-dynamic-cast-monitor DP-3`), so an app can go
+  live hands-free and later `set-dynamic-cast-*` calls switch what's shown.
+  [`pkgs/share-cast-target/`](pkgs/share-cast-target/)
 - <a id="window-pick"></a>**A picker over every open niri window.** `window-pick`
   lists all windows across workspaces and monitors in fuzzel, most recently
   focused first with their app icons, searchable by title or app-id, and

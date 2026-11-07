@@ -83,6 +83,8 @@ in
       slack
       # meme-pick and meme-add, for niri's Mod+M and Mod+Shift+M binds.
       (callPackage ../../../pkgs/memes { library = "${consts.home}/memes"; })
+      # share-cast-target, which Vesktop's VcPresets runs to answer the Share Screen dialog unattended.
+      (callPackage ../../../pkgs/share-cast-target { niri = config.programs.niri.package; })
       # window-pick, for niri's Mod+P: fuzzel over every open window.
       (callPackage ../../../pkgs/window-pick { })
       # Focuses or launches an app, cycling its windows on repeats, for niri's Mod+Alt summon binds.
