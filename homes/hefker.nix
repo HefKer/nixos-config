@@ -20,6 +20,7 @@ in
     ./modules/gui.nix
     ./modules/kanata-keymap.nix
     ./modules/spotify.nix
+    ./modules/syncthing
     ./modules/udiskie.nix
   ]
   ++ lib.optional isDevelopment ./modules/claude-hulio.nix

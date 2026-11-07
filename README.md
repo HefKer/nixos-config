@@ -233,6 +233,16 @@ together](#how-it-fits-together) for what that means when you copy one.
   decrypt. [`homes/modules/spotify.nix`](homes/modules/spotify.nix),
   [`pkgs/soloist-mpris/`](pkgs/soloist-mpris/)
 
+### Sync
+
+- <a id="syncthing"></a>**Syncthing with no first-scan gap.** One table of
+  peers and folder rows builds every host's devices and folders, and each
+  folder's whole `.stignore` is composed from shared lists and written by
+  activation before the service starts, since `ignorePatterns` only lands
+  after the first scan. App-state folders sync only named paths, and the
+  host's identity comes from sops.
+  [`homes/modules/syncthing/`](homes/modules/syncthing/)
+
 ### Secret management
 
 - <a id="secrets"></a>**sops-nix in a public repo.** One encrypted file per
