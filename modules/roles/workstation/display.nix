@@ -37,9 +37,24 @@ in
     systemd.user.services.dms.environment.QS_ICON_THEME = "Papirus-Dark";
 
     xdg.portal = {
-      extraPortals = [ pkgs.xdg-desktop-portal-termfilechooser ];
-      config.niri."org.freedesktop.impl.portal.FileChooser" = "termfilechooser";
+      extraPortals = [
+        pkgs.xdg-desktop-portal-termfilechooser
+        pkgs.xdg-desktop-portal-wlr
+      ];
+      config.niri = {
+        "org.freedesktop.impl.portal.FileChooser" = "termfilechooser";
+        # Monitors only (niri lacks ext-image-copy-capture), but a chooser script can answer without a dialog.
+        "org.freedesktop.impl.portal.ScreenCast" = "wlr";
+      };
     };
+
+    environment.etc."xdg/xdg-desktop-portal-wlr/config".text = ''
+      [screencast]
+      chooser_type=simple
+      chooser_cmd=${
+        lib.getExe (pkgs.callPackage ../../../pkgs/cast-chooser { niri = config.programs.niri.package; })
+      }
+    '';
 
     environment.sessionVariables = {
       NIXOS_OZONE_WL = "1";
