@@ -403,6 +403,8 @@
         "qutewarden": "qutewarden",
         "sops-nix": "sops-nix",
         "spicetify-nix": "spicetify-nix",
+        "vc-actions": "vc-actions",
+        "vc-presets": "vc-presets",
         "zen-browser": "zen-browser"
       }
     },
@@ -510,6 +512,38 @@
       "original": {
         "owner": "numtide",
         "repo": "treefmt-nix",
+        "type": "github"
+      }
+    },
+    "vc-actions": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1794044186,
+        "narHash": "sha256-yqjTfhj9JvxqczUdo+IqhrIr4tp782zFlCqOG/vYwrM=",
+        "owner": "HefKer",
+        "repo": "vc-actions",
+        "rev": "4951fe5a68ce4634ed9f8c53eacef5fe1e98ba33",
+        "type": "github"
+      },
+      "original": {
+        "owner": "HefKer",
+        "repo": "vc-actions",
+        "type": "github"
+      }
+    },
+    "vc-presets": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1794044186,
+        "narHash": "sha256-jRySAaIw/rXIDj9m+2/lUsebgMLBeoVjId8ZB3JZzBc=",
+        "owner": "HefKer",
+        "repo": "vc-presets",
+        "rev": "4fc8aa3c7df842e2206a7ee2399e60ae7415d0a6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "HefKer",
+        "repo": "vc-presets",
         "type": "github"
       }
     },

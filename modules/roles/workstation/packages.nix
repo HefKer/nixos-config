@@ -68,7 +68,16 @@ in
       # --- GUI Applications ---
       nautilus
       obsidian
-      vesktop
+      # Vencord from the store, with VcPresets and VcActions built in, rather than the copy Vesktop downloads.
+      (vesktop.override {
+        withSystemVencord = true;
+        vencord = callPackage ../../../pkgs/vencord-userplugins {
+          plugins = {
+            vcPresets = inputs.vc-presets;
+            vcActions = inputs.vc-actions;
+          };
+        };
+      })
       signal-desktop
       teams-for-linux
       zoom-us

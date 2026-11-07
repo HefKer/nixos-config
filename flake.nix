@@ -39,6 +39,16 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Vencord userplugins, built into Vesktop's Vencord by pkgs/vencord-userplugins.
+    vc-presets = {
+      url = "github:HefKer/vc-presets";
+      flake = false;
+    };
+    vc-actions = {
+      url = "github:HefKer/vc-actions";
+      flake = false;
+    };
+
     qutewarden = {
       url = "github:HefKer/qutewarden";
       inputs.nixpkgs.follows = "nixpkgs";

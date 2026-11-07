@@ -203,6 +203,13 @@ together](#how-it-fits-together) for what that means when you copy one.
   given (`share-cast-target set-dynamic-cast-monitor DP-3`), so an app can go
   live hands-free and later `set-dynamic-cast-*` calls switch what's shown.
   [`pkgs/share-cast-target/`](pkgs/share-cast-target/)
+- <a id="vencord-userplugins"></a>**Vencord userplugins built into Vesktop.**
+  `pkgs/vencord-userplugins` copies plugin sources (here
+  [VcPresets](https://github.com/HefKer/vc-presets): one-command Go Live
+  presets, and [VcActions](https://github.com/HefKer/vc-actions): slash
+  commands and hotkeys) into Vencord's `src/userplugins` and builds it, and
+  Vesktop's `withSystemVencord` loads that instead of downloading Vencord.
+  [`pkgs/vencord-userplugins/`](pkgs/vencord-userplugins/)
 - <a id="window-pick"></a>**A picker over every open niri window.** `window-pick`
   lists all windows across workspaces and monitors in fuzzel, most recently
   focused first with their app icons, searchable by title or app-id, and
