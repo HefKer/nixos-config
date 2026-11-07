@@ -17,6 +17,7 @@ in
     ./rebuild-notify.nix
     ./reboot-notify.nix
     ./spotify.nix
+    ./stale-apps-notify.nix
     ./storage.nix
     ./gaming
     ./local-ai

@@ -166,6 +166,13 @@ together](#how-it-fits-together) for what that means when you copy one.
   notification with the action, duration and, on failure, the exit code,
   reaching the invoking user's session bus even under `sudo`.
   [`modules/roles/workstation/rebuild-notify.nix`](modules/roles/workstation/rebuild-notify.nix)
+- <a id="stale-apps"></a>**Know which apps to restart.** Whenever
+  `/run/current-system` changes, scans your processes' executables and
+  command lines for store paths the new system no longer ships but whose
+  package it still has under another hash, and notifies with their names.
+  `stale-apps` prints the list on demand.
+  [`pkgs/stale-apps/`](pkgs/stale-apps/),
+  [`modules/roles/workstation/stale-apps-notify.nix`](modules/roles/workstation/stale-apps-notify.nix)
 - <a id="health"></a>**Probes for silent breakage.** A daily user timer runs
   every `custom.health.probes.<name>` script (link drift, Syncthing conflict
   files, failed units) into `~/.local/state/health/findings`, notifying only
