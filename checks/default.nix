@@ -178,6 +178,8 @@ in
 
   health = pkgs.callPackage ../pkgs/health/tests.nix { };
 
+  sync-resolve = pkgs.callPackage ../pkgs/sync-resolve/tests.nix { };
+
   # The flake-trap guard (ADR-0001); readlink never follows a link, so the root needn't exist.
   dotfiles = pkgs.runCommandLocal "check-dotfiles" { } ''
     fail=0

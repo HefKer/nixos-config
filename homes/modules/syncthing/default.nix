@@ -16,6 +16,17 @@ let
   isAppState = row: row ? syncOnly;
   folderPaths = map (row: "${home}/${row.path}") (lib.attrValues rows);
 
+  sync-resolve = pkgs.callPackage ../../../pkgs/sync-resolve {
+    folders = folderPaths;
+    appStateFolders = map (row: "${home}/${row.path}") (
+      lib.attrValues (lib.filterAttrs (_: isAppState) rows)
+    );
+    # Conflict file names carry the first 7 characters of the device ID.
+    peers = lib.mapAttrs' (
+      name: peer: lib.nameValuePair (builtins.substring 0 7 peer.id) name
+    ) table.peers;
+  };
+
   versioning =
     name: v:
     {
@@ -108,6 +119,8 @@ in
       options.urAccepted = 3;
     };
   };
+
+  home.packages = [ sync-resolve ];
 
   custom.health.probes.sync-conflict.script =
     (pkgs.callPackage ../../../pkgs/health/probes.nix { }).syncConflict
