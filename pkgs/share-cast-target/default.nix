@@ -1,4 +1,5 @@
 {
+  coreutils,
   jq,
   niri,
   writeShellApplication,
@@ -7,6 +8,7 @@
 writeShellApplication {
   name = "share-cast-target";
   runtimeInputs = [
+    coreutils
     jq
     niri
     wtype
@@ -43,7 +45,10 @@ writeShellApplication {
       sleep 0.15
     done
 
-    # niri holds the stream back, and the portal's answer with it, until a target is set.
-    niri msg action "$@"
+    # niri holds each new dynamic cast until a target is set after it starts, and Chromium opens a second session right after the first.
+    for _ in $(seq 40); do
+      niri msg action "$@"
+      sleep 0.15
+    done
   '';
 }
