@@ -45,10 +45,11 @@ writeShellApplication {
       sleep 0.15
     done
 
-    # niri holds each new dynamic cast until a target is set after it starts, and Chromium opens a second session right after the first.
-    for _ in $(seq 40); do
+    # niri holds each new dynamic cast until a target is set after it starts; Chromium's second, restored session gives up after ~80ms.
+    deadline=$((SECONDS + 6))
+    while ((SECONDS < deadline)); do
       niri msg action "$@"
-      sleep 0.15
+      sleep 0.02
     done
   '';
 }
