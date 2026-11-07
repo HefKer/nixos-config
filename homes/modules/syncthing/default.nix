@@ -14,6 +14,7 @@ let
   rows = lib.filterAttrs (_: row: lib.elem host row.peers) table.folders;
   peerNames = lib.unique (lib.concatMap (row: row.peers) (lib.attrValues rows));
   isAppState = row: row ? syncOnly;
+  folderPaths = map (row: "${home}/${row.path}") (lib.attrValues rows);
 
   versioning =
     name: v:
@@ -107,6 +108,10 @@ in
       options.urAccepted = 3;
     };
   };
+
+  custom.health.probes.sync-conflict.script =
+    (pkgs.callPackage ../../../pkgs/health/probes.nix { }).syncConflict
+      folderPaths;
 
   # Before reloadSystemd, so a first start already has rules: ignorePatterns would land only after the first scan (ADR-0007).
   home.activation.syncthingIgnores = lib.hm.dag.entryBetween [ "reloadSystemd" ] [ "writeBoundary" ] (

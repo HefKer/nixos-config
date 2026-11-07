@@ -37,7 +37,12 @@ runCommandLocal "health-tests"
         ".config/app"
         ".config/f.toml"
       ])
-      probes.syncConflict
+      # Relative, since the sandbox path is unknown at eval time; the test runs from $PWD.
+      (probes.syncConflict [
+        "home/s"
+        "abs dir"
+        "home/gone"
+      ])
     ];
   }
   ''
@@ -100,24 +105,14 @@ runCommandLocal "health-tests"
     expect "$(health-probe-link-drift)" "$HOME/.config/app: directory"$'\n'"$HOME/.config/f.toml: missing" \
       "a directory and a missing target are drift"
 
-    mkdir -p "$HOME/.local/state/syncthing" "$HOME/s/.stversions" "$PWD/abs dir" "$HOME/default"
-    cat >"$HOME/.local/state/syncthing/config.xml" <<'XML'
-    <configuration>
-      <folder id="a" path="~/s"></folder>
-      <folder id="b" path="$PWD/abs dir"></folder>
-      <folder id="c" path="~/gone"></folder>
-      <defaults><folder id="" path="~/default"></folder></defaults>
-    </configuration>
-    XML
-    sed -i "s|\$PWD|$PWD|" "$HOME/.local/state/syncthing/config.xml"
+    mkdir -p "$HOME/s/.stversions" "$PWD/abs dir"
     expect "$(health-probe-sync-conflict)" "" "no conflicts is clean"
     touch "$HOME/s/foo.sync-conflict-20260101-000000-ABCDEFG.txt" \
       "$HOME/s/.stversions/old.sync-conflict-20260101-000000-ABCDEFG.txt" \
-      "$PWD/abs dir/.sync-conflict-20260101-000000-ABCDEFG.last" \
-      "$HOME/default/d.sync-conflict-20260101-000000-ABCDEFG.txt"
+      "$PWD/abs dir/.sync-conflict-20260101-000000-ABCDEFG.last"
     expect "$(health-probe-sync-conflict)" \
-      "$PWD/abs dir/.sync-conflict-20260101-000000-ABCDEFG.last"$'\n'"$HOME/s/foo.sync-conflict-20260101-000000-ABCDEFG.txt" \
-      "conflicts are found in every folder, outside .stversions and the defaults template"
+      "abs dir/.sync-conflict-20260101-000000-ABCDEFG.last"$'\n'"home/s/foo.sync-conflict-20260101-000000-ABCDEFG.txt" \
+      "conflicts are found in every folder, outside .stversions, and a missing folder is skipped"
 
     if [ "$fail" != 0 ]; then exit 1; fi
     touch $out

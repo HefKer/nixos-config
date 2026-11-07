@@ -6,7 +6,6 @@
   systemd,
   writeShellApplication,
   writeText,
-  xmlstarlet,
 }:
 {
   # Takes home.file's targets; each must still be a link into a home-manager-files tree.
@@ -33,37 +32,22 @@
       '';
     };
 
-  # Reads folder paths from Syncthing's config.xml, never its API, so it works while Syncthing is stopped.
-  syncConflict = writeShellApplication {
-    name = "health-probe-sync-conflict";
-    runtimeInputs = [
-      findutils
-      xmlstarlet
-    ];
-    text = ''
-      config=
-      # Syncthing's own order: the legacy config dir wins when it holds a config.
-      for c in "''${XDG_CONFIG_HOME:-$HOME/.config}/syncthing/config.xml" \
-        "''${XDG_STATE_HOME:-$HOME/.local/state}/syncthing/config.xml"; do
-        if [ -f "$c" ]; then
-          config=$c
-          break
-        fi
-      done
-      [ -n "$config" ] || exit 0
-
-      # /configuration/folder skips <defaults><folder>, the template for new folders.
-      xmlstarlet sel -t -m /configuration/folder -v @path -n "$config" | while IFS= read -r dir; do
-        case $dir in
-          "") continue ;;
-          \~) dir=$HOME ;;
-          \~/*) dir=$HOME/''${dir#\~/} ;;
-        esac
-        [ -d "$dir" ] || continue
-        find "$dir" -name .stversions -prune -o -name '*.sync-conflict-*' -print || true
-      done | sort -u
-    '';
-  };
+  # Takes the synced folders' absolute paths; they come from the flake's folder table, so Syncthing needn't be running.
+  syncConflict =
+    dirs:
+    writeShellApplication {
+      name = "health-probe-sync-conflict";
+      runtimeInputs = [
+        coreutils
+        findutils
+      ];
+      text = ''
+        while IFS= read -r dir; do
+          [ -d "$dir" ] || continue
+          find "$dir" -name .stversions -prune -o -name '*.sync-conflict-*' -print || true
+        done <${writeText "sync-folders" (lib.concatLines dirs)} | sort -u
+      '';
+    };
 
   failedUnits =
     ignoreUnits:

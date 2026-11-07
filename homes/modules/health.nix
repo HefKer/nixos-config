@@ -56,7 +56,6 @@ in
   # Probes are contributions, not switches, so any module sets them; the hosts-only rule is for switches.
   config.custom.health.probes = lib.mkIf enabled {
     link-drift.script = builtinProbes.linkDrift linkTargets;
-    sync-conflict.script = builtinProbes.syncConflict;
     failed-units.script = builtinProbes.failedUnits cfg.ignoreUnits;
   };
 
