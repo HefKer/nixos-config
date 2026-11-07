@@ -135,7 +135,7 @@ in
       id = "awqza-4tmhz";
       path = ".claude";
       peers = workstations;
-      only = [
+      syncOnly = [
         "projects"
         "sessions"
         "file-history"
@@ -148,7 +148,7 @@ in
       id = "jmvq4-pxakp";
       path = ".local/share/qutebrowser";
       peers = workstations;
-      only = [ "sessions" ];
+      syncOnly = [ "sessions" ];
     };
   };
 }
