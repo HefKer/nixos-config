@@ -69,6 +69,7 @@ in
       yaml-language-server
       markdownlint-cli2
       marksman
+      taplo
       vscode-json-languageserver
       vscode-langservers-extracted
 
