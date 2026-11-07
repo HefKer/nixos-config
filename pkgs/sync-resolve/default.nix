@@ -8,6 +8,7 @@
   gitMinimal,
   gnugrep,
   gnused,
+  jq,
   # Absolute paths of every synced folder.
   folders,
   # The folders where Syncthing keeps no conflict copies (maxConflicts = 0), so any left are stale.
@@ -31,6 +32,7 @@ writeShellApplication {
     gitMinimal
     gnugrep
     gnused
+    jq
   ];
   text = ''
     usage() {
@@ -38,7 +40,8 @@ writeShellApplication {
     usage: sync-resolve [--dry-run]
       Settles Syncthing conflict copies. What is safe happens on its own: identical copies, stale
       app-state copies and git index/log copies are deleted, a diverged git ref is kept as a
-      sync-conflict/<host>/<ref> branch, and a git-tracked text file whose sides merge cleanly
+      sync-conflict/<host>/<ref> branch, a transcript copy whose every message the live one has
+      is deleted, and a git-tracked text file whose sides merge cleanly
       against the last commit before the conflict is merged. The rest is asked about one by one on a terminal.
       --dry-run  print what would happen and change nothing
     EOF
@@ -76,12 +79,13 @@ writeShellApplication {
       return 1
     }
 
+    # The innermost synced folder decides, since a folder may nest inside an app-state one that ignores its path.
     in_app_state() {
-      local f
+      local f best=
       while IFS= read -r f; do
-        case $1 in "$f"/*) return 0 ;; esac
-      done <${writeText "app-state-folders" (lib.concatLines appStateFolders)}
-      return 1
+        case $1 in "$f"/*) if [ ''${#f} -gt ''${#best} ]; then best=$f; fi ;; esac
+      done <${writeText "sync-folders" (lib.concatLines folders)}
+      [ -n "$best" ] && grep -qxF -- "$best" ${writeText "app-state-folders" (lib.concatLines appStateFolders)}
     }
 
     act() {
@@ -135,6 +139,14 @@ writeShellApplication {
       done
     }
 
+    # Messages (lines with a uuid, as in a Claude transcript) in their copy but not the live one; fails when theirs has none.
+    uuids_missing() {
+      local theirs
+      theirs=$(jq -r '.uuid? // empty' "$c" 2>/dev/null | sort -u) || return 1
+      [ -n "$theirs" ] || return 1
+      comm -13 <(jq -r '.uuid? // empty' "$orig" 2>/dev/null | sort -u) <(echo "$theirs") | wc -l
+    }
+
     # A ref copy: kept as a branch unless the live ref already contains it.
     resolve_ref() {
       local gd=$1 rel=$2 mine theirs name
@@ -161,7 +173,7 @@ writeShellApplication {
     }
 
     resolve() {
-      local base id stamp gd rel top tracked at merged
+      local base id stamp gd rel top tracked at merged missing
       base=$(basename "$c")
       id=$(sed -E 's/.*\.sync-conflict-[0-9]{8}-[0-9]{6}-([A-Z0-9]{7}).*/\1/' <<<"$base")
       stamp=$(sed -E 's/.*\.sync-conflict-([0-9]{8})-([0-9]{6})-.*/\1\2/' <<<"$base")
@@ -175,6 +187,12 @@ writeShellApplication {
         ask "the live file is gone; taking theirs restores it"
       elif cmp -s "$orig" "$c"; then
         remove "identical, deleted"
+      elif [[ $orig == *.jsonl ]] && missing=$(uuids_missing); then
+        if [ "$missing" = 0 ]; then
+          remove "every message already in the live transcript, deleted"
+        else
+          ask "holds $missing messages the live transcript lacks"
+        fi
       elif gd=$(git_dir_of "$c"); then
         rel=''${orig#"$gd"/}
         case $rel in
@@ -212,7 +230,7 @@ writeShellApplication {
       while IFS= read -r dir; do
         [ -d "$dir" ] || continue
         find "$dir" -name .stversions -prune -o -name '*.sync-conflict-*' -type f -print0 || true
-      done <${writeText "sync-folders" (lib.concatLines folders)}
+      done <${writeText "sync-folders" (lib.concatLines folders)} | sort -zu
     )
 
     if [ "$pending" -gt 0 ] && [ "$interactive" = 0 ] && [ "$dry" = 0 ]; then

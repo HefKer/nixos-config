@@ -248,8 +248,8 @@ together](#how-it-fits-together) for what that means when you copy one.
   [`homes/modules/syncthing/`](homes/modules/syncthing/)
 - <a id="sync-resolve"></a>**Settle sync conflicts without the busywork.**
   `sync-resolve` deletes conflict copies that are identical, stale app state
-  or a git index, keeps a diverged git ref as a `sync-conflict/<host>/<ref>`
-  branch, and 3-way merges a git-tracked file against the last commit before
+  or a git index, or Claude transcripts whose every message the live one
+  has, keeps a diverged git ref as a `sync-conflict/<host>/<ref>` branch, and 3-way merges a git-tracked file against the last commit before
   the conflict (not HEAD, which would revert everything since). The rest it
   asks about one by one, naming the peer each copy came from; `--dry-run`
   shows the plan.

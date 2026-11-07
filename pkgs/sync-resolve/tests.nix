@@ -9,6 +9,7 @@ let
     folders = [
       "sync"
       "app"
+      "app/nested"
     ];
     appStateFolders = [ "app" ];
     peers.LENOVO1 = "lenovo";
@@ -38,9 +39,16 @@ runCommandLocal "sync-resolve-tests"
     echo same >sync/same$sc.txt
     echo a >app/state.json
     echo b >app/state$sc.json
+    mkdir -p app/nested
+    echo a >app/nested/n.txt
+    echo b >app/nested/n$sc.txt
     echo a >sync/plain.txt
     echo b >sync/plain$sc.txt
     echo b >sync/gone$sc.txt
+    printf '%s\n' '{"uuid":"1"}' '{"uuid":"2"}' '{"type":"summary"}' >sync/t.jsonl
+    printf '%s\n' '{"uuid":"1"}' '{"type":"summary","x":1}' >sync/t$sc.jsonl
+    printf '%s\n' '{"uuid":"1"}' >sync/u.jsonl
+    printf '%s\n' '{"uuid":"1"}' '{"uuid":"3"}' >sync/u$sc.jsonl
 
     git init -q -b master sync/repo
     r=sync/repo
@@ -72,6 +80,9 @@ runCommandLocal "sync-resolve-tests"
     identical, deleted: sync/same$sc.txt $m
     app state Syncthing no longer keeps conflicts for, deleted: app/state$sc.json $m
     needs you: sync/plain$sc.txt $m — no common base to merge against
+    needs you: app/nested/n$sc.txt $m — no common base to merge against
+    every message already in the live transcript, deleted: sync/t$sc.jsonl $m
+    needs you: sync/u$sc.jsonl $m — holds 1 messages the live transcript lacks
     needs you: sync/gone$sc.txt $m — the live file is gone; taking theirs restores it
     merged cleanly against $b8: $r/f$sc.txt $m
     needs you: $r/g$sc.txt $m — both sides changed the same lines since $b8
@@ -87,11 +98,11 @@ runCommandLocal "sync-resolve-tests"
     expect "$(find sync app -type f | sort)" "$before" "a dry run changes nothing"
 
     out_=$(sync-resolve </dev/null)
-    expect "$(grep -v '^3 left' <<<"$out_" | sort)" "$expected" "a real run acts as planned"
-    expect "$(tail -n1 <<<"$out_")" "3 left; run sync-resolve on a terminal to settle them" "off a terminal, the rest is counted"
+    expect "$(grep -v '^5 left' <<<"$out_" | sort)" "$expected" "a real run acts as planned"
+    expect "$(tail -n1 <<<"$out_")" "5 left; run sync-resolve on a terminal to settle them" "off a terminal, the rest is counted"
     expect "$(cat $r/f.txt)" "$(printf 'one\n2\nthree\n4\nfive')" "a clean merge keeps both sides and later commits"
     expect "$(git -C $r rev-parse sync-conflict/lenovo/master)" "$side" "a diverged ref is kept as a branch"
-    expect "$(find sync app -name '*.sync-conflict-*' | sort)" "$(printf '%s\n' sync/gone$sc.txt sync/plain$sc.txt $r/g$sc.txt | sort)" \
+    expect "$(find sync app -name '*.sync-conflict-*' | sort)" "$(printf '%s\n' app/nested/n$sc.txt sync/u$sc.jsonl sync/gone$sc.txt sync/plain$sc.txt $r/g$sc.txt | sort)" \
       "only the copies that need a person are left"
 
     if [ "$fail" != 0 ]; then exit 1; fi
