@@ -14,6 +14,7 @@ let
   rows = lib.filterAttrs (_: row: lib.elem host row.peers) table.folders;
   peerNames = lib.unique (lib.concatMap (row: row.peers) (lib.attrValues rows));
   isAppState = row: row ? syncOnly;
+  probes = pkgs.callPackage ../../../pkgs/health/probes.nix { };
   folderPaths = map (row: "${home}/${row.path}") (lib.attrValues rows);
 
   sync-resolve = pkgs.callPackage ../../../pkgs/sync-resolve {
@@ -122,9 +123,16 @@ in
 
   home.packages = [ sync-resolve ];
 
-  custom.health.probes.sync-conflict.script =
-    (pkgs.callPackage ../../../pkgs/health/probes.nix { }).syncConflict
-      folderPaths;
+  custom.health.probes.sync-conflict.script = probes.syncConflict folderPaths;
+  custom.health.probes.syncthing.script = probes.syncthingStatus {
+    inherit (config.services.syncthing) guiAddress;
+    peers = lib.listToAttrs (
+      map (name: lib.nameValuePair table.peers.${name}.id name) (lib.remove host peerNames)
+    );
+    folders = lib.mapAttrs' (name: row: lib.nameValuePair row.id name) rows;
+    # The phone syncs only when opened, so a week away is normal.
+    maxUnseenDays = 14;
+  };
 
   # Before reloadSystemd, so a first start already has rules: ignorePatterns would land only after the first scan (ADR-0007).
   home.activation.syncthingIgnores = lib.hm.dag.entryBetween [ "reloadSystemd" ] [ "writeBoundary" ] (

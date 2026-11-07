@@ -15,8 +15,8 @@ in
     ./packages.nix
     ./printing.nix
     ./rebuild-notify.nix
-    ./reboot-notify.nix
     ./spotify.nix
+    ./smart-status.nix
     ./stale-apps-notify.nix
     ./storage.nix
     ./syncthing.nix

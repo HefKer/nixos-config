@@ -155,11 +155,10 @@ together](#how-it-fits-together) for what that means when you copy one.
 
 - <a id="reboot-required"></a>**Know when to reboot.** Compares the kernel,
   initrd and kernel modules against `/run/booted-system`, printing a warning
-  during the switch and sending a desktop notification whenever
-  `/run/current-system` changes.
+  during the switch and, through the [health](#health) probes, notifying
+  after each switch.
   [`pkgs/reboot-required/`](pkgs/reboot-required/),
-  [`modules/core/reboot-required.nix`](modules/core/reboot-required.nix),
-  [`modules/roles/workstation/reboot-notify.nix`](modules/roles/workstation/reboot-notify.nix) ·
+  [`modules/core/reboot-required.nix`](modules/core/reboot-required.nix) ·
   [0891279](https://github.com/HefKer/nixos-config/commit/0891279)
 - <a id="rebuild-notify"></a>**Notify when a rebuild finishes.** A
   high-priority `nixos-rebuild` wrapper runs the real one, then sends a
@@ -173,13 +172,18 @@ together](#how-it-fits-together) for what that means when you copy one.
   `stale-apps` prints the list on demand.
   [`pkgs/stale-apps/`](pkgs/stale-apps/),
   [`modules/roles/workstation/stale-apps-notify.nix`](modules/roles/workstation/stale-apps-notify.nix)
-- <a id="health"></a>**Probes for silent breakage.** A daily user timer runs
-  every `custom.health.probes.<name>` script (link drift, Syncthing conflict
-  files, failed units) into `~/.local/state/health/findings`, notifying only
-  for findings the last run didn't have. `health` re-runs them, and `health
-  --greeting` prints a one-line count for a shell greeting.
+- <a id="health"></a>**Probes for silent breakage.** A daily user timer, and
+  every home-manager switch, runs each `custom.health.probes.<name>` script
+  into `~/.local/state/health/findings`, notifying only for findings the last
+  run didn't have. Probes cover link drift, Syncthing conflict files, unseen
+  peers and folder errors, failed units, a pending reboot, low disk space,
+  an old nixpkgs, SMART trouble (read from a root timer's file), build output
+  untouched for a month, and repos with uncommitted or unpushed work left
+  idle. `health` re-runs them, and `health --greeting` prints a one-line
+  count for a shell greeting.
   [`homes/modules/health.nix`](homes/modules/health.nix),
-  [`pkgs/health/`](pkgs/health/)
+  [`pkgs/health/`](pkgs/health/),
+  [`modules/roles/workstation/smart-status.nix`](modules/roles/workstation/smart-status.nix)
 - <a id="summon"></a>**Summon an app from anywhere.** `summon <app-id>
   <command>` focuses the app's most recently focused window across workspaces
   and monitors, cycles through its others on repeats in the order the cycle
