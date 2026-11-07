@@ -142,6 +142,11 @@ in
         "plugins/installed_plugins.json"
         "plugins/known_marketplaces.json"
         "skills"
+        "settings.json"
+        "CLAUDE.md"
+        "commands"
+        "hooks"
+        "keybindings.json"
       ];
     };
     ".local qutebrowser" = {
