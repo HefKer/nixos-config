@@ -31,6 +31,9 @@ in
   # Read-only osu! gacha API key for ~/dev/_osu/osugacha; only this host's secrets file holds it.
   sops.secrets.osugacha-testing-api.owner = consts.username;
 
+  # The user manager starts at boot, so Syncthing (a user service) syncs before anyone logs in.
+  users.users.${consts.username}.linger = true;
+
   home-manager.users.${consts.username}.custom.home.dotfiles = {
     enable = true;
     host = hostName;

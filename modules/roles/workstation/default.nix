@@ -19,6 +19,7 @@ in
     ./spotify.nix
     ./stale-apps-notify.nix
     ./storage.nix
+    ./syncthing.nix
     ./gaming
     ./local-ai
     ./virtualization
