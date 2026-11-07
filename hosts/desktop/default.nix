@@ -28,6 +28,9 @@ in
     };
   };
 
+  # Read-only osu! gacha API key for ~/dev/_osu/osugacha; only this host's secrets file holds it.
+  sops.secrets.osugacha-testing-api.owner = consts.username;
+
   home-manager.users.${consts.username}.custom.home.dotfiles = {
     enable = true;
     host = hostName;
