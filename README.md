@@ -135,9 +135,9 @@ together](#how-it-fits-together) for what that means when you copy one.
   [`pkgs/herdr-plugins-sync/`](pkgs/herdr-plugins-sync/) ·
   [df23f3c](https://github.com/HefKer/nixos-config/commit/df23f3c)
 - <a id="claude-second-account"></a>**A second Claude Code account sharing
-  your setup.** Links the read-only pieces (skills, commands, agents,
-  keybindings, `CLAUDE.md`) from `~/.claude` into a second config dir, leaving
-  everything Claude writes per-account.
+  your setup.** Links the read-only pieces into a second config dir: skills
+  and agents from `~/.claude`, commands, keybindings and `CLAUDE.md` straight
+  from the dotfiles root, leaving everything Claude writes per-account.
   [`homes/modules/claude-hulio.nix`](homes/modules/claude-hulio.nix) ·
   [35bca13](https://github.com/HefKer/nixos-config/commit/35bca13)
 - <a id="package-skills"></a>**Skills bundled with packages.** Linking

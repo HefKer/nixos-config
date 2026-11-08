@@ -35,6 +35,14 @@ let
     # The directory holds only config and themes; history and keys live in ~/.local/share/atuin.
     "atuin/.config/atuin"
     "btop/.config/btop"
+    # ~/.claude holds Claude Code's runtime state, so its config links piece by piece; these dirs hold only scripts and commands.
+    "claude/.claude/bin"
+    "claude/.claude/commands"
+    "claude/.claude/hooks"
+    # Files beside that state; Claude Code only reads them, while settings.json, which it rewrites, stays a synced real file.
+    "claude/.claude/CLAUDE.md"
+    "claude/.claude/keybindings.json"
+    "claude/.claude/statusline.sh"
     "DankMaterialShell/.config/DankMaterialShell"
     # The shell reads ~/.config/dms, but its regenerated nvim colorscheme reads this path.
     {
