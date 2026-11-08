@@ -198,7 +198,10 @@ together](#how-it-fits-together) for what that means when you copy one.
   file or the clipboard into `~/memes` (Tenor and Giphy as looping mp4s), named
   by tags asked through fuzzel. `meme-pick` shows thumbnails in fuzzel and
   copies the pick as a file reference that Discord, Signal and WhatsApp accept.
+  `sound-add` and `sound-pick` do the same for sound clips, played into a
+  PipeWire "Soundboard mic" that carries your voice too: a soundboard with no app.
   [`pkgs/memes/`](pkgs/memes/) ·
+  [`audio.nix`](modules/roles/workstation/audio.nix) ·
   [b50e756](https://github.com/HefKer/nixos-config/commit/b50e756)
 - <a id="share-cast-target"></a>**Unattended screen sharing on niri.**
   `share-cast-target` waits for the GNOME portal's Share Screen dialog and

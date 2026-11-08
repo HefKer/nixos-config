@@ -90,8 +90,11 @@ in
       czkawka
       moonlight-qt
       slack
-      # meme-pick and meme-add, for niri's Mod+M and Mod+Shift+M binds.
-      (callPackage ../../../pkgs/memes { library = "${consts.home}/memes"; })
+      # meme-pick/meme-add and sound-pick/sound-add/sound-stop, for niri's Mod+G and Mod+Ctrl+G binds.
+      (callPackage ../../../pkgs/memes {
+        library = "${consts.home}/memes";
+        sink = "soundboard-in";
+      })
       # share-cast-target, which Vesktop's VcPresets runs to answer the Share Screen dialog unattended.
       (callPackage ../../../pkgs/share-cast-target { niri = config.programs.niri.package; })
       # window-pick, for niri's Mod+P: fuzzel over every open window.
