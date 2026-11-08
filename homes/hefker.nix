@@ -19,6 +19,7 @@ in
   ++ lib.optionals isWorkstation [
     ./modules/gui.nix
     ./modules/kanata-keymap.nix
+    ./modules/privoxy.nix
     ./modules/spotify.nix
     ./modules/syncthing
     ./modules/udiskie.nix
