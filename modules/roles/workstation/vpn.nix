@@ -10,6 +10,7 @@ let
   cfg = config.custom.roles.workstation;
   netns = "proton";
   webuiPort = 8080;
+  socksPort = 1080;
   downloads = "/srv/torrents";
 
   forwardPort = pkgs.writeShellApplication {
@@ -65,12 +66,16 @@ in
     vpnNamespaces.${netns} = {
       enable = true;
       wireguardConfigFile = config.sops.secrets.proton-wg.path;
-      portMappings = [
-        {
-          from = webuiPort;
-          to = webuiPort;
-        }
-      ];
+      portMappings =
+        map
+          (port: {
+            from = port;
+            to = port;
+          })
+          [
+            webuiPort
+            socksPort
+          ];
     };
 
     services.qbittorrent = {
@@ -103,6 +108,22 @@ in
             vpnNamespace = netns;
           };
           serviceConfig.UMask = "0002";
+        };
+
+        proton-socks = {
+          description = "SOCKS5 proxy out through Proton VPN";
+          wantedBy = [ "multi-user.target" ];
+          vpnConfinement = {
+            enable = true;
+            vpnNamespace = netns;
+          };
+          serviceConfig = {
+            ExecStart = "${lib.getExe pkgs.microsocks} -i ${
+              config.vpnNamespaces.${netns}.namespaceAddress
+            } -p ${toString socksPort}";
+            DynamicUser = true;
+            Restart = "on-failure";
+          };
         };
 
         qbittorrent-port-forward = {

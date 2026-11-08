@@ -20,7 +20,7 @@ in
     ./stale-apps-notify.nix
     ./storage.nix
     ./syncthing.nix
-    ./torrent.nix
+    ./vpn.nix
     ./gaming
     ./local-ai
     ./virtualization
