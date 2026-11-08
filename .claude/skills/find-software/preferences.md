@@ -52,6 +52,12 @@ Highest first.
 Always state what breaks if the vendor's cloud disappears. Acceptable when the cloud is the
 point (Spotify, Slack); counts against when incidental (a notes app that needs a login).
 
+## Habit tools
+
+When software is meant to replace a reflex (opening YouTube), it has to live where the reflex
+already goes, not in a new app beside it. On the desktop that's a qutebrowser tab: newsboat
+lost to "just open a YT tab" (HefKer/nixos-issues#104), as Readwise Reader lost to the YT app.
+
 ## Self-hosted
 
 The homelab runs mostly on NixOS.
