@@ -74,6 +74,8 @@ in
         "(?d)niri/.config/niri/config.kdl.backup*"
         "(?d)DankMaterialShell/.config/DankMaterialShell/.firstlaunch"
         "(?d)DankMaterialShell/.config/DankMaterialShell/.changelog-*"
+        "// lidAwake is a local plugin kept in git, not a clone"
+        "!DankMaterialShell/.config/DankMaterialShell/plugins/lidAwake"
         "// DMS plugin clones: not deletable, re-cloning isn't free"
         "DankMaterialShell/.config/DankMaterialShell/plugins"
         "// fish universal variables hold machine-local paths"
