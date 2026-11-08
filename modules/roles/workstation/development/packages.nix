@@ -61,7 +61,7 @@ in
       lua-language-server
 
       # Nix
-      nil
+      nixd
       nixfmt
       statix
 
@@ -69,6 +69,7 @@ in
       yaml-language-server
       markdownlint-cli2
       marksman
+      fish-lsp
       taplo
       vscode-json-languageserver
       vscode-langservers-extracted
