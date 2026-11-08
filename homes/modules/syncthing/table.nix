@@ -114,6 +114,12 @@ in
       peers = workstations;
       versioning = trashcan 90;
     };
+    Memes = {
+      id = "qrohy-2id38";
+      path = "memes";
+      peers = workstations;
+      versioning = trashcan 90;
+    };
     "Phone Images" = {
       id = "zoktz-z7nsz";
       path = "Phone";
