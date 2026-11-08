@@ -39,7 +39,7 @@ let
     "claude/.claude/bin"
     "claude/.claude/commands"
     "claude/.claude/hooks"
-    # Files beside that state; Claude Code only reads them, while settings.json, which it rewrites, stays a synced real file.
+    # Files beside that state, edited in place through the link; settings.json, which Claude Code itself rewrites, stays a synced real file.
     "claude/.claude/CLAUDE.md"
     "claude/.claude/keybindings.json"
     "claude/.claude/statusline.sh"
