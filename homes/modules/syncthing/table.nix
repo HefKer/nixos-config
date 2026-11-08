@@ -151,6 +151,24 @@ in
         "settings.json"
       ];
     };
+    # The hulio account's pair of the two above; settings.json is merged at launch on each host, so only the override syncs.
+    ".claude-hulio projects" = {
+      id = "3uvis-hcvkx";
+      path = ".claude-hulio/projects";
+      peers = workstations;
+    };
+    ".claude-hulio" = {
+      id = "tkly4-c85ww";
+      path = ".claude-hulio";
+      peers = workstations;
+      syncOnly = [
+        "sessions"
+        "file-history"
+        "plugins/installed_plugins.json"
+        "plugins/known_marketplaces.json"
+        "settings.override.json"
+      ];
+    };
     ".local qutebrowser" = {
       id = "jmvq4-pxakp";
       path = ".local/share/qutebrowser";
