@@ -255,6 +255,16 @@ together](#how-it-fits-together) for what that means when you copy one.
   shows the plan.
   [`pkgs/sync-resolve/`](pkgs/sync-resolve/)
 
+### Networking
+
+- <a id="vpn-torrent"></a>**Torrents that can only leave through the VPN.**
+  qbittorrent-nox runs in a VPN-Confinement network namespace whose only route
+  out is a Proton WireGuard tunnel from sops, started on demand without sudo
+  through a polkit rule and torn down when it stops. A sidecar renews Proton's
+  NAT-PMP port every 45s, opens it in the namespace firewall and sets it as
+  qBittorrent's listening port, so seeding works.
+  [`modules/roles/workstation/torrent.nix`](modules/roles/workstation/torrent.nix)
+
 ### Secret management
 
 - <a id="secrets"></a>**sops-nix in a public repo.** One encrypted file per

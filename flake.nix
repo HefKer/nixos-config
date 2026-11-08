@@ -49,6 +49,8 @@
       flake = false;
     };
 
+    vpn-confinement.url = "github:Maroka-chan/VPN-Confinement";
+
     qutewarden = {
       url = "github:HefKer/qutewarden";
       inputs.nixpkgs.follows = "nixpkgs";

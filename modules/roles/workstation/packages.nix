@@ -85,7 +85,6 @@ in
       cheese
       kdePackages.kdeconnect-kde
       zapzap # Whatsapp
-      qbittorrent
       webex
       czkawka
       moonlight-qt
