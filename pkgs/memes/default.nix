@@ -8,6 +8,7 @@
   glib,
   gnugrep,
   gnused,
+  jq,
   lib,
   libnotify,
   pipewire,
@@ -20,12 +21,17 @@
   library,
   # The PipeWire sink whose loopback is the soundboard mic voice chat records from.
   sink,
+  # A file holding a Klipy API key, for Klipy GIF pages.
+  klipyKey,
 }:
 let
   thumbSize = 64;
   sounds = "${library}/sounds";
   # sound-pick writes the PIDs of what it is playing here, and sound-stop kills them.
   pids = ''"''${XDG_RUNTIME_DIR:-/tmp}/sound-pick.pids"'';
+  # sound-volume writes "<call %> <you %>" here and sound-pick reads it on every pick; per machine, as mics differ.
+  volumeFile = ''"''${XDG_CONFIG_HOME:-$HOME/.config}/memes/sound-volume"'';
+  defaultVolume = "20 20";
 
   # Shared by both commands: the picker makes any thumbnail or OCR text the other machine's meme-add made.
   thumb = ''
@@ -41,6 +47,40 @@ let
           -vf "scale=${toString thumbSize}:${toString thumbSize}:force_original_aspect_ratio=decrease" "$t" || true
       fi
       printf '%s' "$t"
+    }
+    # A 256-bit difference hash of the first frame, as 64 hex digits: one bit per neighbouring pair of a 17x16 grey thumbnail.
+    dhash() {
+      ffmpeg -loglevel error -i "$1" -frames:v 1 -vf scale=17:16:flags=area,format=gray -f rawvideo - 2>/dev/null |
+        od -An -v -tu1 | awk '
+          { for (i = 1; i <= NF; i++) v[n++] = $i }
+          END {
+            if (n < 272) exit 1
+            for (r = 0; r < 16; r++) for (c = 0; c < 16; c += 4) {
+              x = 0
+              for (k = 0; k < 4; k++) x = x * 2 + (v[r * 17 + c + k] < v[r * 17 + c + k + 1])
+              printf "%x", x
+            }
+            print ""
+          }'
+    }
+    # Prints the library meme that looks like $1, if any: within 16 of 256 bits, so recompressed or resized copies match.
+    find_dup() {
+      local h f c hashes=''${XDG_CACHE_HOME:-$HOME/.cache}/memes/hashes
+      h=$(dhash "$1") || return 1
+      mkdir -p "$hashes"
+      for f in "$library"/*; do
+        [ -f "$f" ] || continue
+        c="$hashes/$(basename "$f").hash"
+        [ "$f" -ot "$c" ] || dhash "$f" >"$c" || true
+        printf '%s\t%s\n' "$(cat "$c")" "$f"
+      done | awk -F '\t' -v h="$h" '
+        BEGIN { for (i = 0; i < 16; i++) { x = i; b = 0; while (x) { b += x % 2; x = int(x / 2) } bits[sprintf("%x", i)] = b } }
+        length($1) == 64 {
+          d = 0
+          for (i = 1; i <= 64; i++) d += bits[sprintf("%x", xor(strtonum("0x" substr($1, i, 1)), strtonum("0x" substr(h, i, 1))))]
+          if (d <= 16 && (best == "" || d < bestd)) { best = $2; bestd = d }
+        }
+        END { if (best == "") exit 1; print best }'
     }
     # The meme's text, read once and kept beside it for meme-pick to search: .<name>.<ext>.txt, one lowercase line.
     ocr() {
@@ -120,6 +160,7 @@ let
     runtimeInputs = savingInputs ++ [
       curl
       gnugrep
+      jq
       tesseract
     ];
     text = ''
@@ -140,6 +181,20 @@ let
             [[ $url == */ ]] && url+=giphy.gif
             curl -fsSL -A "$ua" -o "$tmp/media.gif" "$url" || fail "download failed: $url"
             title=$(basename "$src" | sed -E 's/-gif-[0-9]+$//; t; s/-[A-Za-z0-9]+$//')
+            ;;
+          # Klipy's pages answer scripts with a Cloudflare challenge, so the GIF comes from its API by the page's slug.
+          https://klipy.com/gifs/* | https://klipy.com/gif/* | https://www.klipy.com/gifs/*)
+            slug=''${src%%[?#]*}
+            slug=''${slug%/}
+            slug=''${slug##*/}
+            [ -r ${lib.escapeShellArg klipyKey} ] || fail "no Klipy API key; see klipy-api in secrets/shared.yaml"
+            url=$(curl -fsS "https://api.klipy.com/api/v1/$(<${lib.escapeShellArg klipyKey})/gifs/$slug" |
+              jq -r 'first(.. | objects | (.hd?, .md?) | objects | .gif?.url // empty)') ||
+              fail "Klipy has no GIF $slug"
+            [ -n "$url" ] || fail "Klipy has no GIF $slug"
+            curl -fsSL -A "$ua" -o "$tmp/media.gif" "$url" || fail "download failed: $url"
+            # Klipy slugs end in a number: dexter-42.
+            title=$(sed -E 's/-[0-9]+$//' <<<"$slug")
             ;;
           # Reddit refuses logged-out reads of a post, and its API is closed to new apps.
           https://*reddit.com/*/comments/* | https://redd.it/*)
@@ -171,6 +226,14 @@ let
       [ -f "''${files[0]}" ] || fail "nothing was downloaded from $src"
       file=''${files[0]}
       ext=$(tr '[:upper:]' '[:lower:]' <<<"''${file##*.}")
+
+      if dup=$(find_dup "$file"); then
+        uncue
+        # A near match can be a different caption on the same template, so saving anyway stays one pick away.
+        choice=$(printf 'Skip: already saved as %s\nSave anyway\n' "$(basename "$dup")" |
+          fuzzel --dmenu --index --prompt "duplicate> " --lines 2 --width 60) || exit 0
+        [ "$choice" = 1 ] || exit 0
+      fi
 
       dest=$(tagged_path "$library" "$title" "$ext") || exit 0
       mv -- "$file" "$dest"
@@ -281,6 +344,26 @@ let
     '';
   };
 
+  soundVolume = writeShellApplication {
+    name = "sound-volume";
+    runtimeInputs = [ coreutils ];
+    text = ''
+      # sound-volume prints the volumes; sound-volume CALL [YOU] sets them in percent, YOU defaulting to CALL.
+      file=${volumeFile}
+      if [ $# -eq 0 ]; then
+        read -r vcall vyou _ 2>/dev/null <"$file" || read -r vcall vyou <<<"${defaultVolume}"
+        echo "call ''${vcall}%, you ''${vyou:-$vcall}%"
+        exit 0
+      fi
+      for v in "$@"; do
+        [[ $v =~ ^[0-9]+$ ]] || { echo "usage: sound-volume [CALL% [YOU%]], whole numbers" >&2; exit 1; }
+      done
+      mkdir -p "$(dirname "$file")"
+      echo "$1 ''${2:-$1}" >"$file"
+      echo "call $1%, you ''${2:-$1}%"
+    '';
+  };
+
   soundPick = writeShellApplication {
     name = "sound-pick";
     runtimeInputs = [
@@ -290,6 +373,7 @@ let
       libnotify
       pipewire
       soundStop
+      gawk
     ];
     text = ''
       sounds=${lib.escapeShellArg sounds}
@@ -310,10 +394,12 @@ let
 
       # One clip at a time: a new pick cuts off the last.
       sound-stop
-      # Once into the soundboard mic for the call and once to the default output for you, both at 20%, under the boosted mic.
-      pw-play --volume 0.2 --target ${lib.escapeShellArg sink} "''${files[i]}" &
+      read -r vcall vyou _ 2>/dev/null <${volumeFile} || read -r vcall vyou <<<"${defaultVolume}"
+      vyou=''${vyou:-$vcall}
+      # Once into the soundboard mic for the call and once to the default output for you, each at its sound-volume.
+      pw-play --volume "$(awk -v p="$vcall" 'BEGIN { print p / 100 }')" --target ${lib.escapeShellArg sink} "''${files[i]}" &
       call=$!
-      pw-play --volume 0.2 "''${files[i]}" &
+      pw-play --volume "$(awk -v p="$vyou" 'BEGIN { print p / 100 }')" "''${files[i]}" &
       echo "$call $!" >${pids}
     '';
   };
@@ -326,6 +412,7 @@ symlinkJoin {
     soundAdd
     soundPick
     soundStop
+    soundVolume
   ];
   meta.mainProgram = "meme-pick";
 }

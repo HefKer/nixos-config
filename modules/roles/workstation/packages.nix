@@ -14,6 +14,12 @@ in
     users.users.${consts.username}.shell = pkgs.fish;
     environment.localBinInPath = true;
 
+    # meme-add reads Klipy GIFs through Klipy's API, since its pages sit behind a Cloudflare bot check.
+    sops.secrets.klipy-api = {
+      sopsFile = ../../../secrets/shared.yaml;
+      owner = consts.username;
+    };
+
     nixpkgs.overlays = [
       # Enables DRM in qutebrowser
       (final: prev: { qutebrowser = prev.qutebrowser.override { enableWideVine = true; }; })
@@ -90,10 +96,11 @@ in
       czkawka
       moonlight-qt
       slack
-      # meme-pick/meme-add and sound-pick/sound-add/sound-stop, for niri's Mod+G and Mod+Ctrl+G binds.
+      # meme-pick/meme-add and sound-pick/sound-add/sound-stop/sound-volume, for niri's Mod+G and Mod+Ctrl+G binds.
       (callPackage ../../../pkgs/memes {
         library = "${consts.home}/memes";
         sink = "soundboard-in";
+        klipyKey = config.sops.secrets.klipy-api.path;
       })
       # share-cast-target, which Vesktop's VcPresets runs to answer the Share Screen dialog unattended.
       (callPackage ../../../pkgs/share-cast-target { niri = config.programs.niri.package; })

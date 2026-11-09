@@ -195,14 +195,17 @@ together](#how-it-fits-together) for what that means when you copy one.
   [`modules/roles/workstation/display.nix`](modules/roles/workstation/display.nix) ·
   [255b483](https://github.com/HefKer/nixos-config/commit/255b483)
 - <a id="memes"></a>**A meme library with a picker.** `meme-add` saves a URL,
-  file or the clipboard into `~/memes` (Tenor and Giphy as looping mp4s), named
-  by tags asked through fuzzel, with the source URL and the image's OCR text in
-  hidden `.<file>.url` and `.<file>.txt` beside it. `meme-pick` shows thumbnails
+  file or the clipboard into `~/memes` (Tenor, Giphy and Klipy, via its API, as
+  looping gifs), named by tags asked through fuzzel, with the source URL and the
+  image's OCR text in hidden `.<file>.url` and `.<file>.txt` beside it; a
+  picture already in the library, by perceptual hash, asks before saving twice. `meme-pick` shows thumbnails
   in fuzzel, searches tags and that text, and
   copies the pick as a file reference that Discord, Signal and WhatsApp accept;
   Shift+Enter also pastes it into the focused window.
   `sound-add` and `sound-pick` do the same for sound clips, played into a
   PipeWire "Soundboard mic" that carries your voice too: a soundboard with no app.
+  `sound-volume CALL [YOU]` sets their volume in percent without a rebuild, as
+  does a DMS bar widget in the dotfiles.
   [`pkgs/memes/`](pkgs/memes/) ·
   [`audio.nix`](modules/roles/workstation/audio.nix) ·
   [b50e756](https://github.com/HefKer/nixos-config/commit/b50e756)
