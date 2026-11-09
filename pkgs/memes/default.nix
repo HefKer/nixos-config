@@ -227,6 +227,36 @@ let
       file=''${files[0]}
       ext=$(tr '[:upper:]' '[:lower:]' <<<"''${file##*.}")
 
+      # Over 20 MB is shrunk until it fits, so a pick still uploads to Discord.
+      limit=$((20 * 1000 * 1000))
+      if [ "$(stat -c %s "$file")" -gt "$limit" ]; then
+        mkdir -p "$tmp/small"
+        case $ext in
+          gif)
+            # Fewer frames, colours and pixels until it fits; a gif's size has no bitrate to aim at.
+            for w in 480 360 270 200; do
+              ffmpeg -loglevel error -y -i "$file" -vf "fps=15,scale='min(iw,$w)':-2:flags=lanczos,split[a][b];[a]palettegen=max_colors=128[p];[b][p]paletteuse=dither=bayer" \
+                "$tmp/small/media.gif" || fail "could not shrink $(basename "$file")"
+              [ "$(stat -c %s "$tmp/small/media.gif")" -gt "$limit" ] || break
+            done
+            ;;
+          mp4 | webm | mkv | mov)
+            # A video bitrate that lands at 90% of the limit over its length, after 96k of audio.
+            dur=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$file")
+            kbps=$(awk -v l="$limit" -v d="$dur" 'BEGIN { k = int(l * 8 * 0.9 / 1000 / d) - 96; print (k < 100 ? 100 : k) }')
+            ffmpeg -loglevel error -y -i "$file" -vf "scale='min(iw,1280)':-2" -c:v libx264 -preset slow \
+              -b:v "''${kbps}k" -maxrate "''${kbps}k" -bufsize "$((kbps * 2))k" -c:a aac -b:a 96k -movflags +faststart \
+              "$tmp/small/media.mp4" || fail "could not shrink $(basename "$file")"
+            ;;
+          *)
+            ffmpeg -loglevel error -y -i "$file" -vf "scale='min(iw,2560)':-2" -q:v 3 "$tmp/small/media.jpg" ||
+              fail "could not shrink $(basename "$file")"
+            ;;
+        esac
+        file=$(echo "$tmp"/small/media.*)
+        ext=''${file##*.}
+      fi
+
       if dup=$(find_dup "$file"); then
         uncue
         # A near match can be a different caption on the same template, so saving anyway stays one pick away.
