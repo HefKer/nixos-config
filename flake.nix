@@ -48,6 +48,10 @@
       url = "github:HefKer/vc-actions";
       flake = false;
     };
+    vc-shrink = {
+      url = "github:HefKer/vc-shrink";
+      flake = false;
+    };
 
     qutewarden = {
       url = "github:HefKer/qutewarden";

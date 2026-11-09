@@ -405,6 +405,7 @@
         "spicetify-nix": "spicetify-nix",
         "vc-actions": "vc-actions",
         "vc-presets": "vc-presets",
+        "vc-shrink": "vc-shrink",
         "zen-browser": "zen-browser"
       }
     },
@@ -544,6 +545,22 @@
       "original": {
         "owner": "HefKer",
         "repo": "vc-presets",
+        "type": "github"
+      }
+    },
+    "vc-shrink": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1794201729,
+        "narHash": "sha256-8J+Tf3taqo1wVwe1lQM3pgvI8O01Jy2CJ6+qQJxVvo8=",
+        "owner": "HefKer",
+        "repo": "vc-shrink",
+        "rev": "b2b606a56bef4e56073b4f4a8542be61999f36b4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "HefKer",
+        "repo": "vc-shrink",
         "type": "github"
       }
     },
