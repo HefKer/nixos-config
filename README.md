@@ -220,8 +220,8 @@ together](#how-it-fits-together) for what that means when you copy one.
 - <a id="vencord-userplugins"></a>**Vencord userplugins built into Vesktop.**
   `pkgs/vencord-userplugins` copies plugin sources (here
   [VcPresets](https://github.com/HefKer/vc-presets): one-command Go Live
-  presets, [VcActions](https://github.com/HefKer/vc-actions): slash
-  commands and hotkeys, and [VcShrink](https://github.com/HefKer/vc-shrink):
+  presets, [QuickActions](https://github.com/HefKer/vc-actions): slash
+  commands, hotkeys and a palette, and [VcShrink](https://github.com/HefKer/vc-shrink):
   attachments over Discord's upload limit shrunk with ffmpeg) into Vencord's `src/userplugins` and builds it, and
   Vesktop's `withSystemVencord` loads that instead of downloading Vencord.
   [`pkgs/vencord-userplugins/`](pkgs/vencord-userplugins/)
