@@ -46,6 +46,19 @@ in
       proton-vpn-cli
       starship
       yazi
+      # mimeapps.list opens directories with this: yazi.desktop is Terminal=true, which xdg-open runs with no terminal, so yazi dies at once.
+      (makeDesktopItem {
+        name = "yazi-wezterm";
+        desktopName = "Yazi (WezTerm)";
+        icon = "yazi";
+        exec = "wezterm start --always-new-process --class yazi -- yazi %f";
+        mimeTypes = [ "inode/directory" ];
+        categories = [
+          "System"
+          "FileManager"
+        ];
+        noDisplay = true;
+      })
       mediainfo # yazi's "Show media info" opener
       exiftool # yazi's "Show EXIF" opener
       python313Packages.youtube-transcript-api
