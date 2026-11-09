@@ -1,4 +1,9 @@
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 let
   cfg = config.custom.roles.workstation;
 in
@@ -39,11 +44,39 @@ in
             };
           }
           {
-            name = "libpipewire-module-loopback";
+            # DeepFilterNet then gain on the mic alone, so voice chat's noise filter can be off and stop eating the sounds.
+            name = "libpipewire-module-filter-chain";
             args = {
               "node.description" = "Mic into soundboard";
+              "media.name" = "Mic into soundboard";
+              "filter.graph" = {
+                nodes = [
+                  {
+                    type = "ladspa";
+                    name = "denoise";
+                    plugin = "${pkgs.deepfilternet}/lib/ladspa/libdeep_filter_ladspa.so";
+                    label = "deep_filter_mono";
+                    # How far noise is pushed down; 100 removes it outright, lower sounds more natural.
+                    control."Attenuation Limit (dB)" = 100.0;
+                  }
+                  {
+                    type = "builtin";
+                    name = "gain";
+                    label = "linear";
+                    # Output = input x Mult; 4.0 is +12 dB, set so friends no longer boost the mic (and the sounds with it) by 200%.
+                    control.Mult = 4.0;
+                  }
+                ];
+                links = [
+                  {
+                    output = "denoise:Audio Out";
+                    input = "gain:In";
+                  }
+                ];
+              };
               # Passive, so the real mic stays suspended until something records the soundboard mic.
               "capture.props" = {
+                "audio.rate" = 48000;
                 "node.name" = "soundboard-pass";
                 "node.passive" = true;
                 "stream.capture.sink" = false;
@@ -51,6 +84,7 @@ in
               "playback.props" = {
                 "node.name" = "soundboard-pass.out";
                 "node.passive" = true;
+                "audio.rate" = 48000;
                 "target.object" = "soundboard-in";
                 "node.dont-reconnect" = true;
               };
