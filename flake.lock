@@ -518,11 +518,11 @@
     "vc-actions": {
       "flake": false,
       "locked": {
-        "lastModified": 1794044186,
-        "narHash": "sha256-yqjTfhj9JvxqczUdo+IqhrIr4tp782zFlCqOG/vYwrM=",
+        "lastModified": 1794187133,
+        "narHash": "sha256-+YszF34cenOiAJm26gLqTnKeigARQABr0U7L7w8VrIQ=",
         "owner": "HefKer",
         "repo": "vc-actions",
-        "rev": "4951fe5a68ce4634ed9f8c53eacef5fe1e98ba33",
+        "rev": "dacd9458ee1ab3ef7a9db445c3c2dc48653c177f",
         "type": "github"
       },
       "original": {
