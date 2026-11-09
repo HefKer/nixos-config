@@ -406,7 +406,8 @@
         "vc-actions": "vc-actions",
         "vc-presets": "vc-presets",
         "vc-shrink": "vc-shrink",
-        "zen-browser": "zen-browser"
+        "zen-browser": "zen-browser",
+        "vpn-confinement": "vpn-confinement"
       }
     },
     "sops-nix": {
@@ -580,6 +581,21 @@
       "original": {
         "owner": "0xc000022070",
         "repo": "zen-browser-flake",
+        "type": "github"
+      }
+    },
+    "vpn-confinement": {
+      "locked": {
+        "lastModified": 1791310298,
+        "narHash": "sha256-SpqEEuyrkzTqjIHwHrZE+Rs6ez2tzIeYkSY67zp6fcQ=",
+        "owner": "Maroka-chan",
+        "repo": "VPN-Confinement",
+        "rev": "cc37bcf5000e237709e725a9cda010a5cbce3111",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Maroka-chan",
+        "repo": "VPN-Confinement",
         "type": "github"
       }
     }

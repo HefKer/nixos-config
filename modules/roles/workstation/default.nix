@@ -20,6 +20,7 @@ in
     ./stale-apps-notify.nix
     ./storage.nix
     ./syncthing.nix
+    ./vpn.nix
     ./gaming
     ./local-ai
     ./virtualization
