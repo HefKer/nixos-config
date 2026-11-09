@@ -30,6 +30,8 @@ in
 
   # Read-only osu! gacha API key for ~/dev/_osu/osugacha; only this host's secrets file holds it.
   sops.secrets.osugacha-testing-api.owner = consts.username;
+  # Second osu! gacha API key for the same project.
+  sops.secrets.osugacha-api2.owner = consts.username;
   # osu! OAuth app client for osugacha's `osu-login` (reads osu! mutuals).
   sops.secrets.osu-client-id.owner = consts.username;
   sops.secrets.osu-client-secret.owner = consts.username;
