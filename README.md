@@ -196,8 +196,11 @@ together](#how-it-fits-together) for what that means when you copy one.
   [255b483](https://github.com/HefKer/nixos-config/commit/255b483)
 - <a id="memes"></a>**A meme library with a picker.** `meme-add` saves a URL,
   file or the clipboard into `~/memes` (Tenor and Giphy as looping mp4s), named
-  by tags asked through fuzzel. `meme-pick` shows thumbnails in fuzzel and
-  copies the pick as a file reference that Discord, Signal and WhatsApp accept.
+  by tags asked through fuzzel, with the source URL and the image's OCR text in
+  hidden `.<file>.url` and `.<file>.txt` beside it. `meme-pick` shows thumbnails
+  in fuzzel, searches tags and that text, and
+  copies the pick as a file reference that Discord, Signal and WhatsApp accept;
+  Shift+Enter also pastes it into the focused window.
   `sound-add` and `sound-pick` do the same for sound clips, played into a
   PipeWire "Soundboard mic" that carries your voice too: a soundboard with no app.
   [`pkgs/memes/`](pkgs/memes/) ·
