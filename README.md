@@ -198,10 +198,11 @@ together](#how-it-fits-together) for what that means when you copy one.
   file or the clipboard into `~/memes` (Tenor, Giphy and Klipy, via its API, as
   looping gifs), named by tags asked through fuzzel, with the source URL and the
   image's OCR text in hidden `.<file>.url` and `.<file>.txt` beside it; a
-  picture already in the library, by perceptual hash, asks before saving twice. Anything over 20 MB is shrunk to fit a Discord upload. `meme-pick` shows thumbnails
+  picture already in the library, by perceptual hash, asks before saving twice. `meme-pick` shows thumbnails
   in fuzzel, searches tags and that text, and
   copies the pick as a file reference that Discord, Signal and WhatsApp accept;
-  Shift+Enter also pastes it into the focused window.
+  Shift+Enter also pastes it into the focused window; a pick over 20 MB goes as a
+  shrunk copy that fits a Discord upload.
   `sound-add` and `sound-pick` do the same for sound clips, played into a
   PipeWire "Soundboard mic" that carries your voice too: a soundboard with no app.
   `sound-volume CALL [YOU]` sets their volume in percent without a rebuild, as

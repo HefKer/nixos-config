@@ -82,6 +82,44 @@ let
         }
         END { if (best == "") exit 1; print best }'
     }
+    # Prints $1, or over 20 MB a copy in the cache shrunk until it fits a Discord upload; the library keeps the original.
+    small() {
+      local limit=$((20 * 1000 * 1000)) dir out w dur kbps ext
+      if [ "$(stat -c %s "$1")" -le "$limit" ]; then
+        printf '%s' "$1"
+        return
+      fi
+      dir=''${XDG_CACHE_HOME:-$HOME/.cache}/memes/small
+      mkdir -p "$dir"
+      ext=$(tr '[:upper:]' '[:lower:]' <<<"''${1##*.}")
+      case $ext in
+        gif) out="$dir/$(basename "$1")" ;;
+        mp4 | webm | mkv | mov) out="$dir/$(basename "''${1%.*}").mp4" ;;
+        *) out="$dir/$(basename "''${1%.*}").jpg" ;;
+      esac
+      if [ "$1" -nt "$out" ]; then
+        notify-send -a memes -t 3000 "Shrinking meme" "$(basename "$1") is over 20 MB" || true
+        case $ext in
+          gif)
+            # Fewer frames, colours and pixels until it fits; a gif's size has no bitrate to aim at.
+            for w in 480 360 270 200; do
+              ffmpeg -loglevel error -y -i "$1" -vf "fps=15,scale='min(iw,$w)':-2:flags=lanczos,split[a][b];[a]palettegen=max_colors=128[p];[b][p]paletteuse=dither=bayer" \
+                "$out" || return 1
+              [ "$(stat -c %s "$out")" -gt "$limit" ] || break
+            done
+            ;;
+          mp4 | webm | mkv | mov)
+            # A video bitrate that lands at 90% of the limit over its length, after 96k of audio.
+            dur=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$1")
+            kbps=$(awk -v l="$limit" -v d="$dur" 'BEGIN { k = int(l * 8 * 0.9 / 1000 / d) - 96; print (k < 100 ? 100 : k) }')
+            ffmpeg -loglevel error -y -i "$1" -vf "scale='min(iw,1280)':-2" -c:v libx264 -preset slow \
+              -b:v "''${kbps}k" -maxrate "''${kbps}k" -bufsize "$((kbps * 2))k" -c:a aac -b:a 96k -movflags +faststart "$out" || return 1
+            ;;
+          *) ffmpeg -loglevel error -y -i "$1" -vf "scale='min(iw,2560)':-2" -q:v 3 "$out" || return 1 ;;
+        esac
+      fi
+      printf '%s' "$out"
+    }
     # The meme's text, read once and kept beside it for meme-pick to search: .<name>.<ext>.txt, one lowercase line.
     ocr() {
       local t f
@@ -227,36 +265,6 @@ let
       file=''${files[0]}
       ext=$(tr '[:upper:]' '[:lower:]' <<<"''${file##*.}")
 
-      # Over 20 MB is shrunk until it fits, so a pick still uploads to Discord.
-      limit=$((20 * 1000 * 1000))
-      if [ "$(stat -c %s "$file")" -gt "$limit" ]; then
-        mkdir -p "$tmp/small"
-        case $ext in
-          gif)
-            # Fewer frames, colours and pixels until it fits; a gif's size has no bitrate to aim at.
-            for w in 480 360 270 200; do
-              ffmpeg -loglevel error -y -i "$file" -vf "fps=15,scale='min(iw,$w)':-2:flags=lanczos,split[a][b];[a]palettegen=max_colors=128[p];[b][p]paletteuse=dither=bayer" \
-                "$tmp/small/media.gif" || fail "could not shrink $(basename "$file")"
-              [ "$(stat -c %s "$tmp/small/media.gif")" -gt "$limit" ] || break
-            done
-            ;;
-          mp4 | webm | mkv | mov)
-            # A video bitrate that lands at 90% of the limit over its length, after 96k of audio.
-            dur=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$file")
-            kbps=$(awk -v l="$limit" -v d="$dur" 'BEGIN { k = int(l * 8 * 0.9 / 1000 / d) - 96; print (k < 100 ? 100 : k) }')
-            ffmpeg -loglevel error -y -i "$file" -vf "scale='min(iw,1280)':-2" -c:v libx264 -preset slow \
-              -b:v "''${kbps}k" -maxrate "''${kbps}k" -bufsize "$((kbps * 2))k" -c:a aac -b:a 96k -movflags +faststart \
-              "$tmp/small/media.mp4" || fail "could not shrink $(basename "$file")"
-            ;;
-          *)
-            ffmpeg -loglevel error -y -i "$file" -vf "scale='min(iw,2560)':-2" -q:v 3 "$tmp/small/media.jpg" ||
-              fail "could not shrink $(basename "$file")"
-            ;;
-        esac
-        file=$(echo "$tmp"/small/media.*)
-        ext=''${file##*.}
-      fi
-
       if dup=$(find_dup "$file"); then
         uncue
         # A near match can be a different caption on the same template, so saving anyway stays one pick away.
@@ -281,6 +289,7 @@ let
       ffmpeg
       findutils
       fuzzel
+      gawk
       libnotify
       tesseract
       wl-clipboard
@@ -315,7 +324,8 @@ let
       ) || rc=$?
       [ "$rc" -eq 0 ] || [ "$rc" -eq 10 ] || exit 0
       # A file reference, not the bytes: the one form Discord, Signal and WhatsApp all take for every format.
-      printf 'file://%s\r\n' "''${files[i]}" | wl-copy --type text/uri-list
+      pick=$(small "''${files[i]}") || pick=''${files[i]}
+      printf 'file://%s\r\n' "$pick" | wl-copy --type text/uri-list
       if [ "$rc" -eq 10 ]; then
         # Give focus a moment to return from fuzzel to the window it was over.
         sleep 0.15
