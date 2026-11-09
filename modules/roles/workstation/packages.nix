@@ -151,7 +151,6 @@ in
       inputs.pyroclear.packages.${stdenv.hostPlatform.system}.default
 
       # --- browsers ---
-      brave
       inputs.helium.packages.${stdenv.hostPlatform.system}.default
       inputs.zen-browser.packages.${stdenv.hostPlatform.system}.default
 

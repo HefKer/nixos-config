@@ -121,7 +121,7 @@ in
         # Change Java runtimes available to Prism Launcher
         jdks = [
           graalvmPackages.graalvm-ce
-          zulu8
+          (zulu8.override { gtkSupport = false; }) # gtk2 deprecated; MC uses LWJGL, not Swing GTK L&F
           zulu17
           zulu
         ];

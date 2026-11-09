@@ -3,6 +3,15 @@
 {
   nixpkgs.config.allowUnfree = true;
 
+  # cargo-setup-hook sets AWS_LC_SYS_USE_SYSTEM=1 but tectonic lacks aws-lc in buildInputs, so its build panics; drop once nixpkgs fixes it
+  nixpkgs.overlays = [
+    (final: prev: {
+      tectonic-unwrapped = prev.tectonic-unwrapped.overrideAttrs (old: {
+        buildInputs = (old.buildInputs or [ ]) ++ [ final.aws-lc ];
+      });
+    })
+  ];
+
   environment.systemPackages = with pkgs; [
     ripgrep
     fd
