@@ -8,6 +8,7 @@ codebase. Layout is **single-context**.
 - **`GLOSSARY.md`** at the repo root: the glossary for how system configuration, user
   configuration, and hand-edited dotfiles relate.
 - **`docs/adr/`**: read the ADRs that touch the area you're about to work in.
+- **The sibling repo `~/dots/`**, its `GLOSSARY.md` and `docs/adr/`, for app config content: binds, keymaps, themes. A decision lives in the repo where the thing it constrains is edited, and cross-references use `~/` paths.
 
 If a file doesn't exist, proceed silently. `/domain-modeling` (reached via
 `/grill-with-docs` and `/improve-codebase-architecture`) creates them lazily, when a term or
