@@ -234,6 +234,14 @@ together](#how-it-fits-together) for what that means when you copy one.
   lists all windows across workspaces and monitors in fuzzel, most recently
   focused first with their app icons, searchable by title or app-id, and
   focuses the pick. [`pkgs/window-pick/`](pkgs/window-pick/)
+- <a id="bind-palette"></a>**One search over every scope's binds.**
+  `bind-palette` gathers niri's and DMS's binds (`dms keybinds show niri`),
+  the desktop leader's wlr-which-key menu, qutebrowser's effective binds (asked
+  of the running browser over IPC), nvim's global maps and kanata's held
+  layers into one fuzzel list, each trigger beside its action, so searching
+  "backspace" finds `Fn1+P`. Window-manager, shell and leader rows run; app
+  rows copy their trigger. `bind-palette list` prints the rows as TSV.
+  [`pkgs/bind-palette/`](pkgs/bind-palette/)
 - <a id="window-volume"></a>**Volume keys for the focused window.**
   `window-volume up|down|mute` finds the PipeWire streams of the app in niri's
   focused window, including browsers' and Electron's child processes, and steps
