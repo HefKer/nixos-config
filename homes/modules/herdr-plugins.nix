@@ -17,7 +17,10 @@ let
   sync = pkgs.callPackage ../../pkgs/herdr-plugins-sync {
     plugins = lib.attrValues plugins;
     # Kept in the dotfiles and linked in place, so editing them needs no rebuild.
-    localPlugins = map (name: "${dotfilesRoot}/herdr/plugins/${name}") [ "agent-focus" ];
+    localPlugins = map (name: "${dotfilesRoot}/herdr/plugins/${name}") [
+      "agent-focus"
+      "agent-notify"
+    ];
   };
   # herdr-lazygit's AI commit picker, for lazygit outside herdr; it shares the plugin's ai-backend.conf.
   lazygitAiCommit = pkgs.writeShellScriptBin "lazygit-ai-commit" ''
