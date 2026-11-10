@@ -17,6 +17,7 @@ in
     ./modules/health.nix
   ] # default to CLI group
   ++ lib.optionals isWorkstation [
+    ./modules/alarm.nix
     ./modules/chromium.nix
     ./modules/gui.nix
     ./modules/kanata-keymap.nix

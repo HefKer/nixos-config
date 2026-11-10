@@ -235,6 +235,16 @@ together](#how-it-fits-together) for what that means when you copy one.
   or mutes only those, showing the new level in a DMS toast, which
   do-not-disturb leaves alone.
   [`pkgs/window-volume/`](pkgs/window-volume/)
+- <a id="alarm"></a>**Timers and alarms that follow you between machines.**
+  `alarm 10m tea` or `alarm 7:30 standup` (also from a fuzzel prompt on Mod+A)
+  writes one small file per alarm into a Syncthing folder; on each host a path
+  unit mirrors those files as transient systemd calendar timers, which still
+  ring after a suspend. Ringing loops a sound under a critical notification
+  with Dismiss and Snooze. Dismissing on one machine deletes the file, which
+  silences the other, and alarms missed while a machine was off are reported
+  rather than rung. `alarm ls --json` feeds a DMS bar countdown in the dotfiles.
+  [`pkgs/alarm/`](pkgs/alarm/) ·
+  [`alarm.nix`](homes/modules/alarm.nix)
 - <a id="removable-drives"></a>**Removable drives mounted as you.** udisks2
   and a udiskie user service, so FAT and exFAT files aren't owned by root.
   [`modules/roles/workstation/storage.nix`](modules/roles/workstation/storage.nix),

@@ -74,9 +74,10 @@ in
         "(?d)niri/.config/niri/config.kdl.backup*"
         "(?d)DankMaterialShell/.config/DankMaterialShell/.firstlaunch"
         "(?d)DankMaterialShell/.config/DankMaterialShell/.changelog-*"
-        "// lidAwake and soundboard are local plugins kept in git, not clones"
+        "// lidAwake, soundboard and alarms are local plugins kept in git, not clones"
         "!DankMaterialShell/.config/DankMaterialShell/plugins/lidAwake"
         "!DankMaterialShell/.config/DankMaterialShell/plugins/soundboard"
+        "!DankMaterialShell/.config/DankMaterialShell/plugins/alarms"
         "// DMS plugin clones: not deletable, re-cloning isn't free"
         "DankMaterialShell/.config/DankMaterialShell/plugins"
         "// fish universal variables hold machine-local paths"
@@ -132,6 +133,12 @@ in
       ];
       versioning = trashcan 90;
       ignorePerms = true;
+    };
+    # One file per alarm, read by the alarm command on each host.
+    alarms = {
+      id = "ha1jq-rn4g0";
+      path = ".local/state/alarms";
+      peers = workstations;
     };
     Downloads = {
       id = "yftau-peu5g";
