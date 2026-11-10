@@ -134,6 +134,11 @@ together](#how-it-fits-together) for what that means when you copy one.
   [`homes/modules/herdr-plugins.nix`](homes/modules/herdr-plugins.nix),
   [`pkgs/herdr-plugins-sync/`](pkgs/herdr-plugins-sync/) ·
   [df23f3c](https://github.com/HefKer/nixos-config/commit/df23f3c)
+- <a id="collie-service"></a>**Collie's bridge as a Home Manager service.**
+  `collie start` writes a unit pinned to one store path, so it kept running
+  the old version after every upgrade. This one follows the package and finds
+  the tailnet hosts from `tailscale status` at each start.
+  [`homes/modules/collie.nix`](homes/modules/collie.nix)
 - <a id="claude-second-account"></a>**A second Claude Code account sharing
   your setup.** Links the read-only pieces into a second config dir: skills
   and agents from `~/.claude`, commands, keybindings and `CLAUDE.md` straight
