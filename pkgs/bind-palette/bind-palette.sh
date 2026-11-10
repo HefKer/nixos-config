@@ -5,7 +5,8 @@
 #   bind-palette        pick in fuzzel
 #   bind-palette list   print the rows as TSV: scope, trigger, action, command
 
-leader_trigger="Mod+Ctrl+Space"
+# Every reader's rows go through this: tabs and newlines inside a field become spaces, and no escaping, which @tsv adds and the shell would keep.
+tsv='map(. // "" | tostring | gsub("[\t\n]"; " ")) | join("\t")'
 leader_config="${XDG_CONFIG_HOME:-$HOME/.config}/wlr-which-key/config.yaml"
 
 # niri prints spawn arguments shell-quoted, and spawn-sh's script as one quoted string.
@@ -19,26 +20,27 @@ niri_rows() {
         .key,
         (if (.desc // "") == "" then .action else .desc end),
         $cmd ]
-    | @tsv'
+    | '"$tsv"
 }
 
-# Every leaf of the leader's menu, its keys joined after the leader's own trigger.
+# Every leaf of the leader's menu, its keys joined after the trigger niri binds to wlr-which-key.
 leader_rows() {
   [[ -r $leader_config ]] || return 0
-  yq -o=json '.menu' "$leader_config" | jq -r --arg t "$leader_trigger" '
+  local trigger
+  trigger=$(dms keybinds show niri | jq -r '[.binds[][] | select(.action | test("^spawn wlr-which-key"))][0].key // "Mod+Ctrl+Space"')
+  yq -o=json '.menu' "$leader_config" | jq -r --arg t "$trigger" '
     def walk_menu($keys; $path):
       .[] | (.key | if type == "array" then .[0] else . end) as $k | .desc as $d
       | if .submenu then .submenu | walk_menu($keys + [$k]; $path + [$d | ltrimstr("+")])
         else ["leader", ([$t] + $keys + [$k] | join(" ")), (($path + [$d]) | join(" › ")), .cmd] end;
-    walk_menu([]; []) | @tsv'
+    walk_menu([]; []) | '"$tsv"
 }
 
 # qutebrowser's effective binds, defaults merged with binds.py, asked of the running
-# instance; a closed browser is left closed and drops out of the list.
+# instance; a closed browser is left closed (a crash leaves its IPC socket behind, so the process is checked).
 qutebrowser_rows() {
-  local out sockets
-  sockets=("${XDG_RUNTIME_DIR:-/run/user/$UID}"/qutebrowser/ipc-*)
-  [[ -S ${sockets[0]} ]] || return 0
+  local out
+  pgrep -u "$UID" -f '^\S*python\S* \S*qutebrowser' >/dev/null || return 0
   out=$(mktemp)
   # shellcheck disable=SC2016
   qutebrowser ":debug-pyeval -q open('$out.tmp', 'w').write(__import__('json').dumps({m: {str(k): v for k, v in __import__('qutebrowser.config.config', fromlist=['c']).key_instance.get_bindings_for(m).items()} for m in ['normal', 'insert', 'caret', 'passthrough']})) and __import__('os').rename('$out.tmp', '$out.json')" >/dev/null 2>&1
@@ -47,7 +49,7 @@ qutebrowser_rows() {
     sleep 0.1
   done
   [[ -s $out.json ]] && jq -r 'to_entries[] | .key as $m | .value | to_entries[]
-    | ["qutebrowser", (if $m == "normal" then .key else "\($m): \(.key)" end), .value, ""] | @tsv' "$out.json"
+    | ["qutebrowser", (if $m == "normal" then .key else "\($m): \(.key)" end), .value, ""] | '"$tsv" "$out.json"
   rm -f "$out" "$out.json" "$out.tmp"
 }
 
@@ -55,7 +57,7 @@ qutebrowser_rows() {
 nvim_rows() {
   nvim --headless -i NONE +'lua
     local rows = {}
-    for _, m in ipairs({ "n", "x", "i", "o" }) do
+    for _, m in ipairs({ "n", "x", "i", "o", "t", "c" }) do
       for _, k in ipairs(vim.api.nvim_get_keymap(m)) do
         if k.desc and k.desc ~= "" then
           local lhs = vim.fn.keytrans(k.lhs)
@@ -66,8 +68,7 @@ nvim_rows() {
     io.stdout:write(table.concat(rows, "\n") .. "\n")' +qa 2>/dev/null
 }
 
-# kanata's held layers: Fn1 is Caps held, Fn2 is Tab inside Fn1. Aliases (@...) and
-# keys mapped to themselves are skipped.
+# kanata's home-row mods and held layers: Fn1 is Caps held, Fn2 is Tab inside Fn1. Aliases (@...) and keys mapped to themselves are skipped.
 kanata_rows() {
   [[ -r $kanata_keymap ]] || return 0
   awk '
@@ -75,10 +76,21 @@ kanata_rows() {
       split("bspc Backspace del Delete ret Enter esc Escape grv Grave ins Insert pgup PageUp pgdn PageDown " \
             "home Home end End lft Left left Left rght Right up Up down Down prnt PrintScreen caps CapsLock " \
             "pp Play/Pause prev PreviousTrack next NextTrack micmute MicMute mrgt MouseRight lrld ReloadKanata " \
-            "menu Menu tab Tab spc Space ralt RightAlt rmet RightSuper rctl RightCtrl", n, " ")
-      for (i = 1; i < length(n); i += 2) name[n[i]] = n[i + 1]
+            "menu Menu tab Tab spc Space ralt RightAlt rmet RightSuper rctl RightCtrl " \
+            "lmet Super lalt Alt lctl Ctrl lsft Shift rsft Shift", pairs, " ")
+      for (i = 1; i < length(pairs); i += 2) name[pairs[i]] = pairs[i + 1]
     }
     function key(k) { return (k in name) ? name[k] : toupper(k) }
+    # A home-row mod alias: hra (t! hrm a lmet $left-mods), several per line.
+    /\(t! hrm / {
+      line = $0
+      while (match(line, /\(t! hrm [^ ]+ [^ ]+/)) {
+        split(substr(line, RSTART + 8, RLENGTH - 8), hr, " ")
+        printf "kanata\tHold %s\t%s\t\n", key(hr[1]), key(hr[2])
+        line = substr(line, RSTART + RLENGTH)
+      }
+      next
+    }
     /^\(deflayermap \(fn1\)/ { layer = "Fn1"; next }
     /^\(deflayermap \(fn2\)/ { layer = "Fn1+Tab"; next }
     /^\(deflayermap/ { layer = ""; next }
@@ -103,11 +115,18 @@ list() {
 }
 
 pick() {
-  local rows idx scope trigger action cmd
+  local rows idx row scope trigger action cmd
   rows=$(list)
   idx=$(awk -F'\t' '{ printf "%-12s %-28s %s\n", "[" $1 "]", $2, $3 }' <<<"$rows" |
     fuzzel --dmenu --index --prompt "bind › " --width 90) || return 0
-  IFS=$'\t' read -r scope trigger action cmd < <(sed -n "$((idx + 1))p" <<<"$rows")
+  # Typed text matching no row comes back as -1.
+  ((idx >= 0)) || return 0
+  row=$(sed -n "$((idx + 1))p" <<<"$rows")
+  # cut, not read: read collapses runs of tabs, which shifts an empty field.
+  scope=$(cut -f1 <<<"$row")
+  trigger=$(cut -f2 <<<"$row")
+  action=$(cut -f3 <<<"$row")
+  cmd=$(cut -f4 <<<"$row")
   if [[ -n $cmd ]]; then
     # Detached, as niri's own spawn runs it.
     setsid -f sh -c "$cmd" >/dev/null 2>&1
