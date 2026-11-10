@@ -1,6 +1,6 @@
 ---
 name: find-software
-description: Find, compare and shortlist software against the user's preferences, ending in a cited verdict in docs/research/. Use when the user wants an app found, replaced, a lighter alternative to one, a self-hosted service picked, or an issue's candidate tools judged.
+description: Find, compare and shortlist software against the user's preferences, ending in a cited verdict in docs/research/. Use when the user wants an app found, replaced, a lighter alternative to one, a self-hosted service picked, an issue's candidate tools judged, or adopt-vs-build weighed.
 ---
 
 Choose software for the user the same way every time: **dealbreakers** first, then the
@@ -17,6 +17,11 @@ Choose software for the user the same way every time: **dealbreakers** first, th
    - Search wide: nixpkgs (mcp-nixos), upstream repos (commit activity, open issues),
      awesome-* lists, AlternativeTo, r/selfhosted, r/unixporn, HN threads, and Rui's config
      at `/home/hefker/nixos/reference/` (a tie-breaker, never wired into the flake).
+   - On the desktop, also the DMS plugin registry (`dms plugins browse`) and the plugins
+     already under `~/dots/DankMaterialShell/.config/DankMaterialShell/plugins/`.
+   - One candidate is always **build our own**: a script or package glued from tools already
+     installed, with a DMS widget where it needs a face. It runs the same dealbreakers, and
+     its price is upkeep: the lines of code, and what breaks when a dependency changes.
    - YouTube is **corroboration**: `yt-dlp "ytsearch10:<query>" --flat-playlist --print
      "%(title)s|%(upload_date)s|%(view_count)s|%(url)s"`, then `youtube_transcript_api <id>`
      for the top reviews and demos. Use it for how the app feels and works day to day,

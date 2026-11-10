@@ -47,6 +47,18 @@ Highest first.
 7. **Fits the theme and vim-style binds.**
 8. **Maintained and popular**, with a good community and developers.
 
+## Build vs. adopt
+
+**Build our own** wins when the job is small glue between tools already in use and no
+candidate ranks well on the soft ranking. The alarms are the example: GNOME Clocks and KClock
+fell short on sync, keyboard speed and weight, while ~270 lines over systemd, Syncthing and
+fuzzel gave synced, agent-drivable alarms with a bar widget (HefKer/nixos-issues#107).
+**Adopt** when the job is large or security-bearing (crypto, network protocols, media codecs),
+or when an existing app already ranks well.
+
+A **DMS plugin** is layer-shell and themed, so it ranks with a keyboard-driven GUI; one that
+fronts a CLI also counts as agent-drivable.
+
 ## Cloud dependency
 
 Always state what breaks if the vendor's cloud disappears. Acceptable when the cloud is the
