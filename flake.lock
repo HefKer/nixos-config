@@ -520,11 +520,11 @@
     "vc-actions": {
       "flake": false,
       "locked": {
-        "lastModified": 1794262863,
-        "narHash": "sha256-uwmpypbFuxuJQmq+Gf+SwkXOQzblDLx9Zum+sYllhGU=",
+        "lastModified": 1794268648,
+        "narHash": "sha256-wZ8YnwX4EYtRcH1LlJzE9Hc0BDJEjxeBa1v39gzMaBQ=",
         "owner": "HefKer",
         "repo": "vc-actions",
-        "rev": "2d9250eb9b1a784fda37295489e0eb36fbd9bacb",
+        "rev": "e066515f0b2cf00ecd308442da049561728a6f98",
         "type": "github"
       },
       "original": {
