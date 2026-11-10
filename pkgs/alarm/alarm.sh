@@ -157,15 +157,17 @@ cmd_snooze() {
 cmd_prompt() {
   local out id label choice line desc
   # Exact matching, so typing "10m tea" doesn't fuzzy-match a pending "tea"; Shift+Enter always sets.
+  # No --accept-nth: fuzzel applies it to typed text too, and a line with no 2nd column comes out as a literal "{2}".
   out=$(
     while IFS=$'\t' read -r r_id r_at r_label; do
       printf '%s  ·  %s\t%s\n' "$r_label" "$(describe "$r_at")" "$r_id"
-    done < <(rows) | fuzzel --dmenu --match-mode exact --with-nth 1 --accept-nth 2 \
+    done < <(rows) | fuzzel --dmenu --match-mode exact --with-nth 1 \
       --prompt "alarm> " --placeholder "10m tea · 7:30 standup · pick one to cancel" --width 50
   ) || exit 0
   [ -n "$out" ] || exit 0
-  if [[ $out =~ ^[0-9a-f]{8}$ ]] && load "$out"; then
-    id=$out
+  # A picked row ends in a tab and its id; typed text has no tab.
+  if [[ $out =~ $'\t'([0-9a-f]{8})$ ]] && load "${BASH_REMATCH[1]}"; then
+    id=${BASH_REMATCH[1]}
     choice=$(printf 'Cancel\nSnooze 5 min\nSnooze 15 min\n' |
       fuzzel --dmenu --only-match --index --prompt "$label> " --lines 3 --width 40) || exit 0
     case $choice in
