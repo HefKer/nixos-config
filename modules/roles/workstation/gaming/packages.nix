@@ -96,7 +96,6 @@ in
     environment.systemPackages = with pkgs; [
       # Gaming utils/deps
       mangohud
-      xremap
       wine
       me3
 

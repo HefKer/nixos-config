@@ -12,14 +12,24 @@ let
     "osu!"
     "steam_app_0"
   ];
+  # Its Steam id, and the class xremap matched it by.
+  stardew = [
+    "steam_app_413150"
+    "Stardew Valley"
+  ];
   # Games outside Steam, which have no steam_app_ id.
   nonSteamGames = [ ];
-  # App-id regexes (whole app-id) to kanata layers; the first match wins, so osu's steam_app_0 comes before Steam's.
+  # App-id regexes (whole app-id) to kanata layers; the first match wins, so osu's steam_app_0 and Stardew come before Steam's.
   layers =
     map (id: [
       (lib.escapeRegex id)
       "passthrough"
     ]) osu
+    # Native under Steam, so its id may be either; it needs its own layer for the animation cancel on Space.
+    ++ map (id: [
+      (lib.escapeRegex id)
+      "stardew"
+    ]) stardew
     ++ [
       [
         "steam_app_.*"

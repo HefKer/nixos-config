@@ -88,6 +88,7 @@ let
     "xdg-desktop-portal-termfilechooser/.config/xdg-desktop-portal-termfilechooser"
     # The directory takes `ya pkg`'s package.toml, plugins and flavors, so installed packages land in the repo.
     "yazi/.config/yazi"
+    "yt-dlp/.config/yt-dlp"
     {
       source = "scripts/qute-sandbox";
       target = ".local/bin/qute-sandbox";
@@ -95,6 +96,10 @@ let
     {
       source = "scripts/session-find";
       target = ".local/bin/session-find";
+    }
+    {
+      source = "scripts/ytdl";
+      target = ".local/bin/ytdl";
     }
   ];
 

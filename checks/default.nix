@@ -52,8 +52,10 @@ let
       ".config/xdg-desktop-portal-termfilechooser" =
         "xdg-desktop-portal-termfilechooser/.config/xdg-desktop-portal-termfilechooser";
       ".config/yazi" = "yazi/.config/yazi";
+      ".config/yt-dlp" = "yt-dlp/.config/yt-dlp";
       ".local/bin/qute-sandbox" = "scripts/qute-sandbox";
       ".local/bin/session-find" = "scripts/session-find";
+      ".local/bin/ytdl" = "scripts/ytdl";
       ".local/share/qutebrowser/userscripts" = "qutebrowser/.local/share/qutebrowser/userscripts";
     };
     lenovo = {
@@ -99,8 +101,10 @@ let
       ".config/xdg-desktop-portal-termfilechooser" =
         "xdg-desktop-portal-termfilechooser/.config/xdg-desktop-portal-termfilechooser";
       ".config/yazi" = "yazi/.config/yazi";
+      ".config/yt-dlp" = "yt-dlp/.config/yt-dlp";
       ".local/bin/qute-sandbox" = "scripts/qute-sandbox";
       ".local/bin/session-find" = "scripts/session-find";
+      ".local/bin/ytdl" = "scripts/ytdl";
       ".local/share/qutebrowser/userscripts" = "qutebrowser/.local/share/qutebrowser/userscripts";
     };
   };
