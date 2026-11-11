@@ -461,15 +461,17 @@ let
       sounds=${lib.escapeShellArg sounds}
       ${clip}
 
-      # Pastes $1 into the focused window after $2 seconds, as an .ogg so Discord shows its player; makes that the repeat's replay.
-      paste() {
-        local dir out
-        dir=''${XDG_CACHE_HOME:-$HOME/.cache}/memes/ogg
-        out="$dir/$(basename "''${1%.*}").ogg"
-        if [ "$1" -nt "$out" ]; then
-          mkdir -p "$dir"
-          # The .opus is already Ogg, so a stream copy only renames the container.
-          ffmpeg -loglevel error -y -i "$1" -map 0:a -c copy "$out" || { rm -f -- "$out"; out=$1; }
+      # Pastes $1 into the focused window after $2 seconds, an .opus as an .ogg so Discord shows its player; makes that the repeat's replay.
+      paste_sound() {
+        local dir out=$1
+        if [[ $1 == *.opus ]]; then
+          dir=''${XDG_CACHE_HOME:-$HOME/.cache}/memes/ogg
+          out="$dir/$(basename "''${1%.*}").ogg"
+          if [ "$1" -nt "$out" ]; then
+            mkdir -p "$dir"
+            # An .opus is already Ogg inside, so the stream copy changes only the extension Discord judges by.
+            ffmpeg -loglevel error -y -i "$1" -map 0:a -c copy "$out" || { rm -f -- "$out"; out=$1; }
+          fi
         fi
         clip "$out" --paste "$2"
         repeat record sound-pick --paste "$1"
@@ -500,7 +502,7 @@ let
           notify-send -a memes "Sound gone" "$(basename "$2") is no longer in the library"
           exit 0
         fi
-        if [ "$1" = --play ]; then play "$2"; else paste "$2" 0.4; fi
+        if [ "$1" = --play ]; then play "$2"; else paste_sound "$2" 0.4; fi
         exit 0
       fi
       # Newest first, so what was just added is on top before anything is typed.
@@ -523,7 +525,7 @@ let
       ) || rc=$?
       case $rc in
         0) play "''${files[i]}" ;;
-        10) paste "''${files[i]}" 0.15 ;;
+        10) paste_sound "''${files[i]}" 0.15 ;;
       esac
     '';
   };
