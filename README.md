@@ -370,6 +370,12 @@ together](#how-it-fits-together) for what that means when you copy one.
   config by a path unit, which Privoxy reloads without a restart. Works for
   QtWebEngine, which ignores PAC files.
   [`homes/modules/privoxy.nix`](homes/modules/privoxy.nix)
+- <a id="proxy-watch"></a>**Notice sites blocked on the VPN exit.** Privoxy
+  logs connections at `debug 2`, and a user service follows its journal for
+  failed SOCKS hops. Each failing host is retested through Proton and directly,
+  at most once an hour; one that fails only through Proton gets a notification
+  whose "Go direct" button appends it to the direct list.
+  [`homes/modules/privoxy.nix`](homes/modules/privoxy.nix)
 
 ### Secret management
 

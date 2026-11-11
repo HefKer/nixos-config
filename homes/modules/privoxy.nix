@@ -17,6 +17,7 @@ let
       config="$XDG_RUNTIME_DIR/privoxy.conf"
       {
         echo "listen-address 127.0.0.1:8118"
+        echo "debug 2"
         echo "forward-socks5t / ${socks} ."
         echo "forward localhost ."
         echo "forward .ts.net ."
@@ -53,6 +54,35 @@ in
         Restart = "on-failure";
       };
       Install.WantedBy = [ "default.target" ];
+    };
+
+    proxy-watch = {
+      Unit = {
+        Description = "Notify when a site is blocked on the Proton exit, offering the direct list";
+        PartOf = [ "privoxy.service" ];
+        After = [ "privoxy.service" ];
+      };
+      Service = {
+        ExecStart = "%h/.local/bin/proxy-watch";
+        Environment = "PATH=${
+          lib.makeBinPath (
+            with pkgs;
+            [
+              bash
+              coreutils
+              findutils
+              gawk
+              gnugrep
+              gnused
+              libnotify
+              netcat
+              systemd
+            ]
+          )
+        }";
+        Restart = "on-failure";
+      };
+      Install.WantedBy = [ "privoxy.service" ];
     };
   };
 

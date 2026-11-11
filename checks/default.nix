@@ -57,6 +57,8 @@ let
       ".config/yt-dlp" = "yt-dlp/.config/yt-dlp";
       ".local/bin/qute-sandbox" = "scripts/qute-sandbox";
       ".local/bin/jev" = "scripts/jev";
+      ".local/bin/proxy-watch" = "scripts/proxy-watch";
+      ".local/bin/proxy-why" = "scripts/proxy-why";
       ".local/bin/session-find" = "scripts/session-find";
       ".local/bin/ytdl" = "scripts/ytdl";
       ".local/share/qutebrowser/userscripts" = "qutebrowser/.local/share/qutebrowser/userscripts";
@@ -109,6 +111,8 @@ let
       ".config/yt-dlp" = "yt-dlp/.config/yt-dlp";
       ".local/bin/qute-sandbox" = "scripts/qute-sandbox";
       ".local/bin/jev" = "scripts/jev";
+      ".local/bin/proxy-watch" = "scripts/proxy-watch";
+      ".local/bin/proxy-why" = "scripts/proxy-why";
       ".local/bin/session-find" = "scripts/session-find";
       ".local/bin/ytdl" = "scripts/ytdl";
       ".local/share/qutebrowser/userscripts" = "qutebrowser/.local/share/qutebrowser/userscripts";

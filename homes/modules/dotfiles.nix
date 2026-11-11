@@ -96,6 +96,14 @@ let
       target = ".local/bin/jev";
     }
     {
+      source = "scripts/proxy-watch";
+      target = ".local/bin/proxy-watch";
+    }
+    {
+      source = "scripts/proxy-why";
+      target = ".local/bin/proxy-why";
+    }
+    {
       source = "scripts/qute-sandbox";
       target = ".local/bin/qute-sandbox";
     }
