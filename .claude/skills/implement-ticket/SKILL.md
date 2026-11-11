@@ -27,5 +27,10 @@ the number (merge, close the issue, skip review) override the matching step belo
    `same-system` result per host, the review outcome, and what the user still has to run on
    the machine (`nixos-rebuild`, reboots). When the branch changes the link set, run
    `scripts/link-drift` from the worktree and list each path it reports with the `mv` that
-   clears it. Leave merging and closing the issue to the user
-   unless they asked for it.
+   clears it. End with the **closing merge**, the command that lands the branch and closes the
+   ticket:
+   `git merge --no-ff <branch> -m "Merge branch '<branch>'" -m "Closes HefKer/nixos-issues#<n>"`,
+   one full `Closes HefKer/nixos-issues#<n>` per ticket the branch finishes. The step-3 commits
+   only mention the ticket, and `.github/workflows/close-issues.yml` closes only on the keyword,
+   so this merge message is what closes it. Leave running it to the user unless they asked you
+   to merge; then run exactly this.
