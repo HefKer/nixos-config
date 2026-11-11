@@ -92,6 +92,10 @@ let
     "yazi/.config/yazi"
     "yt-dlp/.config/yt-dlp"
     {
+      source = "scripts/jev";
+      target = ".local/bin/jev";
+    }
+    {
       source = "scripts/qute-sandbox";
       target = ".local/bin/qute-sandbox";
     }

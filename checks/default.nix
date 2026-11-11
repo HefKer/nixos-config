@@ -56,6 +56,7 @@ let
       ".config/yazi" = "yazi/.config/yazi";
       ".config/yt-dlp" = "yt-dlp/.config/yt-dlp";
       ".local/bin/qute-sandbox" = "scripts/qute-sandbox";
+      ".local/bin/jev" = "scripts/jev";
       ".local/bin/session-find" = "scripts/session-find";
       ".local/bin/ytdl" = "scripts/ytdl";
       ".local/share/qutebrowser/userscripts" = "qutebrowser/.local/share/qutebrowser/userscripts";
@@ -107,6 +108,7 @@ let
       ".config/yazi" = "yazi/.config/yazi";
       ".config/yt-dlp" = "yt-dlp/.config/yt-dlp";
       ".local/bin/qute-sandbox" = "scripts/qute-sandbox";
+      ".local/bin/jev" = "scripts/jev";
       ".local/bin/session-find" = "scripts/session-find";
       ".local/bin/ytdl" = "scripts/ytdl";
       ".local/share/qutebrowser/userscripts" = "qutebrowser/.local/share/qutebrowser/userscripts";
