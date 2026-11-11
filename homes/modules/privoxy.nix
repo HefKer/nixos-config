@@ -72,6 +72,7 @@ in
               coreutils
               findutils
               gawk
+              gnugrep
               gnused
               libnotify
               netcat
