@@ -244,3 +244,16 @@ _Avoid_: pending volume, window volume
 Text typed into a project's backlog box but not yet filed. Kept, one per
 project, until it is filed or discarded.
 _Avoid_: buffer, saved input
+
+### Browser proxy
+
+**Direct list**:
+The sites the browser reaches without going through Proton VPN, kept by hand in
+the dotfiles. Every other site goes through the tunnel.
+_Avoid_: exceptions, bypass list, whitelist
+
+**Blocked on the exit**:
+A site that fails through the Proton VPN server but loads when reached directly,
+because the server's address is refused, geo-fenced or misrouted there. The
+remedy is the direct list. A site that fails both ways is down, not blocked.
+_Avoid_: proxy break, VPN-blocked
