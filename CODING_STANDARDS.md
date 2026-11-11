@@ -22,6 +22,10 @@ no check can make.
   difference is one the ticket asked for, named in the commit or the hand-back.
 - An existing host's `system.stateVersion` never changes. It records the release the machine was
   installed with, not the release it runs.
+- A desktop action invoked from a bind is a **repeatable action** (`GLOSSARY.md`): when it
+  completes it runs `repeat record CMD ARG...` with its replay, by bare command name and
+  menu-free, and a cancel records nothing. If it shouldn't be repeated, a comment beside its
+  bind says why.
 
 ## Docs and comments
 
