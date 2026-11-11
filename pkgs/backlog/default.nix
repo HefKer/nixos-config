@@ -1,4 +1,5 @@
 {
+  callPackage,
   coreutils,
   fuzzel,
   gawk,
@@ -22,6 +23,7 @@ writeShellApplication {
     jq
     libnotify
     niri
+    (callPackage ../repeat { })
     util-linux
     yq-go
   ];
