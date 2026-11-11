@@ -1,8 +1,18 @@
+{ config, ... }:
 {
+  sops.secrets = {
+    school-user = { };
+    school-pw = { };
+  };
+  # NetworkManager substitutes $HCC_* in the profile below from this env file; root-owned, as ensure-profiles runs as root.
+  sops.templates."hcc-wifi.env".content = ''
+    HCC_IDENTITY=${config.sops.placeholder.school-user}
+    HCC_PASSWORD=${config.sops.placeholder.school-pw}
+  '';
+
   networking.networkmanager = {
     ensureProfiles = {
-      # Not in the repo — create it by hand with $HCC_IDENTITY and $HCC_PASSWORD.
-      environmentFiles = [ "/etc/nixos/secrets/hcc-wifi.env" ];
+      environmentFiles = [ config.sops.templates."hcc-wifi.env".path ];
       profiles = {
         "HCCprivate" = {
           connection = {
