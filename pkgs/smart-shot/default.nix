@@ -7,6 +7,7 @@
   slurp,
   wl-clipboard,
   libnotify,
+  fuzzel,
   niri,
 }:
 # jev isn't a runtime input: it's ~/dots/scripts/jev, linked to ~/.local/bin and found on niri's PATH.
@@ -18,7 +19,14 @@ stdenvNoCC.mkDerivation {
   nativeBuildInputs = [ makeWrapper ];
   installPhase = ''
     install -Dm644 $src $out/share/smart-shot/smart-shot.py
-    makeWrapper ${lib.getExe (python3.withPackages (ps: [ ps.pillow ]))} $out/bin/smart-shot \
+    makeWrapper ${
+      lib.getExe (
+        python3.withPackages (ps: [
+          ps.pillow
+          ps.numpy
+        ])
+      )
+    } $out/bin/smart-shot \
       --add-flags $out/share/smart-shot/smart-shot.py \
       --prefix PATH : ${
         lib.makeBinPath [
@@ -26,6 +34,7 @@ stdenvNoCC.mkDerivation {
           slurp
           wl-clipboard
           libnotify
+          fuzzel
           niri
         ]
       }
