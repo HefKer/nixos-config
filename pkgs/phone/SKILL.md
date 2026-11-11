@@ -22,13 +22,43 @@ The phone has no rollback, so act freely only where the step is easy to undo:
 
 Record the old value before any `settings put`, and tell the user what changed and how to undo it.
 
-## Toolbox
+## Reading state
 
-- Settings: `adb shell settings list|get|put {global,secure,system} <key> [value]`. To find a key behind a UI toggle, dump all three namespaces, flip it (yourself through the UI, or by asking), dump again, diff.
-- Services: `adb shell cmd <service> ...` (`cmd wifi`, `cmd bluetooth_manager`, `cmd notification`, `cmd package`); `adb shell dumpsys <service>` to read state.
-- Apps: `pm list packages [-3] --user 0`, `pm disable-user --user 0`, `pm enable`, `appops get|set`.
-- Screen: `adb exec-out screencap -p > shot.png` then read the image; `adb exec-out uiautomator dump /dev/tty` for the UI tree with bounds; `adb shell input tap X Y|swipe|text|keyevent`. The mobile-mcp tools, when loaded, wrap the same thing.
-- Files: `adb pull` / `adb push`, user storage under `/sdcard`.
+Shell commands work with the screen off or locked.
+
+- `dumpsys battery`, `dumpsys batterystats --charged` (per-UID drain; map a `u0aN` to its app as UID 10000+N via `pm list packages -U --user 0`).
+- `dumpsys notification --noredact` (count `NotificationRecord` lines by `pkg=`), `dumpsys usagestats` (`lastTimeVisible` per package), `dumpsys package <pkg>`.
+- `du -sk /sdcard/*`; the phone's toybox shell lacks GNU flags such as `sort -h`, so pipe output back and process it on the desktop.
+
+## Settings
+
+- `adb shell settings list|get|put|delete {global,secure,system} <key> [value]`; `delete` restores a key that was `null` before.
+- Samsung's `system settings_change_history` names the last 10 keys changed through the Settings app, newest first: the quickest way to learn the key behind a toggle the user just flipped.
+- Otherwise find a key by diffing: dump all three namespaces, flip the toggle (through the UI, or by asking), dump again, diff, flip it back.
+- After a `put`, read the UI back to confirm the app picked it up. Screenshots are taken before display color filters (Eye comfort shield, grayscale), so those need the user's eyes.
+- Services: `cmd notification set_dnd on|off`, `cmd wifi`, `cmd bluetooth_manager`, `cmd statusbar expand-settings|collapse`.
+
+## Driving the screen
+
+UI work needs the phone awake and unlocked. If `dumpsys window` shows `isKeyguardShowing=true`, ask the user to unlock it; the PIN stays with the user.
+
+Every touch is grounded in a fresh UI dump: read the dump, act, dump again to confirm the screen moved where you meant. A swipe that doesn't register leaves you on the old screen, and a long-press then lands on whatever sits there.
+
+- `adb exec-out uiautomator dump /dev/tty` prints the tree on one line; split it with `tr '>' '\n'` before grepping. `bounds` are in screen pixels (1440×3120), the same space `input` takes.
+- `input tap X Y`, `input text 'a%sb'` (`%s` is a space), `input keyevent HOME|BACK|WAKEUP`.
+- `input swipe X1 Y1 X2 Y2 350` changes launcher pages; durations under ~300 ms often register as nothing.
+- `input swipe X Y X Y 1200` is a long-press; `input draganddrop X1 Y1 X2 Y2 2500` picks something up and moves it (an app from the drawer onto a homescreen).
+- `am start -a android.intent.action.VIEW -d <url>` opens a link; `am start -a android.settings.<PAGE>_SETTINGS` jumps to a Settings page.
+- `adb exec-out screencap -p | magick - -resize 40% shot.png`, then read the image; full size costs several times the context.
+- The mobile-mcp tools, when loaded, wrap the same dump/tap/screenshot loop.
+
+The launcher is Nova: it has no "add app" menu; an app reaches a homescreen by dragging it out of the drawer, which closes onto the page it was opened from.
+
+## Apps and files
+
+- `pm list packages [-3] --user 0`, `pm disable-user --user 0`, `pm enable`, `appops get|set`.
+- `adb pull` / `adb push`, user storage under `/sdcard` (screenshots in `/sdcard/DCIM/Screenshots`).
+- `scrcpy` mirrors the phone into a desktop window when the user wants to watch.
 
 ## Gotchas
 
