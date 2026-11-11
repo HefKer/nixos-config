@@ -237,8 +237,9 @@ together](#how-it-fits-together) for what that means when you copy one.
 - <a id="bind-palette"></a>**One search over every scope's binds.**
   `bind-palette` gathers niri's and DMS's binds (`dms keybinds show niri`),
   the desktop leader's wlr-which-key menu, qutebrowser's effective binds (asked
-  of the running browser over IPC), nvim's global maps and kanata's held
-  layers into one fuzzel list, each trigger beside its action, so searching
+  of the running browser over IPC), nvim's global maps, kanata's held layers
+  and a hand-picked list of fish's binds, minus any fish no longer binds, into
+  one fuzzel list, each trigger beside its action, so searching
   "backspace" finds `Fn1+P`. Window-manager, shell and leader rows run; app
   rows copy their trigger. `bind-palette list` prints the rows as TSV.
   [`pkgs/bind-palette/`](pkgs/bind-palette/)

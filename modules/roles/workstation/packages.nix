@@ -47,6 +47,8 @@ in
       # --- Terminal Utils ---
       wezterm
       atuin
+      # tldr; its config lives in the dots repo.
+      tealdeer
       fastfetch
       fzf
       eza

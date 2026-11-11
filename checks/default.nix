@@ -43,6 +43,7 @@ let
       ".config/qutebrowser" = "qutebrowser/.config/qutebrowser";
       ".config/starship.toml" = "starship/.config/starship.toml";
       ".config/swayimg" = "swayimg/.config/swayimg";
+      ".config/tealdeer" = "tealdeer/.config/tealdeer";
       ".config/vesktop/settings.json" = "vesktop/.config/vesktop/settings.json";
       ".config/vesktop/settings" = "vesktop/.config/vesktop/settings";
       ".config/wezterm" = "wezterm/.config/wezterm";
@@ -88,6 +89,7 @@ let
       ".config/qutebrowser" = "qutebrowser/.config/qutebrowser";
       ".config/starship.toml" = "starship/.config/starship.toml";
       ".config/swayimg" = "swayimg/.config/swayimg";
+      ".config/tealdeer" = "tealdeer/.config/tealdeer";
       ".config/vesktop/settings.json" = "vesktop/.config/vesktop/settings.json";
       ".config/vesktop/settings" = "vesktop/.config/vesktop/settings";
       ".config/wezterm" = "wezterm/.config/wezterm";

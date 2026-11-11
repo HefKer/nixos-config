@@ -1,5 +1,5 @@
 # One fuzzy search over every scope's binds: niri and DMS, the desktop leader,
-# qutebrowser, nvim and kanata. Each row shows the trigger beside its action, so
+# qutebrowser, nvim, fish and kanata. Each row shows the trigger beside its action, so
 # searching teaches the bind. Window-manager, shell and leader rows run; app rows
 # copy their trigger.
 #   bind-palette        pick in fuzzel
@@ -59,6 +59,21 @@ nvim_rows() {
     io.stdout:write(table.concat(rows, "\n") .. "\n")' +qa 2>/dev/null
 }
 
+# The fish scope: a hand-picked list (dots: fish/binds.tsv), not every preset. A row whose key fish no longer binds in vi insert mode is dropped; a trigger with a space describes a gesture (Tab after `cmd -`) and always stays.
+fish_rows() {
+  local list="${XDG_CONFIG_HOME:-$HOME/.config}/fish/binds.tsv" live
+  [[ -r $list ]] || return 0
+  # Binds load at the first prompt, which never comes: run its setup by hand, which also prints terminal codes, so the binds come out on fd 3. The key follows `-M insert` in each `bind` line.
+  live=$(fish -ic '__fish_config_interactive; bind -M insert >&3' 3>&1 </dev/null >/dev/null 2>&1 |
+    awk '$1 == "bind" { for (i = 2; i < NF; i++) if ($i == "-M") { print $(i + 2); break } }')
+  # Through the environment, since -v would read the keys' backslashes as escapes.
+  live=$live awk -F'\t' '
+    BEGIN { n = split(ENVIRON["live"], keys, "\n"); for (i = 1; i <= n; i++) bound[keys[i]] }
+    /^#/ || NF < 2 { next }
+    { key = tolower($1); gsub(/\+/, "-", key) }
+    $1 ~ / / || key in bound { printf "fish\t%s\t%s\t\n", $1, $2 }' "$list"
+}
+
 # kanata's home-row mods and held layers: Fn1 is Caps held, Fn2 is Tab inside Fn1. Aliases (@...) and keys mapped to themselves are skipped.
 kanata_rows() {
   [[ -r $kanata_keymap ]] || return 0
@@ -102,6 +117,7 @@ list() {
   leader_rows || true
   qutebrowser_rows || true
   nvim_rows || true
+  fish_rows || true
   kanata_rows || true
 }
 

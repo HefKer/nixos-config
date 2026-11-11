@@ -13,7 +13,7 @@
   # kanata's keymap, read in place from the dotfiles.
   kanataKeymap,
 }:
-# dms, niri, nvim and qutebrowser come from PATH: the palette asks the running, configured ones for their binds.
+# dms, niri, nvim, fish and qutebrowser come from PATH: the palette asks the running, configured ones for their binds.
 writeShellApplication {
   name = "bind-palette";
   runtimeInputs = [
