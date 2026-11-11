@@ -30,6 +30,11 @@ in
       wl-mirror # mirror one Wayland output into a window
       wlr-randr # query/set output modes at runtime (resolution, position)
 
+      # --- Phone (adb over Tailscale) ---
+      android-tools
+      scrcpy # watch and drive the phone screen
+      (callPackage ../../../../pkgs/phone { tailscale = config.services.tailscale.package; })
+
       # --- Development Tools ---
       zed-editor
 

@@ -152,6 +152,12 @@ together](#how-it-fits-together) for what that means when you copy one.
   from the dotfiles root, leaving everything Claude writes per-account.
   [`homes/modules/claude-hulio.nix`](homes/modules/claude-hulio.nix) ·
   [35bca13](https://github.com/HefKer/nixos-config/commit/35bca13)
+- <a id="phone-adb"></a>**Agents on your Android phone, no root.** `phone-connect`
+  finds the phone as the tailnet's online Android peer, rediscovers Wireless Debugging's
+  random port with a port scan when it changes, pins adb to 5555 until the
+  next reboot, and prints the serial for `ANDROID_SERIAL`. A bundled `phone`
+  skill gives agents the toolbox and which actions need a yes first.
+  [`pkgs/phone/`](pkgs/phone/)
 - <a id="package-skills"></a>**Skills bundled with packages.** Linking
   `/share/skills` into the system profile gives skills that ship with packages
   (like hunk's) a path that survives upgrades.
