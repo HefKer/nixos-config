@@ -13,6 +13,8 @@ in
     Service = {
       Type = "oneshot";
       ExecStart = "${lib.getExe backlog} flush --notify";
+      # A filed notification waits for its Open action; the oneshot exits without it, so leave it running.
+      KillMode = "process";
     };
   };
 

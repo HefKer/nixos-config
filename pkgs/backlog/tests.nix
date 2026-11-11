@@ -110,6 +110,16 @@ runCommandLocal "backlog-tests"
     expect "$(tail -n 1 "$LOG")" "create --repo o/openok --title fine --body  --label idea" \
       "public_ok allows a public repo, and labels override the default"
 
+    printf 'projects:\n  - name: x\n    repo: xo/dots-issues\n' >"$PWD/x.yaml"
+    touch "$FAKE/public/xo_dots-issues"
+    expect "$(BACKLOG_CONFIG=$PWD/x.yaml backlog add x 'leak' </dev/null 2>&1 | cut -d' ' -f1-3 || true)" \
+      "backlog: refused: xo/dots-issues" "a cached private repo doesn't vouch for one whose name ends the same"
+
+    mkdir -p "$PWD/elsewhere"
+    expect "$(cd "$PWD/elsewhere" && backlog add 'fallback' </dev/null 2>&1 >/dev/null)" \
+      "backlog: nothing matches $PWD/elsewhere; using the most recent project, openok" \
+      "with no match the CLI falls back to the most recent project and says so"
+
     calls=$(wc -l <"$FAKE/api-calls")
     backlog add nixos 'again' </dev/null >/dev/null
     expect "$(wc -l <"$FAKE/api-calls")" "$calls" "a repo's visibility is cached"
@@ -123,7 +133,7 @@ runCommandLocal "backlog-tests"
     backlog flush
     expect "$(wc -l <"$queue")" 1 "a flush while offline keeps the line"
     rm "$FAKE/offline"
-    expect "$(backlog flush)" "https://github.com/o/nixos-issues/issues/7" "a flush back online files it"
+    expect "$(backlog flush)" "https://github.com/o/nixos-issues/issues/8" "a flush back online files it"
     expect "$([ -e "$queue" ] && echo queued || echo none)" none "and empties the queue"
 
     touch "$FAKE/broken"
@@ -131,12 +141,14 @@ runCommandLocal "backlog-tests"
     expect "$(tail -n 1 "$FAKE/notes" | cut -d' ' -f1-6)" "notify -a backlog -u critical backlog:" \
       "any other failure is critical"
     backlog flush 2>/dev/null
-    backlog flush --notify 2>/dev/null
+    backlog flush 2>/dev/null
     expect "$(jq -r .fails "$queue")" 3 "each failed flush counts against the line"
-    expect "$(grep -c 'failed 3 times' "$FAKE/notes")" 1 "the third failure notifies once"
+    expect "$(grep -c 'failed' "$FAKE/notes" || true)" 0 "a quiet flush can't raise the notification"
     backlog flush --notify 2>/dev/null
-    expect "$(grep -c 'failed 3 times' "$FAKE/notes")" 1 "later failures stay quiet"
-    expect "$(backlog queue | cut -d' ' -f3-)" "o/dots-issues  broken  (failed 4x)" "queue lists the line"
+    expect "$(grep -c 'failed 4 times' "$FAKE/notes")" 1 "the next notifying run past the limit raises it"
+    backlog flush --notify 2>/dev/null
+    expect "$(grep -c 'failed' "$FAKE/notes")" 1 "and only once"
+    expect "$(backlog queue | cut -d' ' -f3-)" "o/dots-issues  broken  (failed 5x)" "queue lists the line"
     rm "$FAKE/broken"
     backlog add dots 'next' </dev/null >/dev/null
     expect "$(tail -n 2 "$LOG" | cut -d' ' -f5 | tr '\n' ' ')" "broken next " "a capture flushes the queue first"

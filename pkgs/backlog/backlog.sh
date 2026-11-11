@@ -14,7 +14,8 @@ notify=0
 
 usage() {
   cat <<'EOF'
-backlog add [PROJECT] "TITLE // BODY"   file an idea; the body may also come on stdin
+backlog add [PROJECT] "TITLE // BODY"   file an idea; " //" splits title from body (a URL's :// doesn't);
+                                        stdin, if not a terminal, is appended to the body
 backlog prompt                          fuzzel: pick a project, type a line, file it in the background
 backlog flush [--notify]                re-send the offline queue
 backlog queue                           list what is queued
@@ -114,19 +115,19 @@ note_filed() {
 is_private() {
   local repo=$1 now line answer at
   now=$(date +%s)
-  if [ -f "$visibility" ] && line=$(grep -F -- "$repo"$'\t' "$visibility" | tail -n 1) && [ -n "$line" ]; then
+  mkdir -p "$state"
+  if [ -f "$visibility" ] && line=$(awk -F'\t' -v r="$repo" '$1 == r' "$visibility" | tail -n 1) && [ -n "$line" ]; then
     IFS=$'\t' read -r _ answer at <<<"$line"
     if ((now - at < visibility_ttl)); then
       echo "$answer"
       return 0
     fi
   fi
-  answer=$(gh api "repos/$repo" --jq .private 2>&1) || {
-    echo "$answer"
+  if ! answer=$(gh api "repos/$repo" --jq .private 2>"$state/gh.err"); then
+    cat "$state/gh.err"
     return 1
-  }
-  mkdir -p "$state"
-  { [ -f "$visibility" ] && grep -Fv -- "$repo"$'\t' "$visibility"; printf '%s\t%s\t%s\n' "$repo" "$answer" "$now"; } >"$visibility.tmp" || true
+  fi
+  { [ -f "$visibility" ] && awk -F'\t' -v r="$repo" '$1 != r' "$visibility"; printf '%s\t%s\t%s\n' "$repo" "$answer" "$now"; } >"$visibility.tmp" || true
   mv -f "$visibility.tmp" "$visibility"
   echo "$answer"
 }
@@ -169,7 +170,7 @@ lock() {
 flush_locked() {
   local line repo title body labels public_ok fails out rc offline=0 pending=()
   [ -s "$queue" ] || return 0
-  while IFS= read -r line; do
+  while IFS= read -r -u 3 line; do
     [ -n "$line" ] || continue
     if [ "$offline" = 1 ]; then
       pending+=("$line")
@@ -178,7 +179,7 @@ flush_locked() {
     repo=$(jq -r .repo <<<"$line")
     title=$(jq -r .title <<<"$line")
     body=$(jq -r .body <<<"$line")
-    labels=$(jq -c '.labels // ["needs-triage", "capture"]' <<<"$line")
+    labels=$(jq -c .labels <<<"$line")
     public_ok=$(jq -r '.public_ok // false' <<<"$line")
     rc=0
     out=$(send "$repo" "$title" "$body" "$labels" "$public_ok") || rc=$?
@@ -195,11 +196,16 @@ flush_locked() {
       *)
         fails=$(($(jq -r '.fails // 0' <<<"$line") + 1))
         echo "backlog: '$title' failed ($fails): $out" >&2
-        ((fails == max_fails)) && note -u critical "backlog: '$title' failed $fails times" "$repo: $out"
-        pending+=("$(jq -c --argjson f "$fails" '.fails = $f' <<<"$line")")
+        line=$(jq -c --argjson f "$fails" '.fails = $f' <<<"$line")
+        # Raised by the first notifying run at or past the limit, so a quiet CLI flush can't use it up.
+        if ((fails >= max_fails)) && [ "$notify" = 1 ] && [ "$(jq -r '.notified // false' <<<"$line")" != true ]; then
+          note -u critical "backlog: '$title' failed $fails times" "$repo: $out"
+          line=$(jq -c '.notified = true' <<<"$line")
+        fi
+        pending+=("$line")
         ;;
     esac
-  done <"$queue"
+  done 3<"$queue"
   if [ ${#pending[@]} -gt 0 ]; then printf '%s\n' "${pending[@]}"; fi >"$queue.tmp"
   mv -f "$queue.tmp" "$queue"
   [ -s "$queue" ] || rm -f "$queue"
@@ -210,19 +216,20 @@ cmd_flush() {
   [ -s "$queue" ] || return 0
   lock
   flush_locked
-  exec 9>&-
-  wait
 }
 
 cmd_add() {
   local p name repo labels public_ok out rc=0 extra=""
   [ "${1:-}" = --notify ] && notify=1 && shift
   case $# in
-    1) name=$(guess "$PWD" | head -n 1) ;;
+    1)
+      name=$(ordered "$PWD" | head -n 1)
+      [ -n "$(guess "$PWD")" ] || echo "backlog: nothing matches $PWD; using the most recent project, $name" >&2
+      ;;
     2) name=$1 && shift ;;
     *) die "usage: backlog add [PROJECT] \"TITLE // BODY\"" ;;
   esac
-  [ -n "$name" ] || die "no project matches $PWD; name one: $(projects_json | jq -r '[.[].name] | join(", ")')"
+  [ -n "$name" ] || die "no projects in $config"
   p=$(project "$name")
   split_line "$1"
   [ -t 0 ] || extra=$(cat)
@@ -231,8 +238,8 @@ cmd_add() {
   repo=$(jq -r .repo <<<"$p")
   labels=$(jq -c .labels <<<"$p")
   public_ok=$(jq -r .public_ok <<<"$p")
-  remember "$name"
   lock
+  remember "$name"
   flush_locked
   out=$(send "$repo" "$title" "$body" "$labels" "$public_ok") || rc=$?
   case $rc in
