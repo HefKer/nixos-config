@@ -214,6 +214,17 @@ One instance of breakage a probe reports, open until a later run no longer
 reports it.
 _Avoid_: alert, warning, issue
 
+### Claude
+
+**Account**:
+One Claude login and the config dir that holds it: credentials, project trust,
+permission state and session history, none of it shared. Configuration Claude
+only reads is shared into the second account's dir as a link set;
+`settings.json`, which Claude rewrites (a write-back application at file
+granularity), is a real file merged in at each launch. The main account is
+`~/.claude`, the second, hulio, `~/.claude-hulio`.
+_Avoid_: profile, login, user
+
 ### Desktop actions
 
 **Repeatable action**:
