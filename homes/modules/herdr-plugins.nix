@@ -11,6 +11,7 @@ let
     "herdr-floax"
     "herdr-hunk-diff"
     "herdr-lazygit"
+    "herdr-resurrect"
     "herdr-yazi"
     "smart-splits-backend-herdr"
   ] (name: pkgs.callPackage ../../pkgs/${name} { });

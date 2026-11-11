@@ -60,6 +60,8 @@ let
     # The directory also holds herdr's sockets, session and logs; herdr writes this file in place, not by rename.
     "herdr/.config/herdr/config.toml"
     "herdr/.config/herdr/plugins/config/jhochenbaum.hunkdiff"
+    # herdr-resurrect only reads these; its snapshots live in herdr's plugin state dir.
+    "herdr/.config/herdr/plugins/config/ntindle.herdr-resurrect"
     # The directory holds only this file; herdr-auto-title reads it once at startup.
     "herdr/.config/herdr-auto-title/config.env"
     # The directory also holds hunk's state.json and extensions; hunk saves view preferences through the link.
