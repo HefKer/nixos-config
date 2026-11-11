@@ -303,18 +303,18 @@ let
     ];
     text = ''
       ${thumb}
-      # Copies $1, pasting it too when $2 is paste, and makes that the repeat's replay.
+      # Copies $1, pasting it too when $2 is --paste, and makes that the repeat's replay; $3 is how long to wait before pasting.
       deliver() {
         local pick
         # A file reference, not the bytes: the one form Discord, Signal and WhatsApp all take for every format.
         pick=$(small "$1") || pick=$1
         printf 'file://%s\r\n' "$pick" | wl-copy --type text/uri-list
-        if [ "$2" = paste ]; then
-          # Give focus a moment to return from fuzzel, or the repeat key's Mod to lift.
-          sleep 0.15
+        if [ "$2" = --paste ]; then
+          # Focus returning from fuzzel, or the repeat key's Mod lifting, else the app sees Super+Ctrl+V.
+          sleep "$3"
           wtype -M ctrl v -m ctrl
         fi
-        repeat record meme-pick "--$2" "$1"
+        repeat record meme-pick "$2" "$1"
       }
 
       # meme-pick --copy|--paste FILE: the repeat's replay, with no menu.
@@ -327,7 +327,7 @@ let
           notify-send -a memes "Meme gone" "$(basename "$2") is no longer in the library"
           exit 0
         fi
-        deliver "$2" "''${1#--}"
+        deliver "$2" "$1" 0.4
         exit 0
       fi
 
@@ -357,8 +357,8 @@ let
           --override "key-bindings.custom-1=Shift+Return Shift+KP_Enter"
       ) || rc=$?
       case $rc in
-        0) deliver "''${files[i]}" copy ;;
-        10) deliver "''${files[i]}" paste ;;
+        0) deliver "''${files[i]}" --copy 0 ;;
+        10) deliver "''${files[i]}" --paste 0.15 ;;
       esac
     '';
   };

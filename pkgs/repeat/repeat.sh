@@ -10,16 +10,16 @@ repeat record CMD [ARG...]
 USAGE
 }
 
-nothing() {
+nothing_to_repeat() {
   notify-send -a repeat "Nothing to repeat" "$1" || true
   exit 0
 }
 
 case ${1:-} in
   "")
-    [ -s "$record" ] || nothing "no repeatable action has run yet"
+    [ -s "$record" ] || nothing_to_repeat "no repeatable action has run yet"
     mapfile -d '' -t argv <"$record"
-    command -v "${argv[0]}" >/dev/null || nothing "${argv[0]} is no longer installed"
+    command -v "${argv[0]}" >/dev/null || nothing_to_repeat "${argv[0]} is no longer installed"
     exec "${argv[@]}"
     ;;
   record)

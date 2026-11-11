@@ -286,9 +286,8 @@ cmd_prompt() {
   fi
   line=$(fuzzel --dmenu --prompt-only "$name> " --placeholder "title // body" --width 60 </dev/null) || exit 0
   [ -n "$(trim "$line")" ] || exit 0
-  # The replay skips the project picker: a repeat opens this project's box again.
-  repeat record backlog prompt "$name"
   setsid -f "$self" add --notify "$name" "$line" </dev/null >/dev/null 2>&1
+  repeat record backlog prompt "$name"
 }
 
 cmd_queue() {
