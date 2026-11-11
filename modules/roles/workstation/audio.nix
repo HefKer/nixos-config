@@ -16,7 +16,6 @@ in
         alsa.enable = true;
         alsa.support32Bit = true;
         pulse.enable = true;
-        jack.enable = true;
         # sound-pick plays into soundboard-in beside a copy of the mic; priority.session 0 keeps WirePlumber from defaulting to either.
         extraConfig.pipewire."90-soundboard"."context.modules" = [
           {

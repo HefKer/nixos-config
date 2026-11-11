@@ -38,6 +38,8 @@ let
     { port, devices }:
     {
       inherit port;
+      # Unread, as configFile replaces the file that uses it; non-empty silences a race warning the disjoint defcfgs already rule out.
+      devices = [ "unused: devices come from the defcfg" ];
       # Replaces the module's generated file, whose build-time --check can't see an include under $HOME.
       configFile = pkgs.writeText "kanata-${name}.kbd" ''
         (defcfg
