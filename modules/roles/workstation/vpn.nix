@@ -123,6 +123,10 @@ in
             } -p ${toString socksPort}";
             DynamicUser = true;
             Restart = "on-failure";
+            # microsocks tries only the first address; some Proton exits drop IPv6 to some hosts.
+            BindReadOnlyPaths = [
+              "${pkgs.writeText "gai.conf" "precedence ::ffff:0:0/96 100\n"}:/etc/gai.conf"
+            ];
           };
         };
 
