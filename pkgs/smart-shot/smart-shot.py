@@ -91,11 +91,16 @@ def grow(region, size, bounds):
 
 def ask_box(shot, region, click, tag, noul):
     """Box over `region` of `shot`, marked at `click`; the box in `shot` pixels and the noul, if asked."""
-    left, top, right, bottom = region
+    left, top = region[:2]
     image = shot.crop(region)
     scale = min(1.0, MAX_SIDE / image.width, MAX_SIDE / image.height)
     if scale < 1:
         image = image.resize((round(image.width * scale), round(image.height * scale)), Image.LANCZOS)
+    # A wide, short region can scale below the API's minimum side: pad it, and map back through the pad.
+    if min(image.size) < MIN_SIDE:
+        padded = Image.new("RGB", (max(image.width, MIN_SIDE), max(image.height, MIN_SIDE)), (128, 128, 128))
+        padded.paste(image)
+        image = padded
     cx, cy = (click[0] - left) * scale, (click[1] - top) * scale
     draw = ImageDraw.Draw(image)
     r, colour = MARKER["radius"], MARKER["colour"]
@@ -106,7 +111,7 @@ def ask_box(shot, region, click, tag, noul):
     image.save(sent)
     command = ["jev", "box", sent, BOX_QUESTION, "--json", "--save-request", os.path.join(STATE, f"{tag}-request.json")]
     if noul:
-        command += ["--noul", NOUL_QUESTION, "-t", str(YES_THRESHOLD)]
+        command += ["--noul", NOUL_QUESTION]
     try:
         done = subprocess.run(command, capture_output=True, text=True, check=False)
     except OSError as error:
@@ -118,7 +123,8 @@ def ask_box(shot, region, click, tag, noul):
         handle.write(done.stdout)
     answers = json.loads(done.stdout)
     edges = answers["box"]["box"]
-    width, height = right - left, bottom - top
+    # Fractions are of the sent image, padding included: back to `shot` pixels through its scale.
+    width, height = image.width / scale, image.height / scale
     box = (
         left + edges["left"] * width,
         top + edges["top"] * height,
@@ -141,6 +147,7 @@ def run():
         whole = (0, 0, shot.width, shot.height)
 
         box, yes = ask_box(shot, whole, click, "pass1", noul=True)
+        assert yes is not None
         if yes < YES_THRESHOLD:
             notify("Nothing found", f"no distinct object under the click (noul {yes:.2f}); clipboard unchanged")
             return 0
@@ -155,16 +162,19 @@ def run():
                 max(box[2] + mx, click[0]),
                 max(box[3] + my, click[1]),
             )
-            box, _ = ask_box(shot, grow(region, MIN_SIDE, shot.size), click, "pass2", noul=False)
+            try:
+                box, _ = ask_box(shot, grow(region, MIN_SIDE, shot.size), click, "pass2", noul=False)
+            except Failure as error:
+                notify("Second pass failed", f"{error}; copying the first pass's coarser box")
 
+        if box[2] - box[0] < 1 or box[3] - box[1] < 1:
+            raise Failure(f"empty box {box}")
         crop = (
             max(0, round(box[0]) - PAD_PX),
             max(0, round(box[1]) - PAD_PX),
             min(shot.width, round(box[2]) + PAD_PX),
             min(shot.height, round(box[3]) + PAD_PX),
         )
-        if crop[2] - crop[0] < 1 or crop[3] - crop[1] < 1:
-            raise Failure(f"empty box {box}")
         out = os.path.join(workdir, "crop.png")
         shot.crop(crop).save(out)
         with open(out, "rb") as handle:
@@ -177,7 +187,7 @@ def run():
 def main():
     try:
         return run()
-    except (Failure, subprocess.CalledProcessError, KeyError, TypeError, ValueError) as error:
+    except (Failure, OSError, subprocess.CalledProcessError, KeyError, TypeError, ValueError) as error:
         notify("Smart screenshot failed", f"{error}; clipboard unchanged")
         print(f"smart-shot: {error}", file=sys.stderr)
         return 2
