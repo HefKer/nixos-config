@@ -109,7 +109,7 @@ in
       czkawka
       moonlight-qt
       slack
-      # meme-pick/meme-add and sound-pick/sound-add/sound-stop/sound-volume, for niri's Mod+G and Mod+Ctrl+G binds.
+      # meme-pick/meme-add and sound-pick/sound-add/sound-stop/sound-volume, for niri's Mod+G bind and the desktop leader's m group.
       (callPackage ../../../pkgs/memes {
         library = "${consts.home}/memes";
         sink = "soundboard-in";
