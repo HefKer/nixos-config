@@ -259,6 +259,17 @@ together](#how-it-fits-together) for what that means when you copy one.
   rather than rung. `alarm ls --json` feeds a DMS bar countdown in the dotfiles.
   [`pkgs/alarm/`](pkgs/alarm/) ·
   [`alarm.nix`](homes/modules/alarm.nix)
+- <a id="backlog"></a>**Ideas straight into a project's GitHub backlog.**
+  Mod+B picks the project (guessed from the focused window, then the most
+  recently used), takes one line, `title // body`, and files it with `gh` in
+  the background as a `needs-triage` + `capture` issue, so the prompt is gone
+  at once. `backlog add [project] "…"` does the same from a shell or an agent,
+  guessing from the working directory. Offline, the idea is queued and filed by
+  the next capture or a 15-minute timer; a public repo is refused unless its
+  entry says `public_ok`. Projects come from a YAML file in the dotfiles, so
+  adding one needs no rebuild.
+  [`pkgs/backlog/`](pkgs/backlog/) ·
+  [`backlog.nix`](homes/modules/backlog.nix)
 - <a id="removable-drives"></a>**Removable drives mounted as you.** udisks2
   and a udiskie user service, so FAT and exFAT files aren't owned by root.
   [`modules/roles/workstation/storage.nix`](modules/roles/workstation/storage.nix),

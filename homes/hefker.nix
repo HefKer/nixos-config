@@ -18,6 +18,7 @@ in
   ] # default to CLI group
   ++ lib.optionals isWorkstation [
     ./modules/alarm.nix
+    ./modules/backlog.nix
     ./modules/binds.nix
     ./modules/chromium.nix
     ./modules/gui.nix
