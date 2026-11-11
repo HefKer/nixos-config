@@ -124,6 +124,8 @@ in
       czkawka
       moonlight-qt
       slack
+      # repeat, for niri's Mod+Period: replays the last repeatable action (meme-pick, sound-pick, backlog prompt, ...).
+      (callPackage ../../../pkgs/repeat { })
       # meme-pick/meme-add and sound-pick/sound-add/sound-stop/sound-volume, for niri's Mod+G bind and the desktop leader's m group.
       (callPackage ../../../pkgs/memes {
         library = "${consts.home}/memes";

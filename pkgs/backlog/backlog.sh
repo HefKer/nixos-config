@@ -16,7 +16,7 @@ usage() {
   cat <<'EOF'
 backlog add [PROJECT] "TITLE // BODY"   file an idea; " //" splits title from body (a URL's :// doesn't);
                                         stdin, if not a terminal, is appended to the body
-backlog prompt                          fuzzel: pick a project, type a line, file it in the background
+backlog prompt [PROJECT]                fuzzel: pick a project (or take PROJECT), type a line, file it in the background
 backlog flush [--notify]                re-send the offline queue
 backlog queue                           list what is queued
 backlog setup                           create the configured labels in every configured repo
@@ -270,15 +270,24 @@ cmd_add() {
 
 cmd_prompt() {
   local names name idx line
-  mapfile -t names < <(ordered "$(focused_window)")
-  [ ${#names[@]} -gt 0 ] || die "no projects in $config"
-  idx=$(printf '%s\n' "${names[@]}" |
-    fuzzel --dmenu --only-match --index --prompt "backlog> " --lines "${#names[@]}" --width 40) || exit 0
-  [ -n "$idx" ] || exit 0
-  name=${names[$idx]}
+  if [ $# -gt 0 ]; then
+    name=$1
+    if ! projects_json | jq -e --arg n "$name" 'any(.[]; .name == $n)' >/dev/null; then
+      notify-send -a backlog "backlog: no project $name" "it is no longer in $config" || true
+      exit 0
+    fi
+  else
+    mapfile -t names < <(ordered "$(focused_window)")
+    [ ${#names[@]} -gt 0 ] || die "no projects in $config"
+    idx=$(printf '%s\n' "${names[@]}" |
+      fuzzel --dmenu --only-match --index --prompt "backlog> " --lines "${#names[@]}" --width 40) || exit 0
+    [ -n "$idx" ] || exit 0
+    name=${names[$idx]}
+  fi
   line=$(fuzzel --dmenu --prompt-only "$name> " --placeholder "title // body" --width 60 </dev/null) || exit 0
   [ -n "$(trim "$line")" ] || exit 0
   setsid -f "$self" add --notify "$name" "$line" </dev/null >/dev/null 2>&1
+  repeat record backlog prompt "$name"
 }
 
 cmd_queue() {
@@ -316,7 +325,7 @@ cmd_setup() {
 
 case ${1:-} in
   add) shift && cmd_add "$@" ;;
-  prompt) cmd_prompt ;;
+  prompt) shift && cmd_prompt "$@" ;;
   flush) shift && cmd_flush "$@" ;;
   queue) cmd_queue ;;
   setup) cmd_setup ;;

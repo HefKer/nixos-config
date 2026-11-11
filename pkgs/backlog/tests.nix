@@ -36,9 +36,20 @@ let
     echo "notify $*" >>"$FAKE/notes"
   '';
 
+  # Answers each call with the next line of $FAKE/answers, cancelling (exit 1) on ESC, and logs its prompt.
+  fakeFuzzel = writeShellScriptBin "fuzzel" ''
+    for a; do case $a in *"> ") echo "$a" >>"$FAKE/fuzzel-prompts" ;; esac; done
+    n=$(($(cat "$FAKE/fuzzel-n" 2>/dev/null || echo 0) + 1))
+    echo "$n" >"$FAKE/fuzzel-n"
+    a=$(sed -n "''${n}p" "$FAKE/answers")
+    [ "$a" != ESC ] || exit 1
+    echo "$a"
+  '';
+
   backlog = callPackage ./. {
     gh = fakeGh;
     libnotify = fakeNotify;
+    fuzzel = fakeFuzzel;
   };
 in
 runCommandLocal "backlog-tests"
@@ -159,6 +170,29 @@ runCommandLocal "backlog-tests"
     expect "$(sort "$LOG" | tr '\n' ' ')" \
       "label capture o/dots-issues label capture o/nixos-issues label capture o/open label idea o/openok " \
       "setup creates only the missing labels in each repo"
+
+    # The prompt runs last: the add it starts is backgrounded, so its log lines land late.
+    record=$HOME/.local/state/repeat/last
+    printf 'ESC\n' >"$FAKE/answers"
+    backlog prompt dots
+    expect "$([ -e "$record" ] && echo recorded || echo none)" none "Esc in the text box records nothing"
+
+    printf '0\nfrom the picker\nESC\nagain\n' >"$FAKE/answers"
+    rm -f "$FAKE/fuzzel-n" "$FAKE/fuzzel-prompts"
+    backlog prompt
+    expect "$(tr '\0' ' ' <"$record")" "backlog prompt dots " "a filed line records the box for its project"
+    backlog prompt dots
+    expect "$(tr '\n' '|' <"$FAKE/fuzzel-prompts")" "backlog> |dots> |dots> |" \
+      "the replay opens the project's box without the picker"
+    expect "$(tr '\0' ' ' <"$record")" "backlog prompt dots " "Esc in the replayed box leaves the record"
+    backlog prompt nixos
+    expect "$(tr '\0' ' ' <"$record")" "backlog prompt nixos " "the next filed line overwrites it"
+
+    : >"$FAKE/notes"
+    backlog prompt removed
+    expect "$(cat "$FAKE/notes")" "notify -a backlog backlog: no project removed it is no longer in $BACKLOG_CONFIG" \
+      "a replay for a project gone from the config notifies and does nothing else"
+    expect "$(cat "$FAKE/fuzzel-n")" 4 "and opens no box"
 
     if [ "$fail" != 0 ]; then exit 1; fi
     touch $out

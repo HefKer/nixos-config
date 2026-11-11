@@ -212,6 +212,8 @@ in
 
   backlog = pkgs.callPackage ../pkgs/backlog/tests.nix { };
 
+  repeat = pkgs.callPackage ../pkgs/repeat/tests.nix { };
+
   health = pkgs.callPackage ../pkgs/health/tests.nix { };
 
   phone = pkgs.callPackage ../pkgs/phone/tests.nix { };
