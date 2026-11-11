@@ -233,6 +233,11 @@ again without its menu. The replay is the action's own choice, not necessarily
 the command that started it.
 _Avoid_: macro, last command
 
+**Held volume**:
+The level and mute state set for a window's audio, kept while the window plays
+nothing and given to every stream it starts until the window closes.
+_Avoid_: pending volume, window volume
+
 ### Backlog
 
 **Draft**:
