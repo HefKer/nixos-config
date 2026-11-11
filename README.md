@@ -134,6 +134,11 @@ together](#how-it-fits-together) for what that means when you copy one.
   [`homes/modules/herdr-plugins.nix`](homes/modules/herdr-plugins.nix),
   [`pkgs/herdr-plugins-sync/`](pkgs/herdr-plugins-sync/) ·
   [df23f3c](https://github.com/HefKer/nixos-config/commit/df23f3c)
+- <a id="herdr-resurrect"></a>**herdr-resurrect without node on herdr's PATH.**
+  The Node plugin runs from the store with node, bash, fzf and jq patched to
+  store paths, and with its `agentResume` off it leaves agent panes to herdr's
+  own resume rather than starting a fresh agent in them.
+  [`pkgs/herdr-resurrect/`](pkgs/herdr-resurrect/)
 - <a id="collie-service"></a>**Collie's bridge as a Home Manager service.**
   `collie start` writes a unit pinned to one store path, so it kept running
   the old version after every upgrade. This one follows the package and finds
