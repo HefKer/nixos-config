@@ -20,6 +20,12 @@ in
       owner = consts.username;
     };
 
+    # ~/dots/scripts/jev reads the TypeSafe API key here; without it, it decrypts the key through rbw on every call.
+    sops.secrets.jev-key = {
+      sopsFile = ../../../secrets/shared.yaml;
+      owner = consts.username;
+    };
+
     nixpkgs.overlays = [
       # DRM, plus caret.js's <style> via textContent: Trusted Types pages (YouTube, GitHub) reject its innerHTML, aborting caret mode
       (final: prev: {
