@@ -33,6 +33,11 @@ stdenvNoCC.mkDerivation {
       --replace-fail '| jq ' '| ${lib.getExe jq} '
     substituteInPlace lib/restore.js --replace-fail \
       'if (resume) return resume;' 'if (resume || !require("./settings").load().agentResume) return resume;'
+    # A store program's cmdline is a wrapper's unquoted args and a path GC can remove, so it relaunches by name.
+    substituteInPlace lib/restore.js --replace-fail \
+      '  if (pane.command && pane.command.restorable) {' \
+      '  if (pane.command && pane.command.restorable) {
+        if (String(pane.command.cmdline || "").startsWith("${builtins.storeDir}/")) return allowlist.baseName((pane.command.argv || [])[0] || pane.command.name);'
   '';
 
   dontBuild = true;

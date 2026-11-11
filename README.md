@@ -137,7 +137,9 @@ together](#how-it-fits-together) for what that means when you copy one.
 - <a id="herdr-resurrect"></a>**herdr-resurrect without node on herdr's PATH.**
   The Node plugin runs from the store with node, bash, fzf and jq patched to
   store paths, and with its `agentResume` off it leaves agent panes to herdr's
-  own resume rather than starting a fresh agent in them.
+  own resume rather than starting a fresh agent in them. A program running from
+  the store, like a wrapped nvim, relaunches by name instead of by its
+  wrapper's unquoted arguments and a store path a GC can remove.
   [`pkgs/herdr-resurrect/`](pkgs/herdr-resurrect/)
 - <a id="collie-service"></a>**Collie's bridge as a Home Manager service.**
   `collie start` writes a unit pinned to one store path, so it kept running
