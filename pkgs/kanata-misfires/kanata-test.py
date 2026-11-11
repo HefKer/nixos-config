@@ -14,7 +14,10 @@ idle pause; `in:` takes raw simulator events instead. Output is the typed
 text, with chords and lone modifiers as <C-c> or <M-S>.
 
 --fuzz types word lists as continuous text at several speeds, with seeded
-random timing, and reports the words that came out wrong by bigram.
+random timing, and reports the words that came out wrong by bigram. Each
+profile holds keys for a random time in its range: by default the laptop
+keyboard's and the Wooting's shorter ones, which its rapid trigger gives,
+side by side; --hold MIN-MAX runs one range instead.
 """
 
 import argparse
@@ -37,6 +40,8 @@ WORD_LISTS = @wordLists@  # noqa: E501
 IDLE = 500
 SETTLE = 1000
 OPTIONS = {"wpm", "hold"}
+# Key hold ranges in ms. wooting is a guess until its windows are measured.
+PROFILES = {"laptop": (60, 140), "wooting": (30, 90)}
 
 MODS = {
     "LCtrl": "C", "RCtrl": "C",
@@ -267,12 +272,12 @@ def load_words(paths):
     return sorted(words)
 
 
-def fuzz_events(words, wpm, rng):
+def fuzz_events(words, wpm, hold_range, rng):
     timed = []
     now = 0.0
     for c in " ".join(words) + " ":
         press = round(now)
-        hold = round(rng.uniform(60, 140))
+        hold = round(rng.uniform(*hold_range))
         timed.append((press, press + hold, KEYS[c]))
         now += interval(wpm) * rng.uniform(0.6, 1.4)
     return roll(separate_repeats(timed))
@@ -298,45 +303,62 @@ def bigram(want, got):
     return want[max(i - 1, 0):i + 1].replace(" ", "␣")
 
 
-def fuzz(keymap_dir, paths, speeds, seed, batch):
+def fuzz(keymap_dir, paths, speeds, profiles, seed, batch):
     words = load_words(paths)
     if not words:
         sys.exit("no typeable words in the word lists")
-    print(f"seed {seed}, {len(words)} words, speeds {speeds} wpm")
+    holds = ", ".join(f"{n} {lo}-{hi}" for n, (lo, hi) in profiles.items())
+    print(f"seed {seed}, {len(words)} words, speeds {speeds} wpm, "
+          f"holds {holds} ms")
     jobs = []
-    for wpm in speeds:
-        rng = random.Random(f"{seed}-{wpm}")
-        order = rng.sample(words, len(words))
-        for start in range(0, len(order), batch):
-            chunk = order[start:start + batch]
-            jobs.append((wpm, chunk, fuzz_events(chunk, wpm, rng)))
+    for name, hold_range in profiles.items():
+        for wpm in speeds:
+            rng = random.Random(f"{seed}-{wpm}-{name}")
+            order = rng.sample(words, len(words))
+            for start in range(0, len(order), batch):
+                chunk = order[start:start + batch]
+                events = fuzz_events(chunk, wpm, hold_range, rng)
+                jobs.append((name, wpm, chunk, events))
     with tempfile.TemporaryDirectory() as tmp:
         cfg = config(tmp, keymap_dir)
         with ThreadPoolExecutor() as pool:
             outs = list(pool.map(
-                lambda n, job: simulate(cfg, job[2], tmp, f"fuzz-{n}")[0],
+                lambda n, job: simulate(cfg, job[3], tmp, f"fuzz-{n}")[0],
                 range(len(jobs)), jobs,
             ))
-    wrong = defaultdict(list)
-    per_speed = defaultdict(int)
-    for (wpm, chunk, _), out in zip(jobs, outs):
+    wrong = {name: defaultdict(list) for name in profiles}
+    count = defaultdict(int)
+    for (name, wpm, chunk, _), out in zip(jobs, outs):
         typed = render(out).split(" ")
         if typed[-1] == "":
             typed.pop()
         for want, got in mismatches(chunk, typed):
-            per_speed[wpm] += 1
-            wrong[bigram(want, got)].append((wpm, want, got))
+            count[name, wpm] += 1
+            wrong[name][bigram(want, got)].append((wpm, want, got))
+    print("  wrong   " + "".join(f"{name:>9}" for name in profiles))
     for wpm in speeds:
-        print(f"  {wpm:>3} wpm: {per_speed[wpm]} wrong")
-    if not wrong:
-        return 0
-    print("by bigram:")
-    for gram, cases in sorted(wrong.items(), key=lambda kv: -len(kv[1])):
-        shown = ", ".join(
-            f"{w!r}→{g!r} @{wpm}" for wpm, w, g in sorted(cases)[:4]
-        )
-        print(f"  {gram:<4}{len(cases):>4}  {shown}")
-    return 1
+        print(f"  {wpm:>3} wpm " + "".join(
+            f"{count[name, wpm]:>9}" for name in profiles
+        ))
+    for name in profiles:
+        if not wrong[name]:
+            continue
+        print(f"{name} by bigram:")
+        for gram, cases in sorted(
+            wrong[name].items(), key=lambda kv: -len(kv[1])
+        ):
+            shown = ", ".join(
+                f"{w!r}→{g!r} @{wpm}" for wpm, w, g in sorted(cases)[:4]
+            )
+            print(f"  {gram:<4}{len(cases):>4}  {shown}")
+    return 1 if any(wrong.values()) else 0
+
+
+def hold_range(spec):
+    lo, _, hi = spec.partition("-")
+    if not (lo.isdigit() and hi.isdigit() and 0 < int(lo) <= int(hi)):
+        raise argparse.ArgumentTypeError(f"not MIN-MAX ms: {spec!r}")
+    return int(lo), int(hi)
 
 
 def main():
@@ -352,6 +374,10 @@ def main():
         "--wpm", type=lambda s: [int(w) for w in s.split(",")],
         default=[60, 90, 120, 150],
     )
+    parser.add_argument(
+        "--hold", type=hold_range, metavar="MIN-MAX",
+        help="fuzz with this key hold range (ms) instead of the profiles",
+    )
     parser.add_argument("--seed", type=int)
     parser.add_argument("--batch", type=int, default=100)
     args = parser.parse_args()
@@ -361,7 +387,13 @@ def main():
             *WORD_LISTS, args.keymap / "tests" / "hrm-words.txt"
         ]
         words = [w for w in words if Path(w).exists()]
-        sys.exit(fuzz(args.keymap, words, args.wpm, seed, args.batch))
+        profiles = (
+            {"hold": args.hold} if args.hold
+            else PROFILES
+        )
+        sys.exit(fuzz(
+            args.keymap, words, args.wpm, profiles, seed, args.batch
+        ))
     sys.exit(run_cases(args.keymap, args.cases))
 
 

@@ -106,7 +106,8 @@ together](#how-it-fits-together) for what that means when you copy one.
   `kanata-flag` asks through fuzzel what you meant and what came out, and logs
   it with each instance's layer and the keymap's git rev. `kanata-test` replays
   `.sim` cases, or fuzzes word lists as fast rolls, in a simulator built from
-  the same kanata the service runs.
+  the same kanata the service runs. The fuzz holds keys for a laptop's
+  durations and a rapid-trigger keyboard's shorter ones, side by side.
   [`pkgs/kanata-misfires/`](pkgs/kanata-misfires/),
   [`pkgs/kanata-sim/`](pkgs/kanata-sim/) ·
   [2b71808](https://github.com/HefKer/nixos-config/commit/2b71808),
