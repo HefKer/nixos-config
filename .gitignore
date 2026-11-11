@@ -1,3 +1,7 @@
 /docs/lessons
 /docs/research
 /result
+# The global ignore drops /.claude; this repo's skills are shared, so re-include only them.
+!/.claude/
+/.claude/*
+!/.claude/skills/
