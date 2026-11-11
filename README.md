@@ -264,6 +264,13 @@ together](#how-it-fits-together) for what that means when you copy one.
   [`homes/modules/udiskie.nix`](homes/modules/udiskie.nix) ·
   [ea64d1a](https://github.com/HefKer/nixos-config/commit/ea64d1a)
 
+- <a id="qutebrowser-caret"></a>**Caret mode on Trusted Types pages.**
+  qutebrowser's `caret.js` fills a `<style>` through `innerHTML`, which YouTube,
+  Google and GitHub reject, so caret mode never starts there; a `postPatch`
+  swaps it for `textContent`, with `--replace-fail` so the build breaks once
+  upstream changes the line.
+  [`modules/roles/workstation/packages.nix`](modules/roles/workstation/packages.nix)
+
 - <a id="soloist"></a>**Spotify without librespot or Electron.** Spotify's
   official headless Soloist runs as a user service and shows up as a Connect
   speaker, with the API key rendered from sops and the `soloist-mpris` bridge

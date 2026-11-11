@@ -21,8 +21,15 @@ in
     };
 
     nixpkgs.overlays = [
-      # Enables DRM in qutebrowser
-      (final: prev: { qutebrowser = prev.qutebrowser.override { enableWideVine = true; }; })
+      # DRM, plus caret.js's <style> via textContent: Trusted Types pages (YouTube, GitHub) reject its innerHTML, aborting caret mode
+      (final: prev: {
+        qutebrowser = (prev.qutebrowser.override { enableWideVine = true; }).overrideAttrs (old: {
+          postPatch = (old.postPatch or "") + ''
+            substituteInPlace qutebrowser/javascript/caret.js \
+              --replace-fail 'node.innerHTML = style;' 'node.textContent = style;'
+          '';
+        });
+      })
       # CiscoCollabHost re-execs argv[0], which execve can't resolve if it's a bare name from PATH
       (final: prev: {
         webex = prev.webex.overrideAttrs (old: {
