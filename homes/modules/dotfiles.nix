@@ -78,6 +78,7 @@ let
     "vesktop/.config/vesktop/settings.json"
     "vesktop/.config/vesktop/settings"
     "wezterm/.config/wezterm"
+    "wlr-which-key/.config/wlr-which-key"
     # xdg-mime writes through the link; a tool saving by rename replaces it with a file that aborts the next rebuild.
     "xdg/.config/mimeapps.list"
     "xdg-desktop-portal-termfilechooser/.config/xdg-desktop-portal-termfilechooser"
