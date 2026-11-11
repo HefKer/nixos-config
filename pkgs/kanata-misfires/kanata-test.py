@@ -16,8 +16,8 @@ text, with chords and lone modifiers as <C-c> or <M-S>.
 --fuzz types word lists as continuous text at several speeds, with seeded
 random timing, and reports the words that came out wrong by bigram. Each
 profile holds keys for a random time in its range: by default the laptop
-keyboard's and the Wooting's shorter ones, which its rapid trigger gives,
-side by side; --hold MIN-MAX runs one range instead.
+keyboard's, and the shorter ones the Wooting's rapid trigger gives, side
+by side; --hold MIN-MAX runs one range instead.
 """
 
 import argparse
@@ -307,13 +307,17 @@ def fuzz(keymap_dir, paths, speeds, profiles, seed, batch):
     words = load_words(paths)
     if not words:
         sys.exit("no typeable words in the word lists")
-    holds = ", ".join(f"{n} {lo}-{hi}" for n, (lo, hi) in profiles.items())
+    holds = ", ".join(
+        n if n == f"{lo}-{hi}" else f"{n} {lo}-{hi}"
+        for n, (lo, hi) in profiles.items()
+    )
     print(f"seed {seed}, {len(words)} words, speeds {speeds} wpm, "
           f"holds {holds} ms")
     jobs = []
     for name, hold_range in profiles.items():
         for wpm in speeds:
-            rng = random.Random(f"{seed}-{wpm}-{name}")
+            lo, hi = hold_range
+            rng = random.Random(f"{seed}-{wpm}-{lo}-{hi}")
             order = rng.sample(words, len(words))
             for start in range(0, len(order), batch):
                 chunk = order[start:start + batch]
@@ -354,7 +358,7 @@ def fuzz(keymap_dir, paths, speeds, profiles, seed, batch):
     return 1 if any(wrong.values()) else 0
 
 
-def hold_range(spec):
+def parse_hold(spec):
     lo, _, hi = spec.partition("-")
     if not (lo.isdigit() and hi.isdigit() and 0 < int(lo) <= int(hi)):
         raise argparse.ArgumentTypeError(f"not MIN-MAX ms: {spec!r}")
@@ -375,7 +379,7 @@ def main():
         default=[60, 90, 120, 150],
     )
     parser.add_argument(
-        "--hold", type=hold_range, metavar="MIN-MAX",
+        "--hold", type=parse_hold, metavar="MIN-MAX",
         help="fuzz with this key hold range (ms) instead of the profiles",
     )
     parser.add_argument("--seed", type=int)
@@ -388,7 +392,7 @@ def main():
         ]
         words = [w for w in words if Path(w).exists()]
         profiles = (
-            {"hold": args.hold} if args.hold
+            {"{}-{}".format(*args.hold): args.hold} if args.hold
             else PROFILES
         )
         sys.exit(fuzz(
