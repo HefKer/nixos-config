@@ -15,6 +15,7 @@
   pipewire,
   symlinkJoin,
   tesseract,
+  util-linux,
   wl-clipboard,
   wtype,
   writeShellApplication,
@@ -29,8 +30,12 @@ let
   repeat = callPackage ../repeat { };
   thumbSize = 64;
   sounds = "${library}/sounds";
-  # sound-pick writes the PIDs of what it is playing here, and sound-stop kills them.
+  # One line per playing sound, oldest first: "<call PID> <you PID>". sound-pick appends, sound-stop kills them all.
   pids = ''"''${XDG_RUNTIME_DIR:-/tmp}/sound-pick.pids"'';
+  # Held while the PID file is read and rewritten, as a burst of replays runs several sound-picks at once.
+  pidsLock = ''"''${XDG_RUNTIME_DIR:-/tmp}/sound-pick.lock"'';
+  # The most sounds playing at once; a replay past it stops the oldest.
+  maxSounds = 5;
   # sound-volume writes "<call %> <you %>" here and sound-pick reads it on every pick; per machine, as mics differ.
   volumeFile = ''"''${XDG_CONFIG_HOME:-$HOME/.config}/memes/sound-volume"'';
   defaultVolume = "20 20";
@@ -403,9 +408,14 @@ let
 
   soundStop = writeShellApplication {
     name = "sound-stop";
-    runtimeInputs = [ coreutils ];
+    runtimeInputs = [
+      coreutils
+      util-linux
+    ];
     text = ''
       pids=${pids}
+      exec 9>${pidsLock}
+      flock 9
       if [ -f "$pids" ]; then
         # shellcheck disable=SC2046
         kill $(cat "$pids") 2>/dev/null || true
@@ -445,22 +455,39 @@ let
       repeat
       soundStop
       gawk
+      util-linux
     ];
     text = ''
       sounds=${lib.escapeShellArg sounds}
 
-      # Plays $1 and makes that the repeat's replay.
+      # Plays $1 on top of what is playing and makes that the repeat's replay; a menu pick runs sound-stop first.
       play() {
-        local vcall vyou call
-        # One clip at a time: a new pick cuts off the last.
-        sound-stop
+        local vcall vyou call you live=() line p
         read -r vcall vyou _ 2>/dev/null <${volumeFile} || read -r vcall vyou <<<"${defaultVolume}"
         vyou=''${vyou:-$vcall}
-        # Once into the soundboard mic for the call and once to the default output for you, each at its sound-volume.
-        pw-play --volume "$(awk -v p="$vcall" 'BEGIN { print p / 100 }')" --target ${lib.escapeShellArg sink} "$1" &
+        exec 9>${pidsLock}
+        flock 9
+        # Sounds with a pw-play still running, oldest first; finished ones drop out of the count.
+        while read -r line; do
+          for p in $line; do
+            if kill -0 "$p" 2>/dev/null; then
+              live+=("$line")
+              break
+            fi
+          done
+        done < <(cat ${pids} 2>/dev/null || true)
+        while [ ''${#live[@]} -ge ${toString maxSounds} ]; do
+          # shellcheck disable=SC2086
+          kill ''${live[0]} 2>/dev/null || true
+          live=("''${live[@]:1}")
+        done
+        # Once into the soundboard mic for the call and once to the default output for you; 9>&- so pw-play doesn't hold the lock.
+        pw-play --volume "$(awk -v p="$vcall" 'BEGIN { print p / 100 }')" --target ${lib.escapeShellArg sink} "$1" 9>&- &
         call=$!
-        pw-play --volume "$(awk -v p="$vyou" 'BEGIN { print p / 100 }')" "$1" &
-        echo "$call $!" >${pids}
+        pw-play --volume "$(awk -v p="$vyou" 'BEGIN { print p / 100 }')" "$1" 9>&- &
+        you=$!
+        printf '%s\n' "''${live[@]}" "$call $you" >${pids}
+        exec 9>&-
         repeat record sound-pick --play "$1"
       }
 
@@ -488,6 +515,8 @@ let
           printf '%s\n' "''${label//-/ }"
         done | fuzzel --dmenu --index --match-mode fzf --prompt "sound> " --placeholder "search tags"
       ) || exit 0
+      # A pick from the menu cuts off everything playing; only the replay stacks.
+      sound-stop
       play "''${files[i]}"
     '';
   };
