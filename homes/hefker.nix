@@ -32,6 +32,7 @@ in
   ++ lib.optional isDevelopment ./modules/collie.nix
   ++ lib.optional isDevelopment ./modules/herdr-plugins.nix
   ++ lib.optional isDevelopment ./modules/hunk-extensions.nix
+  ++ lib.optional isDevelopment ./modules/phone
   ++ lib.optional isGaming ./modules/game-focus-watcher.nix;
 
   home = {

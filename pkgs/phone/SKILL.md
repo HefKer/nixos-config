@@ -20,7 +20,7 @@ The phone has no rollback, so act freely only where the step is easy to undo:
 - **Free:** reading state, screenshots, UI dumps, toggles the user can flip back in one tap.
 - **Ask first:** uninstalling, clearing app data, sending anything (SMS, calls, messages, posts), granting or revoking permissions, accessibility services, device admin, anything in Secure Folder or payment apps.
 
-Record the old value before any `settings put`, and tell the user what changed and how to undo it.
+Change a setting only with `phone-set`, never `settings put` or `settings delete`: it records the value it replaced in the phone journal. Tell the user what changed and how to undo it.
 
 ## Reading state
 
@@ -32,10 +32,12 @@ Shell commands work with the screen off or locked.
 
 ## Settings
 
-- `adb shell settings list|get|put|delete {global,secure,system} <key> [value]`; `delete` restores a key that was `null` before.
+- Read with `adb shell settings list|get {global,secure,system} [key]`.
+- Write with `phone-set {global,secure,system} <key> <value|--delete>`. It prints `old -> new` as read back from the phone, and exits non-zero when the phone holds something other than the value asked for.
+- The phone journal is `~/.local/state/phone/journal.tsv`, one line per change: timestamp, namespace, key, old value, new value (`\t`, `\n` and `\\` escaped). To undo a change, `phone-set` the key back to its old value, or `--delete` it when the old value is `null` (the key was unset).
 - Samsung's `system settings_change_history` names the last 10 keys changed through the Settings app, newest first: the quickest way to learn the key behind a toggle the user just flipped.
 - Otherwise find a key by diffing: dump all three namespaces, flip the toggle (through the UI, or by asking), dump again, diff, flip it back.
-- After a `put`, read the UI back to confirm the app picked it up. Screenshots are taken before display color filters (Eye comfort shield, grayscale), so those need the user's eyes.
+- After a change, read the UI back to confirm the app picked it up. Screenshots are taken before display color filters (Eye comfort shield, grayscale), so those need the user's eyes.
 - Services: `cmd notification set_dnd on|off`, `cmd wifi`, `cmd bluetooth_manager`, `cmd statusbar expand-settings|collapse`.
 
 ## Driving the screen

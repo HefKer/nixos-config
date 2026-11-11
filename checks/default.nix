@@ -212,6 +212,10 @@ in
 
   health = pkgs.callPackage ../pkgs/health/tests.nix { };
 
+  phone = pkgs.callPackage ../pkgs/phone/tests.nix { };
+
+  phone-automations = pkgs.callPackage ../homes/modules/phone/tests.nix { };
+
   sync-resolve = pkgs.callPackage ../pkgs/sync-resolve/tests.nix { };
 
   # The flake-trap guard (ADR-0001); readlink never follows a link, so the root needn't exist.
