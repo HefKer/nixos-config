@@ -93,9 +93,10 @@ where its directory holds runtime state.
 _Avoid_: stateful app, self-modifying config
 
 **Drift**:
-Divergence between the declared link set and what is actually on disk. Splits
-into *content drift* (tracked files changed but uncommitted) and *link drift* (a
-managed target is no longer the link that was placed).
+Divergence between what is declared and what is actually there. Splits into
+*content drift* (tracked files changed but uncommitted), *link drift* (a managed
+target is no longer the link that was placed) and *baseline drift* (the phone no
+longer holds its phone baseline).
 
 ### Sync
 
@@ -168,6 +169,38 @@ What a configuration reveals about a setup without granting access to it, such
 as which services run or which provider holds the backups. Publishing it is
 accepted; publishing a secret in plaintext is not.
 _Avoid_: metadata, fingerprint
+
+### Phone
+
+**Phone**:
+The user's Android phone, named by its role rather than its model. A peer, not
+a host: nothing builds it, so it is changed from outside, by hand, by agents,
+or by scripts.
+_Avoid_: device, mobile, handset
+
+**Phone errand**:
+A one-off job an agent does on the phone at the user's request, with the user
+present to approve anything hard to undo.
+_Avoid_: phone task, phone job
+
+**Phone automation**:
+A recurring job touching the phone that runs unattended on a trigger or
+schedule. It runs on the phone when its trigger lives there or it must work
+while the user is away, and on a host when it needs a host's files, compute or
+agents. Unattended, it only reads and notifies, unless its changes are fixed and
+were reviewed in advance.
+_Avoid_: phone script, routine, macro
+
+**Phone baseline**:
+The settings and apps the user wants held on the phone, reapplied on demand.
+The closest the phone gets to configuration, but nothing builds it, and drift
+from it is only corrected when it is reapplied.
+_Avoid_: phone config, phone profile
+
+**Phone journal**:
+The record of every change an agent makes to the phone, each with the value it
+replaced, so any of them can be undone after the session that made it is gone.
+_Avoid_: change log, history
 
 ### Health
 
