@@ -245,6 +245,8 @@ together](#how-it-fits-together) for what that means when you copy one.
   `sound-add` and `sound-pick` do the same for sound clips, played into a
   PipeWire "Soundboard mic" that carries your voice too: a soundboard with no app;
   repeating a sound stacks it on what is playing, up to 5 at once.
+  Shift+Enter in `sound-pick` pastes the clip as a file instead, an `.ogg` copy so
+  Discord shows its player.
   `sound-volume CALL [YOU]` sets their volume in percent without a rebuild, as
   does a DMS bar widget in the dotfiles.
   [`pkgs/memes/`](pkgs/memes/) ·

@@ -147,6 +147,19 @@ let
     }
   '';
 
+  # Shared by both pickers: puts $1 on the clipboard as a file reference, pasting it too when $2 is --paste after $3 seconds.
+  clip = ''
+    clip() {
+      # A file reference, not the bytes: the one form Discord, Signal and WhatsApp all take for every format.
+      printf 'file://%s\r\n' "$1" | wl-copy --type text/uri-list
+      if [ "$2" = --paste ]; then
+        # Focus returning from fuzzel, or the repeat key's Mod lifting, else the app sees Super+Ctrl+V.
+        sleep "$3"
+        wtype -M ctrl v -m ctrl
+      fi
+    }
+  '';
+
   # Shared by both savers: the clipboard as the default source, and tags asked in fuzzel turned into a free path.
   saving = app: ''
     src=''${1:-$(wl-paste --no-newline 2>/dev/null || true)}
@@ -314,17 +327,12 @@ let
     ];
     text = ''
       ${thumb}
+      ${clip}
       # Copies $1, pasting it too when $2 is --paste, and makes that the repeat's replay; $3 is how long to wait before pasting.
       deliver() {
         local pick
-        # A file reference, not the bytes: the one form Discord, Signal and WhatsApp all take for every format.
         pick=$(small "$1") || pick=$1
-        printf 'file://%s\r\n' "$pick" | wl-copy --type text/uri-list
-        if [ "$2" = --paste ]; then
-          # Focus returning from fuzzel, or the repeat key's Mod lifting, else the app sees Super+Ctrl+V.
-          sleep "$3"
-          wtype -M ctrl v -m ctrl
-        fi
+        clip "$pick" "$2" "$3"
         repeat record meme-pick "$2" "$1"
       }
 
@@ -458,9 +466,29 @@ let
       repeat
       gawk
       util-linux
+      ffmpeg
+      wl-clipboard
+      wtype
     ];
     text = ''
       sounds=${lib.escapeShellArg sounds}
+      ${clip}
+
+      # Pastes $1 into the focused window after $2 seconds, an .opus as an .ogg so Discord shows its player; makes that the repeat's replay.
+      paste_sound() {
+        local dir out=$1
+        if [[ $1 == *.opus ]]; then
+          dir=''${XDG_CACHE_HOME:-$HOME/.cache}/memes/ogg
+          out="$dir/$(basename "''${1%.*}").ogg"
+          if [ "$1" -nt "$out" ]; then
+            mkdir -p "$dir"
+            # An .opus is already Ogg inside, so the stream copy changes only the extension Discord judges by.
+            ffmpeg -loglevel error -y -i "$1" -map 0:a -c copy "$out" || { rm -f -- "$out"; out=$1; }
+          fi
+        fi
+        clip "$out" --paste "$2"
+        repeat record sound-pick --paste "$1"
+      }
 
       # Plays $1 on top of the newest $2 sounds playing, stopping older ones, and makes that the repeat's replay.
       play() {
@@ -492,14 +520,17 @@ let
         repeat record sound-pick --play "$1"
       }
 
-      # sound-pick --play FILE: the repeat's replay, with no menu.
+      # sound-pick --play|--paste FILE: the repeat's replay, with no menu.
       if [ $# -gt 0 ]; then
-        [ "$# $1" = "2 --play" ] || { echo "usage: sound-pick [--play FILE]" >&2 && exit 1; }
+        case "$# $1" in
+          "2 --play" | "2 --paste") ;;
+          *) echo "usage: sound-pick [--play|--paste FILE]" >&2 && exit 1 ;;
+        esac
         if [ ! -f "$2" ]; then
           notify-send -a memes "Sound gone" "$(basename "$2") is no longer in the library"
           exit 0
         fi
-        play "$2" ${toString (maxSounds - 1)}
+        if [ "$1" = --play ]; then play "$2" ${toString (maxSounds - 1)}; else paste_sound "$2" 0.4; fi
         exit 0
       fi
       # Newest first, so what was just added is on top before anything is typed.
@@ -509,15 +540,22 @@ let
         exit 0
       fi
 
+      # Enter plays; Shift+Enter (fuzzel's custom-1, exit 10) pastes the file into the focused window instead.
+      rc=0
       i=$(
         for f in "''${files[@]}"; do
           base=$(basename "$f")
           label=''${base%.*}
           printf '%s\n' "''${label//-/ }"
-        done | fuzzel --dmenu --index --match-mode fzf --prompt "sound> " --placeholder "search tags"
-      ) || exit 0
-      # A pick from the menu cuts off everything playing; only the replay stacks.
-      play "''${files[i]}" 0
+        done | fuzzel --dmenu --index --match-mode fzf --prompt "sound> " --placeholder "search tags" \
+          --override key-bindings.execute-input=none \
+          --override "key-bindings.custom-1=Shift+Return Shift+KP_Enter"
+      ) || rc=$?
+      case $rc in
+        # A pick from the menu cuts off everything playing; only the replay stacks.
+        0) play "''${files[i]}" 0 ;;
+        10) paste_sound "''${files[i]}" 0.15 ;;
+      esac
     '';
   };
 in
