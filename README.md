@@ -268,6 +268,15 @@ together](#how-it-fits-together) for what that means when you copy one.
   lists all windows across workspaces and monitors in fuzzel, most recently
   focused first with their app icons, searchable by title or app-id, and
   focuses the pick. [`pkgs/window-pick/`](pkgs/window-pick/)
+- <a id="smart-shot"></a>**Click a table, get a screenshot of just the
+  table.** `smart-shot` captures every output before a one-click pick, then
+  finds candidate rectangles around the click from long straight edges whose
+  lines stop at the corners, so table cells and panel borders drop out and the
+  crop is pixel-exact. TypeSafe's Jev judges each candidate, outlined in its
+  surroundings, as one whole item or not, and the best one is copied; Jev's Box
+  is the fallback. Every capture is kept, `smart-shot flag` labels the last one
+  as a test case, and `smart-shot test` replays the cases and scores the
+  overlap. [`pkgs/smart-shot/`](pkgs/smart-shot/)
 - <a id="bind-palette"></a>**One search over every scope's binds.**
   `bind-palette` gathers niri's and DMS's binds (`dms keybinds show niri`),
   the desktop leader's wlr-which-key menu, qutebrowser's effective binds (from
