@@ -1,4 +1,5 @@
 {
+  callPackage,
   coreutils,
   curl,
   ffmpeg,
@@ -25,6 +26,7 @@
   klipyKey,
 }:
 let
+  repeat = callPackage ../repeat { };
   thumbSize = 64;
   sounds = "${library}/sounds";
   # sound-pick writes the PIDs of what it is playing here, and sound-stop kills them.
@@ -189,6 +191,7 @@ let
     glib
     gnused
     libnotify
+    repeat
     wl-clipboard
     yt-dlp
   ];
@@ -278,6 +281,8 @@ let
       # The source beside the meme, hidden so meme-pick's listing skips it: .<name>.<ext>.url
       [ -f "$src" ] || printf '%s\n' "$src" >"$(dirname "$dest")/.$(basename "$dest").url"
       notify-send -a memes -i "$(thumb "$dest")" "Meme saved" "$(basename "$dest")"
+      # Replayed bare, so a repeat reads the clipboard afresh: copy the next URL, repeat.
+      [ "$#" -gt 0 ] || repeat record meme-add
       ocr "$dest"
     '';
   };
@@ -291,12 +296,41 @@ let
       fuzzel
       gawk
       libnotify
+      repeat
       tesseract
       wl-clipboard
       wtype
     ];
     text = ''
       ${thumb}
+      # Copies $1, pasting it too when $2 is paste, and makes that the repeat's replay.
+      deliver() {
+        local pick
+        # A file reference, not the bytes: the one form Discord, Signal and WhatsApp all take for every format.
+        pick=$(small "$1") || pick=$1
+        printf 'file://%s\r\n' "$pick" | wl-copy --type text/uri-list
+        if [ "$2" = paste ]; then
+          # Give focus a moment to return from fuzzel, or the repeat key's Mod to lift.
+          sleep 0.15
+          wtype -M ctrl v -m ctrl
+        fi
+        repeat record meme-pick "--$2" "$1"
+      }
+
+      # meme-pick --copy|--paste FILE: the repeat's replay, with no menu.
+      if [ $# -gt 0 ]; then
+        case "$# $1" in
+          "2 --copy" | "2 --paste") ;;
+          *) echo "usage: meme-pick [--copy|--paste FILE]" >&2 && exit 1 ;;
+        esac
+        if [ ! -f "$2" ]; then
+          notify-send -a memes "Meme gone" "$(basename "$2") is no longer in the library"
+          exit 0
+        fi
+        deliver "$2" "''${1#--}"
+        exit 0
+      fi
+
       # Newest first, so what was just added is on top before anything is typed.
       mapfile -t files < <(find "$library" -maxdepth 1 -type f ! -name '.*' -printf '%T@\t%p\n' 2>/dev/null | sort -rn | cut -f2-)
       if [ ''${#files[@]} -eq 0 ]; then
@@ -322,15 +356,10 @@ let
           --override key-bindings.execute-input=none \
           --override "key-bindings.custom-1=Shift+Return Shift+KP_Enter"
       ) || rc=$?
-      [ "$rc" -eq 0 ] || [ "$rc" -eq 10 ] || exit 0
-      # A file reference, not the bytes: the one form Discord, Signal and WhatsApp all take for every format.
-      pick=$(small "''${files[i]}") || pick=''${files[i]}
-      printf 'file://%s\r\n' "$pick" | wl-copy --type text/uri-list
-      if [ "$rc" -eq 10 ]; then
-        # Give focus a moment to return from fuzzel to the window it was over.
-        sleep 0.15
-        wtype -M ctrl v -m ctrl
-      fi
+      case $rc in
+        0) deliver "''${files[i]}" copy ;;
+        10) deliver "''${files[i]}" paste ;;
+      esac
     '';
   };
 
@@ -368,6 +397,7 @@ let
       ffmpeg -loglevel error -y "''${cut[@]}" -i "$file" -vn -af loudnorm -c:a libopus -b:a 96k "$dest" ||
         { rm -f -- "$dest"; fail "ffmpeg could not convert $src"; }
       notify-send -a memes "Sound saved" "$(basename "$dest")"
+      [ "$#" -gt 0 ] || repeat record sound-add
     '';
   };
 
@@ -412,11 +442,38 @@ let
       fuzzel
       libnotify
       pipewire
+      repeat
       soundStop
       gawk
     ];
     text = ''
       sounds=${lib.escapeShellArg sounds}
+
+      # Plays $1 and makes that the repeat's replay.
+      play() {
+        local vcall vyou call
+        # One clip at a time: a new pick cuts off the last.
+        sound-stop
+        read -r vcall vyou _ 2>/dev/null <${volumeFile} || read -r vcall vyou <<<"${defaultVolume}"
+        vyou=''${vyou:-$vcall}
+        # Once into the soundboard mic for the call and once to the default output for you, each at its sound-volume.
+        pw-play --volume "$(awk -v p="$vcall" 'BEGIN { print p / 100 }')" --target ${lib.escapeShellArg sink} "$1" &
+        call=$!
+        pw-play --volume "$(awk -v p="$vyou" 'BEGIN { print p / 100 }')" "$1" &
+        echo "$call $!" >${pids}
+        repeat record sound-pick --play "$1"
+      }
+
+      # sound-pick --play FILE: the repeat's replay, with no menu.
+      if [ $# -gt 0 ]; then
+        [ "$# $1" = "2 --play" ] || { echo "usage: sound-pick [--play FILE]" >&2 && exit 1; }
+        if [ ! -f "$2" ]; then
+          notify-send -a memes "Sound gone" "$(basename "$2") is no longer in the library"
+          exit 0
+        fi
+        play "$2"
+        exit 0
+      fi
       # Newest first, so what was just added is on top before anything is typed.
       mapfile -t files < <(find "$sounds" -maxdepth 1 -type f ! -name '.*' -printf '%T@\t%p\n' 2>/dev/null | sort -rn | cut -f2-)
       if [ ''${#files[@]} -eq 0 ]; then
@@ -431,16 +488,7 @@ let
           printf '%s\n' "''${label//-/ }"
         done | fuzzel --dmenu --index --match-mode fzf --prompt "sound> " --placeholder "search tags"
       ) || exit 0
-
-      # One clip at a time: a new pick cuts off the last.
-      sound-stop
-      read -r vcall vyou _ 2>/dev/null <${volumeFile} || read -r vcall vyou <<<"${defaultVolume}"
-      vyou=''${vyou:-$vcall}
-      # Once into the soundboard mic for the call and once to the default output for you, each at its sound-volume.
-      pw-play --volume "$(awk -v p="$vcall" 'BEGIN { print p / 100 }')" --target ${lib.escapeShellArg sink} "''${files[i]}" &
-      call=$!
-      pw-play --volume "$(awk -v p="$vyou" 'BEGIN { print p / 100 }')" "''${files[i]}" &
-      echo "$call $!" >${pids}
+      play "''${files[i]}"
     '';
   };
 in
