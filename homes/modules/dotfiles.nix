@@ -34,6 +34,8 @@ let
   shared = layer [
     # The directory holds only config and themes; history and keys live in ~/.local/share/atuin.
     "atuin/.config/atuin"
+    # The directory holds only projects.yaml; the queue and caches live in ~/.local/state/backlog.
+    "backlog/.config/backlog"
     "btop/.config/btop"
     # ~/.claude holds Claude Code's runtime state, so its config links piece by piece; these dirs hold only scripts and commands.
     "claude/.claude/bin"

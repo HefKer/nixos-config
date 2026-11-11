@@ -21,6 +21,7 @@ let
       ".claude/hooks" = "claude/.claude/hooks";
       ".claude/keybindings.json" = "claude/.claude/keybindings.json";
       ".claude/statusline.sh" = "claude/.claude/statusline.sh";
+      ".config/backlog" = "backlog/.config/backlog";
       ".config/btop" = "btop/.config/btop";
       ".config/DankMaterialShell" = "DankMaterialShell/.config/DankMaterialShell";
       ".config/Dux Shell" = "DankMaterialShell/.config/DankMaterialShell";
@@ -67,6 +68,7 @@ let
       ".claude/hooks" = "claude/.claude/hooks";
       ".claude/keybindings.json" = "claude/.claude/keybindings.json";
       ".claude/statusline.sh" = "claude/.claude/statusline.sh";
+      ".config/backlog" = "backlog/.config/backlog";
       ".config/btop" = "btop/.config/btop";
       ".config/DankMaterialShell" = "DankMaterialShell/.config/DankMaterialShell";
       ".config/Dux Shell" = "DankMaterialShell/.config/DankMaterialShell";
@@ -197,6 +199,8 @@ in
       '';
 
   summon = (pkgs.callPackage ../pkgs/summon { }).tests;
+
+  backlog = pkgs.callPackage ../pkgs/backlog/tests.nix { };
 
   health = pkgs.callPackage ../pkgs/health/tests.nix { };
 
