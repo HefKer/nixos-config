@@ -357,12 +357,17 @@ cmd_add() {
 
 # Saves the clipboard's image (PNG when offered) to a new file in the state dir and prints its path; fails without one.
 clipboard_image() {
-  local type file
-  type=$(wl-paste --list-types 2>/dev/null | grep -m 1 -x 'image/png') ||
-    type=$(wl-paste --list-types 2>/dev/null | grep -m 1 '^image/') || return 1
+  local types type file sub
+  types=$(wl-paste --list-types 2>/dev/null) || return 1
+  type=$(grep -x 'image/png' <<<"$types") || type=$(grep '^image/' <<<"$types" | head -n 1) || return 1
+  [ -n "$type" ] || return 1
+  sub=${type#image/}
   mkdir -p "$state"
-  file=$(mktemp --suffix=".${type#image/}" "$state/clip.XXXXXXXX")
-  wl-paste --no-newline --type "$type" >"$file"
+  file=$(mktemp --suffix=".${sub%%+*}" "$state/clip.XXXXXXXX") || return 1
+  if ! wl-paste --no-newline --type "$type" >"$file" || [ ! -s "$file" ]; then
+    rm -f "$file"
+    return 1
+  fi
   echo "$file"
 }
 
@@ -431,18 +436,6 @@ label_spec() {
 
 cmd_setup() {
   local repo labels label have spec out
-  repo=$(attachments_repo)
-  if [ -n "$repo" ]; then
-    if out=$(gh api "repos/$repo" --jq .private 2>&1); then
-      [ "$out" = true ] || die "$repo is public; attachments_repo must be private"
-      echo "$repo: exists"
-    elif [[ $out == *"Not Found"* ]]; then
-      gh repo create "$repo" --private --description "Images embedded in backlog issues" >/dev/null
-      echo "$repo: created (private)"
-    else
-      die "can't check $repo: $out"
-    fi
-  fi
   while IFS=$'\t' read -r repo labels; do
     have=$(gh label list --repo "$repo" --limit 500 --json name --jq '.[].name') || die "can't list labels in $repo"
     while read -r label; do
@@ -455,6 +448,18 @@ cmd_setup() {
       echo "$repo: $label created"
     done < <(jq -r '.[]' <<<"$labels")
   done < <(projects_json | jq -r 'group_by(.repo)[] | [.[0].repo, (map(.labels[]) | unique | tojson)] | @tsv')
+  repo=$(attachments_repo)
+  if [ -n "$repo" ]; then
+    if out=$(gh api "repos/$repo" --jq .private 2>&1); then
+      [ "$out" = true ] || die "$repo is public; attachments_repo must be private"
+      echo "$repo: exists"
+    elif [[ $out == *"Not Found"* ]]; then
+      gh repo create "$repo" --private --description "Images embedded in backlog issues" >/dev/null
+      echo "$repo: created (private)"
+    else
+      die "can't check $repo: $out"
+    fi
+  fi
 }
 
 case ${1:-} in
