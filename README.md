@@ -221,6 +221,13 @@ together](#how-it-fits-together) for what that means when you copy one.
   and monitors, cycles through its others on repeats in the order the cycle
   began with, and launches it if none is open; bound to niri's Mod+Alt keys.
   [`pkgs/summon/`](pkgs/summon/)
+- <a id="repeat"></a>**A repeat key for the desktop, like vim's `.`.** Each
+  repeatable action runs `repeat record CMD ARG...` when it completes, naming
+  its own replay (a menu pick replays without the menu), and `repeat`, on
+  niri's Mod+Period, runs it again. The record is a NUL-separated argv, so
+  filenames with spaces or quotes replay exactly; a cancelled menu records
+  nothing.
+  [`pkgs/repeat/`](pkgs/repeat/)
 - <a id="yazi-picker"></a>**yazi as the system file picker.** Uses
   xdg-desktop-portal-termfilechooser on niri, with the environment variables
   that make unsandboxed GTK, Firefox and Qt apps actually use the portal.
