@@ -36,21 +36,12 @@ leader_rows() {
     walk_menu([]; []) | '"$tsv"
 }
 
-# qutebrowser's effective binds, defaults merged with binds.py, asked of the running
-# instance; a closed browser is left closed (a crash leaves its IPC socket behind, so the process is checked).
+# qutebrowser's effective binds, which its config.py writes on every load (dots: bindsdump.py); asking the running browser over IPC would raise its window.
 qutebrowser_rows() {
-  local out
-  pgrep -u "$UID" -f '^\S*python\S* \S*qutebrowser' >/dev/null || return 0
-  out=$(mktemp)
-  # shellcheck disable=SC2016
-  qutebrowser ":debug-pyeval -q open('$out.tmp', 'w').write(__import__('json').dumps({m: {str(k): v for k, v in __import__('qutebrowser.config.config', fromlist=['c']).key_instance.get_bindings_for(m).items()} for m in ['normal', 'insert', 'caret', 'passthrough']})) and __import__('os').rename('$out.tmp', '$out.json')" >/dev/null 2>&1
-  for _ in $(seq 20); do
-    [[ -s $out.json ]] && break
-    sleep 0.1
-  done
-  [[ -s $out.json ]] && jq -r 'to_entries[] | .key as $m | .value | to_entries[]
-    | ["qutebrowser", (if $m == "normal" then .key else "\($m): \(.key)" end), .value, ""] | '"$tsv" "$out.json"
-  rm -f "$out" "$out.json" "$out.tmp"
+  local binds="${XDG_CACHE_HOME:-$HOME/.cache}/qutebrowser/binds.json"
+  [[ -r $binds ]] || return 0
+  jq -r 'to_entries[] | .key as $m | .value | to_entries[]
+    | ["qutebrowser", (if $m == "normal" then .key else "\($m): \(.key)" end), .value, ""] | '"$tsv" "$binds"
 }
 
 # nvim's global maps with a description; buffer-local ones stay on <leader>sk.
