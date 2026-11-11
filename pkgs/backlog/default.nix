@@ -9,6 +9,7 @@
   libnotify,
   niri,
   util-linux,
+  wl-clipboard,
   writeShellApplication,
   yq-go,
 }:
@@ -25,6 +26,7 @@ writeShellApplication {
     niri
     (callPackage ../repeat { })
     util-linux
+    wl-clipboard
     yq-go
   ];
   text = builtins.readFile ./backlog.sh;
