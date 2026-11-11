@@ -23,18 +23,21 @@ field() {
 
 old=$(settings get)
 if [ "$value" = --delete ]; then
-  settings delete >/dev/null
+  asked=null
+  settings delete >/dev/null || failed=1
 else
-  settings put "$(quote "$value")"
+  # Command substitution drops trailing newlines from what is read back, so the comparison drops them too.
+  asked=$(printf %s "$value")
+  settings put "$(quote "$value")" || failed=1
 fi
-# Read back, so the journal holds what the phone took rather than what was asked.
-new=$(settings get)
+# Read back, so the journal holds what the phone took; when that fails too, the entry still records the old value.
+new=$(settings get) || new="unknown, asked for $asked"
 
 mkdir -p "$(dirname "$journal")"
 printf '%s\t%s\t%s\t%s\t%s\n' "$(date -Is)" "$ns" "$(field "$key")" "$(field "$old")" "$(field "$new")" >>"$journal"
 echo "$ns $key: $old -> $new"
 
-if [ "$value" != --delete ] && [ "$new" != "$value" ]; then
-  echo "phone-set: the phone holds '$new', not '$value'" >&2
+if [ -n "${failed:-}" ] || [ "$new" != "$asked" ]; then
+  echo "phone-set: the phone holds '$new', not '$asked'" >&2
   exit 1
 fi

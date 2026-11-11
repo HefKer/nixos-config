@@ -6,8 +6,8 @@
   writeShellApplication,
 }:
 let
-  automation =
-    name: inputs: text:
+  reaching =
+    name: inputs: script:
     writeShellApplication {
       inherit name;
       runtimeInputs = [
@@ -15,20 +15,14 @@ let
         phone
       ]
       ++ inputs;
-      text = builtins.readFile ./reach.sh + text;
+      text = builtins.readFile ./reach.sh + builtins.readFile script;
     };
 in
 {
-  # A finding once no automation has reached the phone for `maxHours`.
-  adbProbe =
-    maxHours:
-    automation "health-probe-phone-adb" [ ] ''
-      MAX_HOURS=${toString maxHours}
-      ${builtins.readFile ./adb-probe.sh}
-    '';
+  adbProbe = reaching "health-probe-phone-adb" [ ] ./adb-probe.sh;
 
-  settingsLog = automation "phone-settings-log" [
+  settingsChanges = reaching "phone-settings-changes" [
     android-tools
     gnugrep
-  ] (builtins.readFile ./settings-log.sh);
+  ] ./settings-changes.sh;
 }

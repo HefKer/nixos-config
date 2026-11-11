@@ -11,9 +11,13 @@ let
     eval "set -- $*"
     file=$PHONE/$3/$4
     case $2 in
-      get) if [ -e "$file" ]; then cat "$file"; else echo null; fi ;;
+      get)
+        if [ -e "$PHONE/drops-after-put" ] && [ -e "$PHONE/put" ]; then exit 1; fi
+        if [ -e "$file" ]; then cat "$file"; else echo null; fi
+        ;;
       put)
         if [ -e "$PHONE/read-only" ]; then exit 0; fi
+        touch "$PHONE/put"
         mkdir -p "$PHONE/$3"
         printf '%s\n' "$5" >"$file"
         ;;
@@ -65,6 +69,13 @@ runCommandLocal "phone-tests" { nativeBuildInputs = [ phone ]; } ''
   if phone-set global mode 2 >/dev/null 2>&1; then echo "FAIL a change the phone dropped exits 0"; fail=1; fi
   expect "$(entries | tail -n1)" $'global\tmode\tnull\tnull' "a dropped change is journalled as what the phone holds"
   rm "$PHONE/read-only"
+
+  rm -f "$PHONE/put"
+  touch "$PHONE/drops-after-put"
+  if phone-set global mode 3 >/dev/null 2>&1; then echo "FAIL a change that couldn't be read back exits 0"; fail=1; fi
+  expect "$(entries | tail -n1)" $'global\tmode\tnull\tunknown, asked for 3' "a change adb dropped after applying is still journalled with its old value"
+  rm "$PHONE/drops-after-put"
+  before=$((before + 1))
 
   for bad in "" "bogus key v" "system key" "system key v extra"; do
     # shellcheck disable=SC2086
