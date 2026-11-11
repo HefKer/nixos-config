@@ -5,13 +5,29 @@
   writeShellScriptBin,
 }:
 let
-  # Fake GitHub: $FAKE/offline drops the network, $FAKE/broken fails a label, $FAKE/public/<owner>_<repo> is public.
+  # Fake GitHub: $FAKE/offline drops the network, $FAKE/broken fails a label, $FAKE/{public,missing}/<owner>_<repo>.
   fakeGh = writeShellScriptBin "gh" ''
     net() { echo "error connecting to api.github.com" >&2; exit 1; }
     case "$1 $2" in
+      "api repos/"*/contents/*)
+        [ -e "$FAKE/offline" ] && net
+        p=''${2#repos/}
+        f=$FAKE/uploads/''${p/\/contents\//\/}
+        url="https://github.com/''${p%%/contents/*}/blob/main/''${p#*/contents/}"
+        if [ "$3 $4" = "-X PUT" ]; then
+          [ -e "$f" ] && { cat >/dev/null; echo "gh: sha wasn't supplied (HTTP 422)" >&2; exit 1; }
+          mkdir -p "$(dirname "$f")"
+          jq -r .content | base64 -d >"$f"
+          echo "upload $p" >>"$LOG"
+        else
+          [ -e "$f" ] || { echo "gh: Not Found (HTTP 404)" >&2; exit 1; }
+        fi
+        echo "$url"
+        ;;
       "api "*)
         [ -e "$FAKE/offline" ] && net
         r=''${2#repos/}
+        [ -e "$FAKE/missing/''${r//\//_}" ] && { echo "gh: Not Found (HTTP 404)" >&2; exit 1; }
         if [ -e "$FAKE/public/''${r//\//_}" ]; then echo false; else echo true; fi
         echo "api $r" >>"$FAKE/api-calls"
         ;;
@@ -28,6 +44,7 @@ let
         ;;
       "label list") cat "$FAKE/labels" 2>/dev/null || true ;;
       "label create") echo "label $3 $5" >>"$LOG" ;;
+      "repo create") echo "repo create $3 $4" >>"$LOG" ;;
       *) echo "fake gh: unexpected $*" >&2; exit 1 ;;
     esac
   '';
@@ -36,20 +53,37 @@ let
     echo "notify $*" >>"$FAKE/notes"
   '';
 
-  # Answers each call with the next line of $FAKE/answers, cancelling (exit 1) on ESC, and logs its prompt.
+  # Answers with the next line of $FAKE/answers (ESC cancels, SHIFT: is Shift+Enter), logging prompt and refill.
   fakeFuzzel = writeShellScriptBin "fuzzel" ''
-    for a; do case $a in *"> ") echo "$a" >>"$FAKE/fuzzel-prompts" ;; esac; done
+    prev=""
+    for a; do
+      case $a in *"> ") echo "$a" >>"$FAKE/fuzzel-prompts" ;; esac
+      [ "$prev" != --search ] || echo "$a" >>"$FAKE/fuzzel-search"
+      prev=$a
+    done
     n=$(($(cat "$FAKE/fuzzel-n" 2>/dev/null || echo 0) + 1))
     echo "$n" >"$FAKE/fuzzel-n"
     a=$(sed -n "''${n}p" "$FAKE/answers")
     [ "$a" != ESC ] || exit 1
-    echo "$a"
+    case $a in
+      SHIFT:*) echo "''${a#SHIFT:}" && exit 10 ;;
+      *) echo "$a" ;;
+    esac
+  '';
+
+  # The clipboard: $FAKE/clip-types lists its types, $FAKE/clip holds the bytes.
+  fakeWlPaste = writeShellScriptBin "wl-paste" ''
+    case $1 in
+      --list-types) cat "$FAKE/clip-types" 2>/dev/null || true ;;
+      *) echo "$*" >>"$FAKE/wl-paste-args" && cat "$FAKE/clip" ;;
+    esac
   '';
 
   backlog = callPackage ./. {
     gh = fakeGh;
     libnotify = fakeNotify;
     fuzzel = fakeFuzzel;
+    wl-clipboard = fakeWlPaste;
   };
 in
 runCommandLocal "backlog-tests"
@@ -171,6 +205,56 @@ runCommandLocal "backlog-tests"
       "label capture o/dots-issues label capture o/nixos-issues label capture o/open label idea o/openok " \
       "setup creates only the missing labels in each repo"
 
+    printf 'PNG1' >"$PWD/shot.png"
+    : >"$LOG"
+    expect "$(backlog add --image "$PWD/shot.png" nixos 'x' </dev/null 2>&1 || echo "rc=$?")" \
+      "backlog: --image needs attachments_repo: OWNER/NAME in $BACKLOG_CONFIG"$'\n'"rc=1" \
+      "--image without attachments_repo is refused"
+    expect "$(cat "$LOG")" "" "and nothing is uploaded or filed"
+
+    echo 'attachments_repo: o/attach' >>"$BACKLOG_CONFIG"
+    day=$(date -u +%Y-%m-%d)
+    raw() { echo "https://github.com/o/attach/blob/main/$day/$(sha256sum "$1" | cut -c1-16).png?raw=true"; }
+    url1=$(raw "$PWD/shot.png")
+    backlog add --image "$PWD/shot.png" nixos 'shot // look' </dev/null >/dev/null
+    expect "$(cat "$FAKE/uploads/o/attach/$day/"*.png)" PNG1 "the image is committed to the attachments repo"
+    expect "$(tail -n 3 "$LOG")" \
+      "create --repo o/nixos-issues --title shot --body look"$'\n\n'"![image]($url1) --label needs-triage --label capture" \
+      "and embedded at the end of the body by its raw URL"
+
+    backlog add --image "$PWD/shot.png" dots 'again' </dev/null >/dev/null
+    expect "$(tail -n 1 "$LOG")" "create --repo o/dots-issues --title again --body ![image]($url1) --label needs-triage --label capture" \
+      "an image already uploaded is reused"
+
+    printf 'PNG2' >"$PWD/two.png"
+    url2=$(raw "$PWD/two.png")
+    touch "$FAKE/offline"
+    backlog add --image "$PWD/two.png" nixos 'later' </dev/null 2>/dev/null
+    expect "$(cat "$(jq -r .image "$queue")")" PNG2 "offline, the image is copied into the state dir beside the queued line"
+    rm "$PWD/two.png" "$FAKE/offline"
+    backlog flush >/dev/null
+    expect "$(tail -n 1 "$LOG")" "create --repo o/nixos-issues --title later --body ![image]($url2) --label needs-triage --label capture" \
+      "a flush uploads the copy and files the line with it, after the original is gone"
+    expect "$(ls -A "$HOME/.local/state/backlog/images")" "" "and removes the copy"
+
+    touch "$FAKE/public/o_attach"
+    rm "$HOME/.local/state/backlog/visibility"
+    expect "$(backlog add --image "$PWD/shot.png" dots 'leak' </dev/null 2>&1 >/dev/null || true)" \
+      "backlog: queued after an error: o/attach is public; attachments_repo must be private" \
+      "a public attachments repo is never uploaded to"
+    expect "$(tail -n 1 "$LOG")" "create --repo o/nixos-issues --title later --body ![image]($url2) --label needs-triage --label capture" \
+      "nor is the issue filed without its image"
+    rm "$FAKE/public/o_attach" "$queue" "$HOME/.local/state/backlog/visibility"
+    rm -r "$HOME/.local/state/backlog/images"
+
+    mkdir -p "$FAKE/missing"
+    touch "$FAKE/missing/o_attach"
+    : >"$LOG"
+    expect "$(backlog setup | grep o/attach)" "o/attach: created (private)" "setup creates a missing attachments repo"
+    expect "$(grep '^repo' "$LOG")" "repo create o/attach --private" "as private"
+    rm "$FAKE/missing/o_attach"
+    expect "$(backlog setup | grep o/attach)" "o/attach: exists" "and leaves an existing one"
+
     # The prompt runs last: the add it starts is backgrounded, so its log lines land late.
     record=$HOME/.local/state/repeat/last
     printf 'ESC\n' >"$FAKE/answers"
@@ -193,6 +277,41 @@ runCommandLocal "backlog-tests"
     expect "$(cat "$FAKE/notes")" "notify -a backlog backlog: no project removed it is no longer in $BACKLOG_CONFIG" \
       "a replay for a project gone from the config notifies and does nothing else"
     expect "$(cat "$FAKE/fuzzel-n")" 4 "and opens no box"
+
+    # Shift+Enter: with no attachments_repo, then no image, the box reopens with the text; then the image is filed.
+    filed() {
+      for _ in $(seq 100); do grep -q "title $1 " "$LOG" && return 0; sleep 0.1; done
+    }
+    : >"$FAKE/notes"
+    rm -f "$FAKE/fuzzel-n" "$FAKE/fuzzel-search"
+    printf 'SHIFT:pic // see\nESC\n' >"$FAKE/answers"
+    BACKLOG_CONFIG=$PWD/x.yaml backlog prompt x
+    expect "$(grep "can't attach" "$FAKE/notes")" "notify -a backlog backlog: can't attach an image set attachments_repo: OWNER/NAME in $PWD/x.yaml" \
+      "Shift+Enter without attachments_repo says so"
+    expect "$(cat "$FAKE/fuzzel-search")" "pic // see" "and reopens the box with the text kept"
+
+    : >"$FAKE/notes"
+    rm -f "$FAKE/fuzzel-n" "$FAKE/fuzzel-search"
+    printf 'text/plain\n' >"$FAKE/clip-types"
+    printf 'SHIFT:nopic // see\nESC\n' >"$FAKE/answers"
+    backlog prompt nixos
+    expect "$(grep "can't attach" "$FAKE/notes")" "notify -a backlog backlog: can't attach an image no image on the clipboard" \
+      "Shift+Enter with no image on the clipboard says so"
+    expect "$(cat "$FAKE/fuzzel-search")" "nopic // see" "and reopens the box with the text kept"
+
+    rm -f "$FAKE/fuzzel-n"
+    printf 'image/jpeg\nimage/png\n' >"$FAKE/clip-types"
+    printf 'PNG3' >"$FAKE/clip"
+    printf 'SHIFT:pic // see\n' >"$FAKE/answers"
+    backlog prompt nixos
+    filed pic
+    expect "$(cat "$FAKE/wl-paste-args")" "--no-newline --type image/png" "PNG is preferred among the offered types"
+    expect "$(grep -A2 'title pic ' "$LOG")" \
+      "create --repo o/nixos-issues --title pic --body see"$'\n\n'"![image]($(raw "$FAKE/clip")) --label needs-triage --label capture" \
+      "the second Shift+Enter files the line with the clipboard's image"
+    for _ in $(seq 100); do compgen -G "$HOME/.local/state/backlog/clip.*" >/dev/null || break; sleep 0.1; done
+    expect "$(compgen -G "$HOME/.local/state/backlog/clip.*" || true)" "" "and removes the clipboard's copy"
+    expect "$(tr '\0' ' ' <"$record")" "backlog prompt nixos " "an image filing records the box like a plain one"
 
     if [ "$fail" != 0 ]; then exit 1; fi
     touch $out

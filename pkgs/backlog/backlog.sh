@@ -4,6 +4,7 @@ self=$(readlink -f "$0")
 config=${BACKLOG_CONFIG:-${XDG_CONFIG_HOME:-$HOME/.config}/backlog/projects.yaml}
 state=${XDG_STATE_HOME:-$HOME/.local/state}/backlog
 queue=$state/queue.jsonl
+images=$state/images
 recent=$state/recent
 visibility=$state/visibility
 # A queued line failing this many times for a reason other than the network raises one notification.
@@ -14,12 +15,16 @@ notify=0
 
 usage() {
   cat <<'EOF'
-backlog add [PROJECT] "TITLE // BODY"   file an idea; " //" splits title from body (a URL's :// doesn't);
-                                        stdin, if not a terminal, is appended to the body
-backlog prompt [PROJECT]                fuzzel: pick a project (or take PROJECT), type a line, file it in the background
+backlog add [--image FILE] [PROJECT] "TITLE // BODY"
+                                        file an idea; " //" splits title from body (a URL's :// doesn't);
+                                        stdin, if not a terminal, is appended to the body; --image embeds FILE,
+                                        uploaded to the config's attachments_repo
+backlog prompt [PROJECT]                fuzzel: pick a project (or take PROJECT), type a line, file it in the background;
+                                        Shift+Enter attaches the clipboard's image
 backlog flush [--notify]                re-send the offline queue
 backlog queue                           list what is queued
-backlog setup                           create the configured labels in every configured repo
+backlog setup                           create the configured labels in every configured repo, and the
+                                        attachments_repo (private) if missing
 backlog projects                        list the configured projects, best guess first
 EOF
 }
@@ -38,6 +43,12 @@ projects_json() {
     labels: (.labels // ["needs-triage", "capture"]),
     public_ok: (.public_ok // false)
   }]'
+}
+
+# The private repo images are uploaded to, or nothing.
+attachments_repo() {
+  [ -f "$config" ] || die "no config at $config"
+  yq -r '.attachments_repo // ""' "$config"
 }
 
 project() {
@@ -132,10 +143,50 @@ is_private() {
   echo "$answer"
 }
 
-# Files one issue. Exit 0 filed (URL on stdout), 2 refused as public, 3 network, 4 any other failure (message on stdout).
+# The extension an image is stored under, from its name.
+ext_of() {
+  local base=${1##*/} ext=png
+  [[ $base == *.* ]] && ext=${base##*.}
+  echo "${ext,,}"
+}
+
+# Commits $1 to the attachments repo at its content hash, so a retry reuses it; prints the embed URL or the failure.
+upload() {
+  local file=$1 repo private path out url
+  repo=$(attachments_repo)
+  if [ -z "$repo" ]; then
+    echo "no attachments_repo in $config"
+    return 1
+  fi
+  if [ ! -f "$file" ]; then
+    echo "the image $file is gone"
+    return 1
+  fi
+  private=$(is_private "$repo") || {
+    echo "$private"
+    return 1
+  }
+  if [ "$private" != true ]; then
+    echo "$repo is public; attachments_repo must be private"
+    return 1
+  fi
+  path=$(date -u +%Y-%m-%d)/$(sha256sum "$file" | cut -c1-16).$(ext_of "$file")
+  if out=$(base64 -w0 "$file" | jq -Rsc --arg m "backlog: $path" '{message: $m, content: .}' |
+    gh api "repos/$repo/contents/$path" -X PUT --input - --jq .content.html_url 2>&1); then
+    echo "$out?raw=true"
+    return 0
+  fi
+  if url=$(gh api "repos/$repo/contents/$path" --jq .html_url 2>/dev/null); then
+    echo "$url?raw=true"
+    return 0
+  fi
+  echo "$out"
+  return 1
+}
+
+# Files one issue, image $6 embedded. Exit 0 filed (URL on stdout), 2 refused as public, 3 network, 4 other (message).
 send() {
-  local repo=$1 title=$2 body=$3 labels=$4 public_ok=$5 private out
-  local -a args=(issue create --repo "$repo" --title "$title" --body "$body")
+  local repo=$1 title=$2 body=$3 labels=$4 public_ok=$5 image=${6:-} private out url
   if ! private=$(is_private "$repo"); then
     echo "$private"
     is_network "$private" && return 3
@@ -145,6 +196,15 @@ send() {
     echo "$repo is public; set public_ok: true in $config to allow it"
     return 2
   fi
+  if [ -n "$image" ]; then
+    if ! url=$(upload "$image"); then
+      echo "$url"
+      is_network "$url" && return 3
+      return 4
+    fi
+    body=${body:+$body$'\n\n'}"![image]($url)"
+  fi
+  local -a args=(issue create --repo "$repo" --title "$title" --body "$body")
   while read -r l; do args+=(--label "$l"); done < <(jq -r '.[]' <<<"$labels")
   if out=$(gh "${args[@]}" 2>&1); then
     tail -n 1 <<<"$out"
@@ -155,10 +215,19 @@ send() {
   return 4
 }
 
+# Queues one idea; image $7, if given, is copied into the state dir, since the original may not outlive the queue.
 enqueue() {
+  local copy=""
   mkdir -p "$state"
+  if [ -n "${7:-}" ]; then
+    mkdir -p "$images"
+    copy=$(mktemp --suffix=".$(ext_of "$7")" "$images/XXXXXXXX")
+    cp -f "$7" "$copy"
+  fi
   jq -nc --arg repo "$1" --arg title "$2" --arg body "$3" --argjson labels "$4" --argjson public_ok "$5" --argjson fails "$6" \
-    '{repo: $repo, title: $title, body: $body, labels: $labels, public_ok: $public_ok, at: (now | todate), fails: $fails}' >>"$queue"
+    --arg image "$copy" \
+    '{repo: $repo, title: $title, body: $body, labels: $labels, public_ok: $public_ok, at: (now | todate), fails: $fails}
+      + (if $image == "" then {} else {image: $image} end)' >>"$queue"
 }
 
 lock() {
@@ -168,7 +237,7 @@ lock() {
 }
 
 flush_locked() {
-  local line repo title body labels public_ok fails out rc offline=0 pending=()
+  local line repo title body labels public_ok image fails out rc offline=0 pending=()
   [ -s "$queue" ] || return 0
   while IFS= read -r -u 3 line; do
     [ -n "$line" ] || continue
@@ -181,11 +250,16 @@ flush_locked() {
     body=$(jq -r .body <<<"$line")
     labels=$(jq -c .labels <<<"$line")
     public_ok=$(jq -r '.public_ok // false' <<<"$line")
+    image=$(jq -r '.image // ""' <<<"$line")
     rc=0
-    out=$(send "$repo" "$title" "$body" "$labels" "$public_ok") || rc=$?
+    out=$(send "$repo" "$title" "$body" "$labels" "$public_ok" "$image") || rc=$?
     case $rc in
-      0) note_filed "$repo" "$out" 9>&- & ;;
+      0)
+        [ -z "$image" ] || rm -f "$image"
+        note_filed "$repo" "$out" 9>&- &
+        ;;
       2)
+        [ -z "$image" ] || rm -f "$image"
         echo "backlog: dropped '$title': $out" >&2
         note -u critical "backlog: dropped from queue" "$title — $out"
         ;;
@@ -219,15 +293,28 @@ cmd_flush() {
 }
 
 cmd_add() {
-  local p name repo labels public_ok out rc=0 extra=""
-  [ "${1:-}" = --notify ] && notify=1 && shift
+  local p name repo labels public_ok out rc=0 extra="" image=""
+  while :; do
+    case ${1:-} in
+      --notify) notify=1 && shift ;;
+      --image)
+        [ $# -ge 2 ] || die "usage: backlog add [--image FILE] [PROJECT] \"TITLE // BODY\""
+        image=$2 && shift 2
+        ;;
+      *) break ;;
+    esac
+  done
+  if [ -n "$image" ]; then
+    [ -f "$image" ] && [ -r "$image" ] || die "no readable image at $image"
+    [ -n "$(attachments_repo)" ] || die "--image needs attachments_repo: OWNER/NAME in $config"
+  fi
   case $# in
     1)
       name=$(ordered "$PWD" | head -n 1)
       [ -n "$(guess "$PWD")" ] || echo "backlog: nothing matches $PWD; using the most recent project, $name" >&2
       ;;
     2) name=$1 && shift ;;
-    *) die "usage: backlog add [PROJECT] \"TITLE // BODY\"" ;;
+    *) die "usage: backlog add [--image FILE] [PROJECT] \"TITLE // BODY\"" ;;
   esac
   [ -n "$name" ] || die "no projects in $config"
   p=$(project "$name")
@@ -241,10 +328,10 @@ cmd_add() {
   lock
   remember "$name"
   flush_locked
-  out=$(send "$repo" "$title" "$body" "$labels" "$public_ok") || rc=$?
+  out=$(send "$repo" "$title" "$body" "$labels" "$public_ok" "$image") || rc=$?
   case $rc in
-    3) enqueue "$repo" "$title" "$body" "$labels" "$public_ok" 0 ;;
-    4) enqueue "$repo" "$title" "$body" "$labels" "$public_ok" 1 ;;
+    3) enqueue "$repo" "$title" "$body" "$labels" "$public_ok" 0 "$image" ;;
+    4) enqueue "$repo" "$title" "$body" "$labels" "$public_ok" 1 "$image" ;;
   esac
   # Released before any notification waits on its action, so the next capture needn't wait for it.
   exec 9>&-
@@ -268,8 +355,25 @@ cmd_add() {
   wait
 }
 
+# Saves the clipboard's image (PNG when offered) to a new file in the state dir and prints its path; fails without one.
+clipboard_image() {
+  local types type file sub
+  types=$(wl-paste --list-types 2>/dev/null) || return 1
+  type=$(grep -x 'image/png' <<<"$types") || type=$(grep '^image/' <<<"$types" | head -n 1) || return 1
+  [ -n "$type" ] || return 1
+  sub=${type#image/}
+  mkdir -p "$state"
+  file=$(mktemp --suffix=".${sub%%+*}" "$state/clip.XXXXXXXX") || return 1
+  if ! wl-paste --no-newline --type "$type" >"$file" || [ ! -s "$file" ]; then
+    rm -f "$file"
+    return 1
+  fi
+  echo "$file"
+}
+
 cmd_prompt() {
-  local names name idx line
+  local names name idx line rc image="" problem
+  local -a refill=()
   if [ $# -gt 0 ]; then
     name=$1
     if ! projects_json | jq -e --arg n "$name" 'any(.[]; .name == $n)' >/dev/null; then
@@ -284,9 +388,32 @@ cmd_prompt() {
     [ -n "$idx" ] || exit 0
     name=${names[$idx]}
   fi
-  line=$(fuzzel --dmenu --prompt-only "$name> " --placeholder "title // body" --width 60 </dev/null) || exit 0
-  [ -n "$(trim "$line")" ] || exit 0
-  setsid -f "$self" add --notify "$name" "$line" </dev/null >/dev/null 2>&1
+  # Shift+Enter (custom-1, exit 10) attaches the clipboard's image; when it can't, the box reopens with the text.
+  while :; do
+    rc=0
+    line=$(fuzzel --dmenu --prompt-only "$name> " --placeholder "title // body (Shift+Enter: + clipboard image)" \
+      --width 60 "${refill[@]}" --override key-bindings.execute-input=none \
+      --override "key-bindings.custom-1=Shift+Return Shift+KP_Enter" </dev/null) || rc=$?
+    [ "$rc" = 0 ] || [ "$rc" = 10 ] || exit 0
+    [ -n "$(trim "$line")" ] || exit 0
+    [ "$rc" = 10 ] || break
+    if [ -z "$(attachments_repo)" ]; then
+      problem="set attachments_repo: OWNER/NAME in $config"
+    elif image=$(clipboard_image); then
+      break
+    else
+      problem="no image on the clipboard"
+    fi
+    notify-send -a backlog "backlog: can't attach an image" "$problem" || true
+    refill=(--search "$line")
+  done
+  if [ -n "$image" ]; then
+    # shellcheck disable=SC2016 # expanded by the inner shell, which removes the clipboard's copy once add is done
+    setsid -f "$BASH" -c '"$0" add --notify --image "$1" "$2" "$3"; rm -f "$1"' "$self" "$image" "$name" "$line" \
+      </dev/null >/dev/null 2>&1
+  else
+    setsid -f "$self" add --notify "$name" "$line" </dev/null >/dev/null 2>&1
+  fi
   repeat record backlog prompt "$name"
 }
 
@@ -308,7 +435,7 @@ label_spec() {
 }
 
 cmd_setup() {
-  local repo labels label have spec
+  local repo labels label have spec out
   while IFS=$'\t' read -r repo labels; do
     have=$(gh label list --repo "$repo" --limit 500 --json name --jq '.[].name') || die "can't list labels in $repo"
     while read -r label; do
@@ -321,6 +448,18 @@ cmd_setup() {
       echo "$repo: $label created"
     done < <(jq -r '.[]' <<<"$labels")
   done < <(projects_json | jq -r 'group_by(.repo)[] | [.[0].repo, (map(.labels[]) | unique | tojson)] | @tsv')
+  repo=$(attachments_repo)
+  if [ -n "$repo" ]; then
+    if out=$(gh api "repos/$repo" --jq .private 2>&1); then
+      [ "$out" = true ] || die "$repo is public; attachments_repo must be private"
+      echo "$repo: exists"
+    elif [[ $out == *"Not Found"* ]]; then
+      gh repo create "$repo" --private --description "Images embedded in backlog issues" >/dev/null
+      echo "$repo: created (private)"
+    else
+      die "can't check $repo: $out"
+    fi
+  fi
 }
 
 case ${1:-} in
