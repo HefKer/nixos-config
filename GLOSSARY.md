@@ -213,3 +213,18 @@ _Avoid_: health check, monitor, test
 One instance of breakage a probe reports, open until a later run no longer
 reports it.
 _Avoid_: alert, warning, issue
+
+### Desktop actions
+
+**Repeatable action**:
+A desktop action that records how to replay itself, so the repeat key can run it
+again without its menu. The replay is the action's own choice, not necessarily
+the command that started it.
+_Avoid_: macro, last command
+
+### Backlog
+
+**Draft**:
+Text typed into a project's backlog box but not yet filed. Kept, one per
+project, until it is filed or discarded.
+_Avoid_: buffer, saved input
