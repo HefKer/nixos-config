@@ -158,6 +158,12 @@ together](#how-it-fits-together) for what that means when you copy one.
   next reboot, and prints the serial for `ANDROID_SERIAL`. A bundled `phone`
   skill gives agents the toolbox and which actions need a yes first.
   [`pkgs/phone/`](pkgs/phone/)
+- <a id="phone-journal"></a>**Undo for an agent's phone changes.** `phone-set
+  {global,secure,system} <key> <value|--delete>` reads the old value, applies
+  the change over adb, reads it back and appends both to a journal, so a
+  change can be reverted after the session that made it is gone. The `phone`
+  skill tells agents to change settings no other way.
+  [`pkgs/phone/phone-set.sh`](pkgs/phone/phone-set.sh)
 - <a id="package-skills"></a>**Skills bundled with packages.** Linking
   `/share/skills` into the system profile gives skills that ship with packages
   (like hunk's) a path that survives upgrades.
