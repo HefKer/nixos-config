@@ -39,8 +39,11 @@ in
   # The user manager starts at boot, so Syncthing (a user service) syncs before anyone logs in.
   users.users.${consts.username}.linger = true;
 
-  home-manager.users.${consts.username}.custom.home.dotfiles = {
-    enable = true;
-    host = hostName;
+  home-manager.users.${consts.username}.custom.home = {
+    dotfiles = {
+      enable = true;
+      host = hostName;
+    };
+    phone.enable = true;
   };
 }

@@ -164,6 +164,11 @@ together](#how-it-fits-together) for what that means when you copy one.
   change can be reverted after the session that made it is gone. The `phone`
   skill tells agents to change settings no other way.
   [`pkgs/phone/phone-set.sh`](pkgs/phone/phone-set.sh)
+- <a id="phone-adb-probe"></a>**Notice when the phone drops off adb.** A
+  [health](#health) probe tries `phone-connect` on every run and reports a
+  finding once nothing has reached the phone for a day, which also covers
+  every host-driven phone automation failing silently.
+  [`homes/modules/phone/`](homes/modules/phone/)
 - <a id="package-skills"></a>**Skills bundled with packages.** Linking
   `/share/skills` into the system profile gives skills that ship with packages
   (like hunk's) a path that survives upgrades.
