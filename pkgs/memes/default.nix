@@ -36,6 +36,12 @@ let
   pidsLock = ''"''${XDG_RUNTIME_DIR:-/tmp}/sound-pick.lock"'';
   # The most sounds playing at once; a replay past it stops the oldest.
   maxSounds = 5;
+  # Shared by sound-pick and sound-stop: the lock, and a PID check, as a PID left in the file can be reused by another process.
+  pidsTools = ''
+    exec 9>${pidsLock}
+    flock 9
+    playing() { [ "$(cat /proc/"$1"/comm 2>/dev/null)" = pw-play ]; }
+  '';
   # sound-volume writes "<call %> <you %>" here and sound-pick reads it on every pick; per machine, as mics differ.
   volumeFile = ''"''${XDG_CONFIG_HOME:-$HOME/.config}/memes/sound-volume"'';
   defaultVolume = "20 20";
@@ -413,14 +419,11 @@ let
       util-linux
     ];
     text = ''
-      pids=${pids}
-      exec 9>${pidsLock}
-      flock 9
-      if [ -f "$pids" ]; then
-        # shellcheck disable=SC2046
-        kill $(cat "$pids") 2>/dev/null || true
-        rm -f -- "$pids"
-      fi
+      ${pidsTools}
+      for p in $(cat ${pids} 2>/dev/null || true); do
+        ! playing "$p" || kill "$p" 2>/dev/null || true
+      done
+      rm -f -- ${pids}
     '';
   };
 
@@ -453,32 +456,30 @@ let
       libnotify
       pipewire
       repeat
-      soundStop
       gawk
       util-linux
     ];
     text = ''
       sounds=${lib.escapeShellArg sounds}
 
-      # Plays $1 on top of what is playing and makes that the repeat's replay; a menu pick runs sound-stop first.
+      # Plays $1 on top of the newest $2 sounds playing, stopping older ones, and makes that the repeat's replay.
       play() {
         local vcall vyou call you live=() line p
         read -r vcall vyou _ 2>/dev/null <${volumeFile} || read -r vcall vyou <<<"${defaultVolume}"
         vyou=''${vyou:-$vcall}
-        exec 9>${pidsLock}
-        flock 9
-        # Sounds with a pw-play still running, oldest first; finished ones drop out of the count.
+        ${pidsTools}
         while read -r line; do
           for p in $line; do
-            if kill -0 "$p" 2>/dev/null; then
+            if playing "$p"; then
               live+=("$line")
               break
             fi
           done
-        done < <(cat ${pids} 2>/dev/null || true)
-        while [ ''${#live[@]} -ge ${toString maxSounds} ]; do
-          # shellcheck disable=SC2086
-          kill ''${live[0]} 2>/dev/null || true
+        done < <(cat ${pids} 2>/dev/null)
+        while [ ''${#live[@]} -gt "$2" ]; do
+          for p in ''${live[0]}; do
+            ! playing "$p" || kill "$p" 2>/dev/null || true
+          done
           live=("''${live[@]:1}")
         done
         # Once into the soundboard mic for the call and once to the default output for you; 9>&- so pw-play doesn't hold the lock.
@@ -498,7 +499,7 @@ let
           notify-send -a memes "Sound gone" "$(basename "$2") is no longer in the library"
           exit 0
         fi
-        play "$2"
+        play "$2" ${toString (maxSounds - 1)}
         exit 0
       fi
       # Newest first, so what was just added is on top before anything is typed.
@@ -516,8 +517,7 @@ let
         done | fuzzel --dmenu --index --match-mode fzf --prompt "sound> " --placeholder "search tags"
       ) || exit 0
       # A pick from the menu cuts off everything playing; only the replay stacks.
-      sound-stop
-      play "''${files[i]}"
+      play "''${files[i]}" 0
     '';
   };
 in
