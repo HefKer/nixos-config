@@ -16,25 +16,27 @@ adb devices | awk -v ip="$ip" 'index($1, ip ":") == 1 && $2 != "device" {print $
   while read -r stale; do adb disconnect "$stale" >/dev/null; done
 
 fixed="$ip:5555"
-timeout 5 adb connect "$fixed" >/dev/null 2>&1
+timeout 5 adb connect "$fixed" >/dev/null 2>&1 || true
 if ready "$fixed"; then echo "$fixed"; exit 0; fi
 
 # Wireless debugging listens on a random port that changes whenever it restarts.
+# Other apps listen up here too, and adb connect hangs on them; `|| true` keeps
+# errexit from ending the scan at the first one.
 ports=$(nmap -Pn -sT -T4 --open -p 30000-65535 "$ip" -oG - | grep -o '[0-9]*/open' | cut -d/ -f1)
 for port in $ports; do
   serial="$ip:$port"
-  timeout 5 adb connect "$serial" >/dev/null 2>&1
+  timeout 5 adb connect "$serial" >/dev/null 2>&1 || true
   if ready "$serial"; then
     adb -s "$serial" tcpip 5555 >/dev/null
     for _ in 1 2 3 4 5; do
       sleep 1
-      timeout 5 adb connect "$fixed" >/dev/null 2>&1
+      timeout 5 adb connect "$fixed" >/dev/null 2>&1 || true
       if ready "$fixed"; then echo "$fixed"; exit 0; fi
     done
     echo "$serial"
     exit 0
   fi
-  adb disconnect "$serial" >/dev/null 2>&1
+  adb disconnect "$serial" >/dev/null 2>&1 || true
 done
 
 echo "phone-connect: no adb on $host; Wireless debugging is off or the phone left Wi-Fi" >&2
