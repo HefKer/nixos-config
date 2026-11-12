@@ -33,7 +33,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 SIM = @sim@  # noqa: E501
-DEFCFG = @defcfg@  # noqa: E501
+DEFCFG = @defcfg@
 KEYMAP_DIR = @keymapDir@  # noqa: E501
 WORD_LISTS = @wordLists@  # noqa: E501
 
