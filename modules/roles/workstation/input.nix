@@ -29,8 +29,8 @@ let
 
   quoted = lib.concatMapStringsSep " " (name: ''"${name}"'');
 
-  # Every instance's defcfg beyond its devices; kanata-test simulates with the same.
-  defcfg = "process-unmapped-keys yes";
+  # Every instance's defcfg beyond its devices, kanata-test simulating with the same; defchordsv2 (the keymap's f+j Esc) needs concurrent-tap-hold, and its min-idle matches hrm-idle.
+  defcfg = "process-unmapped-keys yes concurrent-tap-hold yes chords-v2-min-idle 150";
 
   # A config holds one defcfg and an included file none, so all of it lives here.
   instance =
