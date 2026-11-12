@@ -138,8 +138,6 @@ in
       (callPackage ../../../pkgs/window-pick { })
       # Focuses or launches an app, cycling its windows on repeats, for niri's Mod+Alt summon binds.
       (callPackage ../../../pkgs/summon { })
-      # For niri's per-window volume binds, on kanata's Fn2 a/s/d.
-      (callPackage ../../../pkgs/window-volume { niri = config.programs.niri.package; })
       # smart-shot, for niri's Shift+Print: click an object, Jev's Box crops the screenshot to it.
       (callPackage ../../../pkgs/smart-shot { niri = config.programs.niri.package; })
 

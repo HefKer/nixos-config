@@ -293,8 +293,11 @@ together](#how-it-fits-together) for what that means when you copy one.
   `window-volume up|down|mute` finds the PipeWire streams of the app in niri's
   focused window, including browsers' and Electron's child processes, and steps
   or mutes only those, showing the new level in a DMS toast, which
-  do-not-disturb leaves alone.
-  [`pkgs/window-volume/`](pkgs/window-volume/)
+  do-not-disturb leaves alone. A window playing nothing keeps the level as its
+  held volume, and a user service watching `pw-dump --monitor` gives it to each
+  stream the window starts, so a site can be turned down before it plays.
+  [`pkgs/window-volume/`](pkgs/window-volume/),
+  [`modules/roles/workstation/window-volume.nix`](modules/roles/workstation/window-volume.nix)
 - <a id="alarm"></a>**Timers and alarms that follow you between machines.**
   `alarm 10m tea` or `alarm 7:30 standup` (also from a fuzzel prompt on Mod+A)
   writes one small file per alarm into a Syncthing folder; on each host a path
