@@ -257,3 +257,37 @@ A site that fails through the Proton VPN server but loads when reached directly,
 because the server's address is refused, geo-fenced or misrouted there. The
 remedy is the direct list. A site that fails both ways is down, not blocked.
 _Avoid_: proxy break, VPN-blocked
+
+### Software placement
+
+**Project**:
+Software with a repo of its own, kept in the user's dev directory. It is
+software that isn't about the user's machines, or carries a build, versions
+or release cadence of its own. A project the hosts use is consumed as a flake
+input.
+_Avoid_: app, repo
+
+**Flake package**:
+The user's own tool, built and installed by this flake, because it is coupled
+to the user's setup. It stays one however large it grows.
+_Avoid_: script, tool
+
+**Loose script**:
+A single-file executable kept in the dotfiles root and linked live, so it is
+edited without a rebuild. It has no dependencies beyond what is installed and
+no tests.
+_Avoid_: helper, util
+
+**Promotion**:
+A loose script becoming a flake package, once it needs a dependency, a test or
+a second file.
+
+**Graduation**:
+A flake package or loose script becoming a project, keeping its history.
+Distinct from promotion, which never leaves the flake.
+
+**Capture repo**:
+A private repo, holding only issues, kept beside a public project so ideas can
+be captured into it unfiltered. Only capture-heavy public projects have one;
+every other project keeps its issues on its own repo.
+_Avoid_: issues repo, inbox
