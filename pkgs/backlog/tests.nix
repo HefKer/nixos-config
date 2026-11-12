@@ -53,19 +53,23 @@ let
     echo "notify $*" >>"$FAKE/notes"
   '';
 
-  # Answers with the next line of $FAKE/answers (ESC cancels, SHIFT: is Shift+Enter), logging prompt and refill.
+  # Answers with the next line of $FAKE/answers (ESC prints the box's text, ESC:TEXT or the refill, CTRLG cancels), logging args, prompt, refill and list.
   fakeFuzzel = writeShellScriptBin "fuzzel" ''
-    prev=""
+    prev="" search="" box=0
+    echo "$*" >>"$FAKE/fuzzel-args"
     for a; do
-      case $a in *"> ") echo "$a" >>"$FAKE/fuzzel-prompts" ;; esac
-      [ "$prev" != --search ] || echo "$a" >>"$FAKE/fuzzel-search"
+      case $a in *"> ") echo "$a" >>"$FAKE/fuzzel-prompts" ;; --prompt-only) box=1 ;; esac
+      if [ "$prev" = --search ]; then echo "$a" >>"$FAKE/fuzzel-search" && search=$a; fi
       prev=$a
     done
+    [ "$box" = 1 ] || cat >"$FAKE/fuzzel-list"
     n=$(($(cat "$FAKE/fuzzel-n" 2>/dev/null || echo 0) + 1))
     echo "$n" >"$FAKE/fuzzel-n"
     a=$(sed -n "''${n}p" "$FAKE/answers")
-    [ "$a" != ESC ] || exit 1
     case $a in
+      CTRLG) exit 2 ;;
+      ESC) [ "$box" = 1 ] || exit 2; echo "$search" && exit 11 ;;
+      ESC:*) echo "''${a#ESC:}" && exit 11 ;;
       SHIFT:*) echo "''${a#SHIFT:}" && exit 10 ;;
       *) echo "$a" ;;
     esac
@@ -312,6 +316,59 @@ runCommandLocal "backlog-tests"
     for _ in $(seq 100); do compgen -G "$HOME/.local/state/backlog/clip.*" >/dev/null || break; sleep 0.1; done
     expect "$(compgen -G "$HOME/.local/state/backlog/clip.*" || true)" "" "and removes the clipboard's copy"
     expect "$(tr '\0' ' ' <"$record")" "backlog prompt nixos " "an image filing records the box like a plain one"
+
+    # Drafts: Esc keeps the box's text per project, reopened in the box and marked in the picker.
+    drafts=$HOME/.local/state/backlog/drafts
+    box() {
+      rm -f "$FAKE/fuzzel-n" "$FAKE/fuzzel-search" "$FAKE/fuzzel-list" "$FAKE/fuzzel-args"
+      printf '%s\n' "''${@:2}" >"$FAKE/answers"
+      backlog prompt ''${1:+"$1"}
+    }
+    draft() { if [ -e "$drafts/$1" ]; then cat "$drafts/$1"; else echo none; fi; }
+    text='foo // bar "q" ✓  '
+    box openok "ESC:$text"
+    expect "$(draft openok)" "$text" "Esc keeps the text, byte for byte, as the project's draft"
+    expect "$(grep -c -- --no-exit-on-keyboard-focus-loss "$FAKE/fuzzel-args")" 1 "the box stays open on focus loss"
+
+    box "" 0 ESC
+    expect "$(tr '\n' '|' <"$FAKE/fuzzel-list")" "openok ✎|$(backlog projects | grep -vx openok | tr '\n' '|')" \
+      "a project with a draft leads the picker, marked"
+    expect "$(cat "$FAKE/fuzzel-prompts" | tail -n 1)" "openok> " "picking it opens its box by its bare name"
+    expect "$(cat "$FAKE/fuzzel-search")" "$text" "with the draft in it"
+    expect "$(draft openok)" "$text" "Esc on the untouched box keeps the draft"
+
+    box "" 0 'drafted // filed'
+    filed drafted
+    expect "$(draft openok)" none "Enter files it and clears the draft"
+    box "" 0 ESC
+    expect "$(grep -c '✎' "$FAKE/fuzzel-list" || true)" 0 "the next picker marks nothing"
+    expect "$([ -e "$FAKE/fuzzel-search" ] && echo refilled || echo empty)" empty "and the next box is empty"
+
+    box dots "ESC:keep"
+    box nixos "ESC:mine"
+    box dots CTRLG
+    expect "$(cat "$FAKE/fuzzel-search")" keep "the box reopens with its own project's draft"
+    expect "$(draft dots)" none "Ctrl+G discards the draft"
+    expect "$(draft nixos)" mine "and leaves another project's"
+    box nixos "ESC:   "
+    expect "$(draft nixos)" none "Esc on an emptied box clears the draft"
+
+    box dots "ESC:cli"
+    backlog add dots 'from the cli' </dev/null >/dev/null
+    expect "$(draft dots)" cli "the CLI's add leaves drafts alone"
+    rm "$drafts/dots"
+
+    box open 'secret // s'
+    for _ in $(seq 100); do [ -e "$drafts/open" ] && break; sleep 0.1; done
+    expect "$(draft open)" "secret // s" "a line the repo refuses becomes the draft again"
+
+    touch "$FAKE/offline"
+    box nixos "ESC:later"
+    box nixos 'queued draft'
+    for _ in $(seq 100); do grep -q 'queued draft' "$queue" 2>/dev/null && break; sleep 0.1; done
+    expect "$(jq -r .title "$queue")" "queued draft" "an offline line is queued"
+    expect "$(draft nixos)" none "and clears the draft, as filing does"
+    rm "$FAKE/offline"
 
     if [ "$fail" != 0 ]; then exit 1; fi
     touch $out

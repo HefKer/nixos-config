@@ -7,6 +7,7 @@ queue=$state/queue.jsonl
 images=$state/images
 recent=$state/recent
 visibility=$state/visibility
+drafts=$state/drafts
 # A queued line failing this many times for a reason other than the network raises one notification.
 max_fails=3
 # How long a repo's private/public answer is trusted before gh is asked again.
@@ -20,7 +21,8 @@ backlog add [--image FILE] [PROJECT] "TITLE // BODY"
                                         stdin, if not a terminal, is appended to the body; --image embeds FILE,
                                         uploaded to the config's attachments_repo
 backlog prompt [PROJECT]                fuzzel: pick a project (or take PROJECT), type a line, file it in the background;
-                                        Shift+Enter attaches the clipboard's image
+                                        Shift+Enter attaches the clipboard's image; Esc keeps the text as
+                                        the project's draft, reopened next time; Ctrl+G discards it
 backlog flush [--notify]                re-send the offline queue
 backlog queue                           list what is queued
 backlog setup                           create the configured labels in every configured repo, and the
@@ -73,6 +75,33 @@ remember() {
   mkdir -p "$state"
   { echo "$1"; [ -f "$recent" ] && grep -Fxv -- "$1" "$recent"; } | head -n 20 >"$recent.tmp" || true
   mv -f "$recent.tmp" "$recent"
+}
+
+# A project's draft file; % and / are escaped so any name is one file.
+draft_file() {
+  local n=${1//%/%25}
+  echo "$drafts/${n//\//%2F}"
+}
+
+# Saves $2 as project $1's draft, byte for byte; a blank one clears it.
+save_draft() {
+  local f
+  if [ -z "$(trim "$2")" ]; then
+    clear_draft "$1"
+    return 0
+  fi
+  f=$(draft_file "$1")
+  mkdir -p "$drafts"
+  printf '%s' "$2" >"$f.tmp"
+  mv -f "$f.tmp" "$f"
+}
+
+clear_draft() {
+  rm -f "$(draft_file "$1")"
+}
+
+has_draft() {
+  [ -s "$(draft_file "$1")" ]
 }
 
 focused_window() {
@@ -293,10 +322,12 @@ cmd_flush() {
 }
 
 cmd_add() {
-  local p name repo labels public_ok out rc=0 extra="" image=""
+  local p name repo labels public_ok out rc=0 extra="" image="" draft=0
   while :; do
     case ${1:-} in
       --notify) notify=1 && shift ;;
+      # From the box, whose draft was cleared on Enter: a refused line becomes the draft again.
+      --draft) draft=1 && shift ;;
       --image)
         [ $# -ge 2 ] || die "usage: backlog add [--image FILE] [PROJECT] \"TITLE // BODY\""
         image=$2 && shift 2
@@ -338,6 +369,7 @@ cmd_add() {
   case $rc in
     0) note_filed "$repo" "$out" ;;
     2)
+      [ "$draft" = 0 ] || save_draft "$name" "$1"
       note -u critical "backlog: refused" "$out"
       die "refused: $out"
       ;;
@@ -372,8 +404,8 @@ clipboard_image() {
 }
 
 cmd_prompt() {
-  local names name idx line rc image="" problem
-  local -a refill=()
+  local name idx line rc image="" problem n
+  local -a refill=() names=() shown=() rest=()
   if [ $# -gt 0 ]; then
     name=$1
     if ! projects_json | jq -e --arg n "$name" 'any(.[]; .name == $n)' >/dev/null; then
@@ -381,21 +413,41 @@ cmd_prompt() {
       exit 0
     fi
   else
-    mapfile -t names < <(ordered "$(focused_window)")
+    # Projects with a draft first, marked; --index maps the pick back to the bare name.
+    while IFS= read -r n; do
+      if has_draft "$n"; then
+        names+=("$n") shown+=("$n ✎")
+      else
+        rest+=("$n")
+      fi
+    done < <(ordered "$(focused_window)")
+    names+=("${rest[@]}") shown+=("${rest[@]}")
     [ ${#names[@]} -gt 0 ] || die "no projects in $config"
-    idx=$(printf '%s\n' "${names[@]}" |
+    idx=$(printf '%s\n' "${shown[@]}" |
       fuzzel --dmenu --only-match --index --prompt "backlog> " --lines "${#names[@]}" --width 40) || exit 0
     [ -n "$idx" ] || exit 0
     name=${names[$idx]}
   fi
-  # Shift+Enter (custom-1, exit 10) attaches the clipboard's image; when it can't, the box reopens with the text.
+  # The box opens with the project's draft, if any.
+  if has_draft "$name"; then refill=(--search "$(<"$(draft_file "$name")")"); fi
+  # Shift+Enter (custom-1, exit 10) attaches the clipboard's image, else reopens the box; Esc (custom-2, exit 11) keeps a draft; Ctrl+G or right-click (cancel, exit 2) drops it.
   while :; do
     rc=0
     line=$(fuzzel --dmenu --prompt-only "$name> " --placeholder "title // body (Shift+Enter: + clipboard image)" \
-      --width 60 "${refill[@]}" --override key-bindings.execute-input=none \
-      --override "key-bindings.custom-1=Shift+Return Shift+KP_Enter" </dev/null) || rc=$?
-    [ "$rc" = 0 ] || [ "$rc" = 10 ] || exit 0
-    [ -n "$(trim "$line")" ] || exit 0
+      --width 60 "${refill[@]}" --no-exit-on-keyboard-focus-loss --override key-bindings.execute-input=none \
+      --override "key-bindings.custom-1=Shift+Return Shift+KP_Enter" \
+      --override key-bindings.cancel=Control+g --override "key-bindings.custom-2=Escape Control+bracketleft" \
+      </dev/null) || rc=$?
+    case $rc in
+      0 | 10) ;;
+      11) save_draft "$name" "$line"; exit 0 ;;
+      2) clear_draft "$name"; exit 0 ;;
+      *) exit 0 ;;
+    esac
+    if [ -z "$(trim "$line")" ]; then
+      clear_draft "$name"
+      exit 0
+    fi
     [ "$rc" = 10 ] || break
     if [ -z "$(attachments_repo)" ]; then
       problem="set attachments_repo: OWNER/NAME in $config"
@@ -407,12 +459,14 @@ cmd_prompt() {
     notify-send -a backlog "backlog: can't attach an image" "$problem" || true
     refill=(--search "$line")
   done
+  # Filed or queued, the line needs no draft; add restores it if the repo refuses it.
+  clear_draft "$name"
   if [ -n "$image" ]; then
     # shellcheck disable=SC2016 # expanded by the inner shell, which removes the clipboard's copy once add is done
-    setsid -f "$BASH" -c '"$0" add --notify --image "$1" "$2" "$3"; rm -f "$1"' "$self" "$image" "$name" "$line" \
+    setsid -f "$BASH" -c '"$0" add --notify --draft --image "$1" "$2" "$3"; rm -f "$1"' "$self" "$image" "$name" "$line" \
       </dev/null >/dev/null 2>&1
   else
-    setsid -f "$self" add --notify "$name" "$line" </dev/null >/dev/null 2>&1
+    setsid -f "$self" add --notify --draft "$name" "$line" </dev/null >/dev/null 2>&1
   fi
   repeat record backlog prompt "$name"
 }
