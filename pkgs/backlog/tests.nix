@@ -53,7 +53,7 @@ let
     echo "notify $*" >>"$FAKE/notes"
   '';
 
-  # Answers with the next line of $FAKE/answers (ESC prints the box's text, ESC:TEXT or the refill, CTRLG cancels), logging args, prompt, refill and list.
+  # Answers with the next line of $FAKE/answers (ESC and CTRLG print the box's text, ESC:TEXT or the refill), logging args, prompt, refill and list.
   fakeFuzzel = writeShellScriptBin "fuzzel" ''
     prev="" search="" box=0
     echo "$*" >>"$FAKE/fuzzel-args"
@@ -67,7 +67,8 @@ let
     echo "$n" >"$FAKE/fuzzel-n"
     a=$(sed -n "''${n}p" "$FAKE/answers")
     case $a in
-      CTRLG) exit 2 ;;
+      CTRLG) echo "$search" && exit 12 ;;
+      RCLICK) exit 2 ;;
       ESC) [ "$box" = 1 ] || exit 2; echo "$search" && exit 11 ;;
       ESC:*) echo "''${a#ESC:}" && exit 11 ;;
       SHIFT:*) echo "''${a#SHIFT:}" && exit 10 ;;
@@ -350,6 +351,8 @@ runCommandLocal "backlog-tests"
     expect "$(cat "$FAKE/fuzzel-search")" keep "the box reopens with its own project's draft"
     expect "$(draft dots)" none "Ctrl+G discards the draft"
     expect "$(draft nixos)" mine "and leaves another project's"
+    box nixos RCLICK
+    expect "$(draft nixos)" mine "a right-click, which prints nothing, leaves the draft"
     box nixos "ESC:   "
     expect "$(draft nixos)" none "Esc on an emptied box clears the draft"
 
@@ -361,6 +364,12 @@ runCommandLocal "backlog-tests"
     box open 'secret // s'
     for _ in $(seq 100); do [ -e "$drafts/open" ] && break; sleep 0.1; done
     expect "$(draft open)" "secret // s" "a line the repo refuses becomes the draft again"
+
+    box dots "ESC:kept"
+    box dots ' // no title'
+    for _ in $(seq 100); do [ -e "$drafts/dots" ] && break; sleep 0.1; done
+    expect "$(draft dots)" " // no title" "a line add rejects before filing becomes the draft again"
+    rm "$drafts/dots"
 
     touch "$FAKE/offline"
     box nixos "ESC:later"

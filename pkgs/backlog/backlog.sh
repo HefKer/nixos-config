@@ -83,7 +83,7 @@ draft_file() {
   echo "$drafts/${n//\//%2F}"
 }
 
-# Saves $2 as project $1's draft, byte for byte; a blank one clears it.
+# A blank $2 clears project $1's draft rather than saving it.
 save_draft() {
   local f
   if [ -z "$(trim "$2")" ]; then
@@ -102,6 +102,10 @@ clear_draft() {
 
 has_draft() {
   [ -s "$(draft_file "$1")" ]
+}
+
+read_draft() {
+  printf '%s' "$(<"$(draft_file "$1")")"
 }
 
 focused_window() {
@@ -322,12 +326,11 @@ cmd_flush() {
 }
 
 cmd_add() {
-  local p name repo labels public_ok out rc=0 extra="" image="" draft=0
+  local p name repo labels public_ok out rc=0 extra="" image="" from_box=0
   while :; do
     case ${1:-} in
       --notify) notify=1 && shift ;;
-      # From the box, whose draft was cleared on Enter: a refused line becomes the draft again.
-      --draft) draft=1 && shift ;;
+      --from-box) from_box=1 && shift ;;
       --image)
         [ $# -ge 2 ] || die "usage: backlog add [--image FILE] [PROJECT] \"TITLE // BODY\""
         image=$2 && shift 2
@@ -335,6 +338,11 @@ cmd_add() {
       *) break ;;
     esac
   done
+  # The box cleared its draft on Enter, so a line exiting unfiled and unqueued goes back, unless a newer draft was typed meanwhile.
+  if [ "$from_box" = 1 ] && [ $# = 2 ]; then
+    box_name=$1 box_line=$2
+    trap 'has_draft "$box_name" || save_draft "$box_name" "$box_line"' EXIT
+  fi
   if [ -n "$image" ]; then
     [ -f "$image" ] && [ -r "$image" ] || die "no readable image at $image"
     [ -n "$(attachments_repo)" ] || die "--image needs attachments_repo: OWNER/NAME in $config"
@@ -364,12 +372,12 @@ cmd_add() {
     3) enqueue "$repo" "$title" "$body" "$labels" "$public_ok" 0 "$image" ;;
     4) enqueue "$repo" "$title" "$body" "$labels" "$public_ok" 1 "$image" ;;
   esac
+  case $rc in 0 | 3 | 4) trap - EXIT ;; esac
   # Released before any notification waits on its action, so the next capture needn't wait for it.
   exec 9>&-
   case $rc in
     0) note_filed "$repo" "$out" ;;
     2)
-      [ "$draft" = 0 ] || save_draft "$name" "$1"
       note -u critical "backlog: refused" "$out"
       die "refused: $out"
       ;;
@@ -428,20 +436,21 @@ cmd_prompt() {
     [ -n "$idx" ] || exit 0
     name=${names[$idx]}
   fi
-  # The box opens with the project's draft, if any.
-  if has_draft "$name"; then refill=(--search "$(<"$(draft_file "$name")")"); fi
-  # Shift+Enter (custom-1, exit 10) attaches the clipboard's image, else reopens the box; Esc (custom-2, exit 11) keeps a draft; Ctrl+G or right-click (cancel, exit 2) drops it.
+  if has_draft "$name"; then refill=(--search "$(read_draft "$name")"); fi
+  # Shift+Enter (custom-1, exit 10) attaches the clipboard's image, else reopens the box; Esc (custom-2, exit 11) keeps a draft; Ctrl+G (custom-3, exit 12) drops it.
   while :; do
     rc=0
     line=$(fuzzel --dmenu --prompt-only "$name> " --placeholder "title // body (Shift+Enter: + clipboard image)" \
       --width 60 "${refill[@]}" --no-exit-on-keyboard-focus-loss --override key-bindings.execute-input=none \
       --override "key-bindings.custom-1=Shift+Return Shift+KP_Enter" \
-      --override key-bindings.cancel=Control+g --override "key-bindings.custom-2=Escape Control+bracketleft" \
+      --override "key-bindings.custom-2=Escape Control+bracketleft" --override key-bindings.custom-3=Control+g \
+      --override key-bindings.cancel=none \
       </dev/null) || rc=$?
     case $rc in
       0 | 10) ;;
       11) save_draft "$name" "$line"; exit 0 ;;
-      2) clear_draft "$name"; exit 0 ;;
+      12) clear_draft "$name"; exit 0 ;;
+      # A right-click still cancels, printing nothing: the draft stays as it was.
       *) exit 0 ;;
     esac
     if [ -z "$(trim "$line")" ]; then
@@ -463,10 +472,10 @@ cmd_prompt() {
   clear_draft "$name"
   if [ -n "$image" ]; then
     # shellcheck disable=SC2016 # expanded by the inner shell, which removes the clipboard's copy once add is done
-    setsid -f "$BASH" -c '"$0" add --notify --draft --image "$1" "$2" "$3"; rm -f "$1"' "$self" "$image" "$name" "$line" \
+    setsid -f "$BASH" -c '"$0" add --notify --from-box --image "$1" "$2" "$3"; rm -f "$1"' "$self" "$image" "$name" "$line" \
       </dev/null >/dev/null 2>&1
   else
-    setsid -f "$self" add --notify --draft "$name" "$line" </dev/null >/dev/null 2>&1
+    setsid -f "$self" add --notify --from-box "$name" "$line" </dev/null >/dev/null 2>&1
   fi
   repeat record backlog prompt "$name"
 }
