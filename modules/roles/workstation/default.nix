@@ -21,6 +21,7 @@ in
     ./storage.nix
     ./syncthing.nix
     ./vpn.nix
+    ./window-volume.nix
     ./gaming
     ./local-ai
     ./virtualization
