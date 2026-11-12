@@ -177,6 +177,13 @@ together](#how-it-fits-together) for what that means when you copy one.
   (like hunk's) a path that survives upgrades.
   [`modules/roles/workstation/development/packages.nix`](modules/roles/workstation/development/packages.nix) ·
   [2f0f5eb](https://github.com/HefKer/nixos-config/commit/2f0f5eb)
+- <a id="new-software"></a>**Agents decide where new software goes.** A
+  bundled `new-software` skill applies one rule (its own project, a package in
+  this flake, or a single-file script in the dotfiles), says which in one line,
+  and wires it there: `nix flake new -t` from this flake's `python`, `rust` or
+  `bare` templates for a project, the link and its check for a script, and the
+  moves for when one outgrows its place. A flake check builds every template.
+  [`pkgs/new-software/`](pkgs/new-software/), [`templates/`](templates/)
 - <a id="hunk-extensions"></a>**Pinned, patched hunk extensions.** Fetches an
   extension at a commit, patches it, and places `installed/` as one store
   directory, since hunk skips symlinked extension folders.
@@ -419,6 +426,8 @@ This repository is structured in a modularized format, with each directory servi
 **scripts**: `same-system` proves a refactor leaves every host's build unchanged; `link-drift` lists files in `$HOME` that would block Home Manager's links.
 
 **homes**: Home Manager — the home layer. It *wires* dotfiles into `$HOME`; it does not hold them. Their content lives in a separate dotfiles root, and packages stay at the system layer, in `modules`. See [Dotfiles](#dotfiles).
+
+**templates**: Starting points for new projects (`nix flake new -t ~/nixos/main#python`, `#rust`, `#bare`), each with a devShell, a package and the agent docs. The `new-software` skill picks when a project is the right home (see `docs/adr/0010-where-new-software-goes.md`).
 
 **secrets**: Secrets encrypted with sops-nix, one file per host plus a shared one; `.sops.yaml` at the root says which keys can read which file. See [Secrets](#secrets).
 
