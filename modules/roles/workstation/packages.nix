@@ -76,6 +76,7 @@ in
       })
       mediainfo # yazi's "Show media info" opener
       exiftool # yazi's "Show EXIF" opener
+      ripdrag # yazi's `c r`: drag files out of the terminal
       python313Packages.youtube-transcript-api
       rclone
       yq
