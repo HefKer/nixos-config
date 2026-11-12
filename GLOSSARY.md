@@ -238,6 +238,33 @@ The level and mute state set for a window's audio, kept while the window plays
 nothing and given to every stream it starts until the window closes.
 _Avoid_: pending volume, window volume
 
+### Attention
+
+**Notification**:
+A message that informs the user. It may pop up and stays in the notification
+center, but nothing waits on it.
+_Avoid_: alert, ping
+
+**Attention item**:
+Something waiting on an action from the user, such as a blocked agent, a
+finished agent, or a message that needs a reply. A notification may produce
+one; most do not. It stays until handled, and leaving it unhandled puts it
+back in the queue.
+_Avoid_: notification, task, todo
+
+**Attention queue**:
+Every open attention item, ranked by how much each one needs the user. A
+blocked agent outranks a finished one; within a rank the oldest comes first,
+and a skipped item goes behind its peers.
+_Avoid_: inbox, notification list
+
+**Handled**:
+An attention item the user has dealt with. A blocked agent is handled once it
+is no longer blocked; a finished agent once the user has watched it for a few
+seconds or given it a new prompt. A message from another app is handled once the
+user goes to it. Leaving an agent before then does not handle it.
+_Avoid_: dismissed, seen, read
+
 ### Backlog
 
 **Draft**:
