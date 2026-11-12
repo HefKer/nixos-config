@@ -21,6 +21,7 @@
           pyproject = true;
           src = ./.;
           build-system = [ pkgs.python3Packages.hatchling ];
+          dependencies = with pkgs.python3Packages; [ ];
         };
       });
 

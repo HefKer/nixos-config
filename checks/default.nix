@@ -271,7 +271,7 @@ in
     '';
 
   # Each template's own flake, evaluated against this nixpkgs, builds its package and devShell from the baseline files.
-  templates = pkgs.linkFarm "check-templates" (
+  flake-templates = pkgs.linkFarm "check-templates" (
     lib.concatLists (
       lib.mapAttrsToList (
         name: template:

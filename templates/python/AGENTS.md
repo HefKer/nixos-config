@@ -4,7 +4,7 @@
 
 ## Build
 
-Python with uv: `uv add <dep>` for dependencies, `uv run new-project` to run, `nix build` for the packaged app (`packages.default` builds from `pyproject.toml`).
+Python with uv: `uv add <dep>` for a dependency, then add its nixpkgs `python3Packages` attribute to `dependencies` in `flake.nix` so `nix build` has it too; `uv run new-project` to run, `nix build` for the packaged app (`packages.default` builds from `pyproject.toml`).
 
 ## Domain docs
 

@@ -5,9 +5,9 @@ description: "Place and scaffold new software: a project in ~/dev, a flake packa
 
 # New software
 
-The rule is `~/nixos/main/docs/adr/0010-where-new-software-goes.md`; its terms are in `~/nixos/main/GLOSSARY.md`. Apply the tests in order and take the first that fits:
+The rule is `~/nixos/main/docs/adr/0010-where-new-software-goes.md`; its terms are in `~/nixos/main/GLOSSARY.md`. Apply the tests in order and take the first that fits; an audience is shared through the README's Worth stealing list from any of the three:
 
-1. **Project** (`~/dev/<name>`): it isn't about the user's machines (a site, game, mod, work), or it carries its own build, versions or release cadence. An audience alone doesn't make one.
+1. **Project** (`~/dev/<name>`): it isn't about the user's machines (a site, game, mod, work), or it carries its own build, versions or release cadence.
 2. **Flake package** (`~/nixos`, `pkgs/<name>`): it is coupled to this setup (niri, herdr, hosts, paths), however large.
 3. **Loose script** (`~/dots/scripts/<name>`): one file, no dependencies beyond what is installed, no tests, worth editing without a rebuild.
 
@@ -22,7 +22,7 @@ Each destination has its recipe. Read the one you need before touching files:
 - Project: [`PROJECT.md`](PROJECT.md)
 - Flake package: [`FLAKE-PACKAGE.md`](FLAKE-PACKAGE.md)
 - Loose script: [`LOOSE-SCRIPT.md`](LOOSE-SCRIPT.md)
-- **Promotion**, a loose script gaining a dependency, a test or a second file: [`PROMOTION.md`](PROMOTION.md)
-- **Graduation**, a flake package or loose script that now passes test 1: [`GRADUATION.md`](GRADUATION.md)
+- Promotion (loose script → flake package): [`PROMOTION.md`](PROMOTION.md)
+- Graduation (flake package or loose script → project): [`GRADUATION.md`](GRADUATION.md)
 
-Changes in `~/nixos` and `~/dots` follow that repo's `AGENTS.md` (branching, checks, commits, never rebuilding). Each recipe ends with what the user runs on the machine; hand that back.
+Every change in `~/nixos` or `~/dots` follows that repo's `AGENTS.md` (branching, checks, commits, Worth stealing entries, never rebuilding). Each recipe ends with what the user runs on the machine; hand that back.
