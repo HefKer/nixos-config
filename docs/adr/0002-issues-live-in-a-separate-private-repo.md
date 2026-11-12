@@ -45,10 +45,10 @@ second column would appear, so they are the half worth closing.
 
 - `gh` infers its repo from `git remote -v`, which resolves to `nixos-config`.
   Every tracker command must pass `--repo HefKer/nixos-issues` explicitly.
-- Closing keywords do not cross repositories: a commit saying `Fixes #12` closes
-  nothing. Issues are closed explicitly, quoting the SHA. A cross-repo mention
-  still leaves a backlink, and renders as a dead reference to anyone without
-  access — so a public commit can carry an issue number safely.
+- Closing keywords cross repositories only when fully qualified: `Fixes #12` closes
+  nothing, `Fixes HefKer/nixos-issues#12` closes it once the commit lands on `main`. A
+  cross-repo mention still leaves a backlink, and renders as a dead reference to
+  anyone without access — so a public commit can carry an issue number safely.
 - `grep -r .scratch/` no longer finds every ticket on a topic; that becomes
   `gh issue list --search`, a network round-trip, and issue bodies no longer sit
   on disk beside the code they describe.

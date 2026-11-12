@@ -15,10 +15,12 @@ the number (merge, close the issue, skip review) override the matching step belo
 2. **Branch in a new worktree** off `main`:
    `git worktree add -b <type>/<slug> /home/hefker/nixos/<slug> main`, and work only there.
 3. **Commit in chunks**, one reviewable step each, the message ending
-   `(HefKer/nixos-issues#<n>)`. A chunk is done when `nix flake check` passes and
-   `scripts/same-system main` shows either `identical`/a reorder with matching lists (neutral
-   tickets) or only the differences the ticket names. Run `git add` on new files first, since
-   the flake can't see untracked files.
+   `(HefKer/nixos-issues#<n>)`, except the chunk that meets the last acceptance criterion, which
+   ends `Closes HefKer/nixos-issues#<n>` (one per ticket the branch finishes): GitHub closes the
+   ticket when that commit lands on `main`, whichever way it is merged. A chunk is done when
+   `nix flake check` passes and `scripts/same-system main` shows either `identical`/a reorder
+   with matching lists (neutral tickets) or only the differences the ticket names. Run `git add`
+   on new files first, since the flake can't see untracked files.
 4. **Check acceptance**: every criterion from step 1 ticked off by a command whose output you
    keep for the hand-back.
 5. **Review** with `/code-review` from `main`. Fix every blocking finding in a new commit and
@@ -27,10 +29,5 @@ the number (merge, close the issue, skip review) override the matching step belo
    `same-system` result per host, the review outcome, and what the user still has to run on
    the machine (`nixos-rebuild`, reboots). When the branch changes the link set, run
    `scripts/link-drift` from the worktree and list each path it reports with the `mv` that
-   clears it. End with the **closing merge**, the command that lands the branch and closes the
-   ticket:
-   `git merge --no-ff <branch> -m "Merge branch '<branch>'" -m "Closes HefKer/nixos-issues#<n>"`,
-   one full `Closes HefKer/nixos-issues#<n>` per ticket the branch finishes. The step-3 commits
-   only mention the ticket, and `.github/workflows/close-issues.yml` closes only on the keyword,
-   so this merge message is what closes it. Leave running it to the user unless they asked you
-   to merge; then run exactly this.
+   clears it. Leave the merge to the user unless they asked you to merge; then run
+   `git merge --no-ff <branch>`.

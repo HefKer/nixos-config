@@ -29,10 +29,10 @@ visible finish line.
 ## Linking issues to the code
 
 A commit or PR in `nixos-config` that writes `HefKer/nixos-issues#12` leaves a backlink in
-that issue's timeline. GitHub's closing keywords do not reach across repos, so
-`.github/workflows/close-issues.yml` stands in: a commit pushed to `main` whose message
-writes `Closes HefKer/nixos-issues#12` (or `Fixes`/`Resolves`, any tense) closes that issue,
-with a comment linking the commit. Use the keyword only in the commit that finishes the
+that issue's timeline. A commit that writes `Closes HefKer/nixos-issues#12` (or
+`Fixes`/`Resolves`, any tense) closes that issue when it lands on `main`: GitHub's closing
+keywords cross repositories when the reference is fully qualified, so a bare `Closes #12`
+closes nothing. Use the keyword only in the commit that finishes the
 issue; a bare `HefKer/nixos-issues#12` is a mention and closes nothing. To close one
 without a commit, use `gh issue close`.
 
