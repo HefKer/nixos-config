@@ -1,7 +1,9 @@
 {
   pkgs,
   consts,
+  nixpkgs,
   nixosConfigurations,
+  templates,
   src,
 }:
 let
@@ -267,6 +269,41 @@ in
       ''}
       touch $out
     '';
+
+  # Each template's own flake, evaluated against this nixpkgs, builds its package and devShell from the baseline files.
+  flake-templates = pkgs.linkFarm "check-templates" (
+    lib.concatLists (
+      lib.mapAttrsToList (
+        name: template:
+        let
+          outputs = (import "${template.path}/flake.nix").outputs { inherit nixpkgs; };
+          baseline = pkgs.runCommandLocal "check-template-${name}-baseline" { } ''
+            cd ${template.path}
+            for f in flake.nix .envrc AGENTS.md CLAUDE.md README.md CHANGELOG.md; do
+              [ -f "$f" ] || { echo "templates.${name}: $f missing"; exit 1; }
+            done
+            grep -qx 'use flake' .envrc || { echo "templates.${name}: .envrc lacks use flake"; exit 1; }
+            grep -qx '@AGENTS.md' CLAUDE.md || { echo "templates.${name}: CLAUDE.md lacks @AGENTS.md"; exit 1; }
+            touch $out
+          '';
+        in
+        [
+          {
+            name = "${name}-baseline";
+            path = baseline;
+          }
+          {
+            name = "${name}-package";
+            path = outputs.packages.${pkgs.stdenv.hostPlatform.system}.default;
+          }
+          {
+            name = "${name}-devshell";
+            path = outputs.devShells.${pkgs.stdenv.hostPlatform.system}.default;
+          }
+        ]
+      ) templates
+    )
+  );
 
   game-focus-watcher =
     pkgs.runCommandLocal "check-game-focus-watcher" { nativeBuildInputs = [ pkgs.python3 ]; }

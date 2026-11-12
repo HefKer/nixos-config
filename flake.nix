@@ -102,9 +102,25 @@
 
       formatter.${system} = pkgs.nixfmt-tree;
 
+      templates = {
+        python = {
+          path = ./templates/python;
+          description = "Project with uv: devShell, packages.default, agent docs";
+        };
+        rust = {
+          path = ./templates/rust;
+          description = "Rust project: devShell, packages.default, agent docs";
+        };
+        bare = {
+          path = ./templates/bare;
+          description = "Project with an empty devShell, a shell packages.default, agent docs";
+        };
+      };
+
       checks.${system} = import ./checks {
         inherit pkgs consts;
-        inherit (self) nixosConfigurations;
+        inherit nixpkgs;
+        inherit (self) nixosConfigurations templates;
         src = self;
       };
     };

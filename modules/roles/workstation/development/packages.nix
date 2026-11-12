@@ -49,6 +49,7 @@ in
       llm-agents.herdr
       llm-agents.collie
       (callPackage ../../../../pkgs/skillshare.nix { })
+      (callPackage ../../../../pkgs/new-software { })
 
       # Rust
       rustup
