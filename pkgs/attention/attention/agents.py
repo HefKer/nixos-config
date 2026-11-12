@@ -22,11 +22,12 @@ def mark_key(agent):
     return None
 
 
-def observe(marks, agents, now):
+def observe(marks, agents, now, unreachable=()):
     """Brings the marks in line with the live agents: new ones for fresh blocked or done states,
     none for states that have gone. Only herdr's `done` (finished, not yet seen there) opens a
-    done mark, so an agent idle since before the watcher ran never becomes an item."""
-    live = {}
+    done mark, so an agent idle since before the watcher ran never becomes an item. A session
+    that didn't answer keeps its marks, since a slow reply isn't a restart."""
+    live = {key: mark for key, mark in marks.items() if key.split("/", 1)[0] in unreachable}
     for agent in agents:
         key = mark_key(agent)
         if key is None:

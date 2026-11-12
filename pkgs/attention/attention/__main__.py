@@ -15,13 +15,19 @@ import time
 
 from . import agents as agent_items
 from . import bands, herdr, messages, store
-from .ranking import build, requeue
+from .ranking import build, ranked, requeue
 
 TICK = 1
 
 
 def toast(text):
     subprocess.run(["dms", "ipc", "call", "toast", "info", text], capture_output=True, check=False)
+
+
+def current(state, now):
+    """The ranked queue, read live from herdr."""
+    live, unreachable = herdr.agents()
+    return build(state, live, now, unreachable=unreachable)
 
 
 def go(item):
@@ -32,15 +38,14 @@ def go(item):
 
 
 def cmd_next():
-    live = herdr.agents()
     now = time.time()
     with store.locked() as state:
-        queue = build(state, live, now)
+        queue = current(state, now)
         here = {item["id"] for item in queue if item["kind"] == "agent" and herdr.watching(item["agent"])}
         for item in queue:
             if item["id"] in here:
                 requeue(state, item, now)
-        queue = build(state, live, now)
+        queue = ranked(queue)
     target = next((item for item in queue if item["id"] not in here), None)
     if target is None:
         toast("Nothing else needs you" if here else "All clear")
@@ -55,9 +60,8 @@ def public(item):
 
 
 def cmd_list(as_json):
-    live = herdr.agents()
     with store.locked() as state:
-        queue = build(state, live, time.time())
+        queue = current(state, time.time())
     if as_json:
         print(json.dumps([public(item) for item in queue]))
         return 0
@@ -67,9 +71,8 @@ def cmd_list(as_json):
 
 
 def cmd_go(item_id):
-    live = herdr.agents()
     with store.locked() as state:
-        queue = build(state, live, time.time())
+        queue = current(state, time.time())
     item = next((item for item in queue if item["id"] == item_id), None)
     if item is None:
         toast("Already handled")
@@ -106,14 +109,21 @@ def cmd_ingest():
     return 0
 
 
+def watch_tick():
+    now = time.time()
+    with store.locked() as state:
+        for item in current(state, now):
+            if item["kind"] == "agent" and item["band"] == bands.DONE_AGENT:
+                agent_items.watched(state.agents, item, herdr.watching(item["agent"]), now)
+
+
 def cmd_watch():
     while True:
-        live = herdr.agents()
-        now = time.time()
-        with store.locked() as state:
-            for item in build(state, live, now):
-                if item["kind"] == "agent" and item["band"] == bands.DONE_AGENT:
-                    agent_items.watched(state.agents, item, herdr.watching(item["agent"]), now)
+        try:
+            watch_tick()
+        except Exception as error:  # noqa: BLE001
+            # One bad tick (a hung agent-notify, a transcript mid-write) mustn't drop the watch counts with the process.
+            print(f"attention watch: {error!r}", file=sys.stderr, flush=True)
         time.sleep(TICK)
 
 

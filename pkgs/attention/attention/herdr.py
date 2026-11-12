@@ -110,15 +110,16 @@ def agents_of(session, path, snap):
 
 
 def agents():
-    """Every agent in every reachable session; a session whose server is down has none."""
-    found = []
+    """(every agent in every session that answered, the names of the sessions that didn't)."""
+    found, unreachable = [], set()
     for session, path in sockets().items():
         try:
             result = request(path, "session.snapshot", {})
         except HerdrError:
+            unreachable.add(session)
             continue
         found.extend(agents_of(session, path, result.get("snapshot", result)))
-    return found
+    return found, unreachable
 
 
 def background_busy(agent):

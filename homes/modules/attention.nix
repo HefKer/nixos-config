@@ -5,7 +5,6 @@ in
 {
   home.packages = [ attention ];
 
-  # Counts how long a finished agent has been watched, and notes when it entered its band.
   systemd.user.services.attention-watch = {
     Unit = {
       Description = "Keep the attention queue's agent marks current";

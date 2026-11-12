@@ -77,6 +77,13 @@ class Queue(unittest.TestCase):
         with store.locked() as state:
             self.assertEqual(state.agents, {})
 
+    def test_a_session_that_does_not_answer_keeps_its_marks(self):
+        self.build([agent("a", "done", session="work"), agent("b", "done")], 1)
+        with store.locked() as state:
+            queue = build(state, [agent("b", "done")], 2, idle, unreachable={"work"})
+        self.assertEqual(ids(queue), ["default/b/done/1"])
+        self.assertEqual(ids(self.build([agent("a", "idle", session="work"), agent("b", "idle")], 3)), ["work/a/done/1", "default/b/done/1"])
+
     def test_background_work_keeps_a_done_agent_out(self):
         self.assertEqual(self.build([agent("a")], 1, busy=lambda _: True), [])
         self.assertEqual(len(self.build([agent("a")], 2)), 1)
@@ -105,7 +112,7 @@ class Queue(unittest.TestCase):
     def test_going_to_a_message_handles_it(self):
         item = messages.ingest({"summary": "Sam", "body": "hi", "id": 4}, 1, place=lambda _: "reply_soon")
         self.assertEqual(ids(self.build([], 2)), [item["id"]])
-        messages.invoke = lambda _: True
+        messages.invoke = lambda _id, _summary: True
         messages.go(item)
         self.assertEqual(self.build([], 3), [])
 

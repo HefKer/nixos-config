@@ -1,7 +1,4 @@
-"""Placing a third-party notification: rules first, then Jev's judgments, then a truth table in code.
-
-Every question, threshold and the table itself live here, so they can be read and tuned together.
-"""
+"""Placing a third-party notification: rules first, then Jev's judgments, then a truth table in code."""
 
 import json
 import os
@@ -66,7 +63,6 @@ def band(answers, work_contact):
     return "later"
 
 
-# Sources --------------------------------------------------------------------------------------
 
 ISOLATES = dict.fromkeys(map(ord, "⁦⁧⁨⁩"))
 DISCORD_TITLE = re.compile(r"^(?P<sender>.+?) \((?P<where>.+)\)$")
@@ -94,7 +90,6 @@ def discord_origin(summary):
     return match["sender"], where, None
 
 
-# Contacts ---------------------------------------------------------------------------------------
 
 
 def contacts_path():
@@ -154,7 +149,6 @@ def prune(value):
     return value
 
 
-# Jev ------------------------------------------------------------------------------------------
 
 
 class Unreachable(Exception):

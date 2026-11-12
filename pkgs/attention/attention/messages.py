@@ -30,11 +30,12 @@ def items(state):
     return list(state.messages.values())
 
 
-def invoke(dms_id):
-    """Runs the original notification's default action through the DMS plugin; False if it has none or is gone."""
+def invoke(dms_id, summary):
+    """Runs the original notification's default action through the DMS plugin; False if it has none or is gone.
+    The summary must match too, since DMS numbers notifications afresh after a shell restart."""
     try:
         done = subprocess.run(
-            ["dms", "ipc", "call", "attention", "invoke", str(dms_id)],
+            ["dms", "ipc", "call", "attention", "invoke", str(dms_id), summary],
             capture_output=True,
             text=True,
             timeout=5,
@@ -49,7 +50,7 @@ def go(item):
     """Going to a third-party item handles it: its action runs, or its full text is shown."""
     with store.locked() as state:
         state.messages.pop(item["id"], None)
-    if item.get("dms_id") is None or not invoke(item["dms_id"]):
+    if item.get("dms_id") is None or not invoke(item["dms_id"], item["title"]):
         subprocess.run(
             ["notify-send", "--app-name=Attention", "--transient", item["title"] or "Notification", item["detail"]],
             check=False,

@@ -31,14 +31,11 @@ class State:
 
     def __init__(self, directory):
         self.directory = directory
-        self.loaded = {}
         for name in self.FILES:
             try:
-                self.loaded[name] = json.loads((directory / f"{name}.json").read_text(encoding="utf-8"))
+                setattr(self, name, json.loads((directory / f"{name}.json").read_text(encoding="utf-8")))
             except (OSError, ValueError):
-                self.loaded[name] = {}
-        self.agents = self.loaded["agents"]
-        self.messages = self.loaded["messages"]
+                setattr(self, name, {})
 
     def save(self):
         for name in self.FILES:
