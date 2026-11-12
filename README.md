@@ -312,7 +312,9 @@ together](#how-it-fits-together) for what that means when you copy one.
   at once. `backlog add [project] "…"` does the same from a shell or an agent,
   guessing from the working directory. Shift+Enter in the box (or
   `--image FILE`) attaches the clipboard's image, committed to one private
-  attachments repo and embedded in the issue. Offline, the idea and its image
+  attachments repo and embedded in the issue. Esc keeps the text as that
+  project's draft, back in its box next time and marked in the picker; Ctrl+G
+  discards it. Offline, the idea and its image
   are queued and filed by the next capture or a 15-minute timer; a public repo
   is refused unless its entry says `public_ok`. Projects come from a YAML file
   in the dotfiles, so adding one needs no rebuild.
