@@ -112,9 +112,11 @@ together](#how-it-fits-together) for what that means when you copy one.
   [`pkgs/kanata-sim/`](pkgs/kanata-sim/) ·
   [2b71808](https://github.com/HefKer/nixos-config/commit/2b71808),
   [7cbf756](https://github.com/HefKer/nixos-config/commit/7cbf756)
-- <a id="kanata-keymap"></a>**A keymap viewer that redraws itself.** A path
-  unit watches `keymap.kbd` and redraws it as an SVG with keymap-drawer, and a
-  bind toggles it in swayimg.
+- <a id="kanata-keymap"></a>**A searchable keymap viewer that redraws itself.** A path
+  unit watches `keymap.kbd` and redraws it with keymap-drawer, and a bind toggles
+  it as a page in a bare qutebrowser window: number keys switch layers, and `/`
+  finds every key for a legend or alias on every layer. It's colored with DMS's
+  matugen palette and follows theme changes live.
   [`homes/modules/kanata-keymap.nix`](homes/modules/kanata-keymap.nix),
   [`pkgs/kanata-keymap/`](pkgs/kanata-keymap/) ·
   [ad8ab11](https://github.com/HefKer/nixos-config/commit/ad8ab11)
