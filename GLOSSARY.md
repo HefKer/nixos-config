@@ -238,12 +238,32 @@ The level and mute state set for a window's audio, kept while the window plays
 nothing and given to every stream it starts until the window closes.
 _Avoid_: pending volume, window volume
 
+**Alarm**:
+A time the user asked to be rung at. It rings on every workstation, and once
+it has rung it is gone.
+_Avoid_: reminder
+
+**Timer**:
+An alarm set as a duration from now rather than a time of day.
+_Avoid_: countdown
+
+**Repeating alarm**:
+An alarm that rings at the same time on chosen days of the week and stays
+after ringing. Removing it ends the series; snoozing it delays only the ring
+going off now.
+_Avoid_: recurring alarm, schedule
+
 ### Attention
 
 **Notification**:
 A message that informs the user. It may pop up and stays in the notification
 center, but nothing waits on it.
 _Avoid_: alert, ping
+
+**Toast**:
+A brief message under the bar that disappears by itself after about a second.
+It needs no click or dismissal and is not kept anywhere afterwards.
+_Avoid_: notification, popup
 
 **Attention item**:
 Something waiting on an action from the user, such as a blocked agent, a
