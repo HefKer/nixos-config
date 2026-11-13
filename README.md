@@ -135,6 +135,16 @@ together](#how-it-fits-together) for what that means when you copy one.
   [`homes/modules/herdr-plugins.nix`](homes/modules/herdr-plugins.nix),
   [`pkgs/herdr-plugins-sync/`](pkgs/herdr-plugins-sync/) ·
   [df23f3c](https://github.com/HefKer/nixos-config/commit/df23f3c)
+- <a id="attention"></a>**One bind to whatever needs you most.** `attention
+  next` jumps to the top of a queue ranked in fixed bands: Urgent, blocked
+  agent, Reply soon, finished agent, Later, oldest first within each. Agent
+  items are read live from every herdr session, so a restart leaves none
+  stale, and a Claude whose turn ended with subagents or background shells
+  still running counts as working. A finished agent drops out once watched
+  for 5 s or prompted; pressing the bind on one you haven't dealt with sends
+  it behind its peers. Discord and phone notifications are banded by rules,
+  then by TypeSafe's Jev from a few yes/no judgments that a truth table in
+  code combines. [`pkgs/attention/`](pkgs/attention/)
 - <a id="herdr-resurrect"></a>**herdr-resurrect without node on herdr's PATH.**
   The Node plugin runs from the store with node, bash, fzf and jq patched to
   store paths, and with its `agentResume` off it leaves agent panes to herdr's

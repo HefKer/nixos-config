@@ -28,6 +28,7 @@ in
     ./modules/syncthing
     ./modules/udiskie.nix
   ]
+  ++ lib.optional isDevelopment ./modules/attention.nix
   ++ lib.optional isDevelopment ./modules/claude-hulio.nix
   ++ lib.optional isDevelopment ./modules/collie.nix
   ++ lib.optional isDevelopment ./modules/herdr-plugins.nix

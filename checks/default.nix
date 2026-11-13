@@ -305,6 +305,9 @@ in
     )
   );
 
+  # Its unit tests run in the build.
+  attention = pkgs.callPackage ../pkgs/attention { };
+
   game-focus-watcher =
     pkgs.runCommandLocal "check-game-focus-watcher" { nativeBuildInputs = [ pkgs.python3 ]; }
       ''
