@@ -317,6 +317,13 @@ together](#how-it-fits-together) for what that means when you copy one.
   stream the window starts, so a site can be turned down before it plays.
   [`pkgs/window-volume/`](pkgs/window-volume/),
   [`modules/roles/workstation/window-volume.nix`](modules/roles/workstation/window-volume.nix)
+- <a id="mic-mute-warn"></a>**A toast when an app records a muted mic.** A
+  user service watches `pw-dump --monitor` for capture streams linking to a
+  real `Audio/Source`; if the source it links to (not necessarily the default)
+  is muted, a DMS warn toast names the app, once per stream. Monitor captures
+  link from a sink, so visualizers and screen recorders never trip it.
+  [`pkgs/mic-mute-warn/`](pkgs/mic-mute-warn/),
+  [`modules/roles/workstation/mic-mute-warn.nix`](modules/roles/workstation/mic-mute-warn.nix)
 - <a id="alarm"></a>**Timers and alarms that follow you between machines.**
   `alarm 10m tea` or `alarm 7:30 standup` (also from a fuzzel prompt on Mod+A)
   writes one small file per alarm into a Syncthing folder; on each host a path
