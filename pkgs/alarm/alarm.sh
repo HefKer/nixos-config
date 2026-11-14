@@ -53,7 +53,7 @@ load() {
 }
 
 # Writes alarm $1 from at, label, repeat and handled, beside and renamed over, so Syncthing and the
-# path unit never see half a file. A one-shot keeps the original two-line format.
+# path unit never see half a file. A one-shot stays two lines, readable by a host still on the old alarm.
 save() {
   mkdir -p "$store"
   {
@@ -64,12 +64,13 @@ save() {
   mv -f -- "$store/.$1.tmp" "$store/$1"
 }
 
-# Sets prev and next, the occurrences of $repeat around now (prev is 0 if none in the past week).
+# Sets prev and next, the occurrences of $repeat around now (0 if none in the window).
 occurrences() {
   local now t d days=${repeat% *} hm=${repeat#* }
   now=$(date +%s)
   prev=0 next=0
-  # One date(1) call per batch; a line naming a DST gap fails alone, and each result carries its own weekday.
+  # One date(1) call for all days. A day whose HH:MM falls in a DST gap fails alone and is skipped,
+  # as systemd's calendar timer skips it; the window spans two of every weekday on each side.
   while read -r t d; do
     [[ ,$days, == *",$d,"* ]] || continue
     if [ "$t" -le "$now" ]; then
@@ -77,7 +78,7 @@ occurrences() {
     elif [ "$next" -eq 0 ]; then
       next=$t
     fi
-  done < <(for i in $(seq -7 7); do echo "today $i days"; done | LC_ALL=C date -f - +%F |
+  done < <(for i in $(seq -14 14); do echo "today $i days"; done | LC_ALL=C date -f - +%F |
     sed "s/\$/ $hm/" | LC_ALL=C date -f - '+%s %a' 2>/dev/null || true)
 }
 
@@ -101,9 +102,14 @@ repeat_words() {
   echo "$days ${repeat#* }"
 }
 
-# Sets repeat from a day word ($1) and a time ($2), or fails with why.
+# Sets repeat from a day word ($1) and a time ($2, or $2 $3 when $3 is am or pm), or fails with why.
+# Sets time_words to how many words the time took.
 parse_repeat() {
-  local w d n hm days=""
+  local w d n hm days="" spec=${2:-}
+  time_words=1
+  if [[ ${3:-} =~ ^[aApP][mM]$ ]]; then
+    spec+=" $3" time_words=2
+  fi
   case ${1,,} in
     daily) days=Mon,Tue,Wed,Thu,Fri,Sat,Sun ;;
     weekdays) days=Mon,Tue,Wed,Thu,Fri ;;
@@ -123,8 +129,8 @@ parse_repeat() {
       days=${days#,}
       ;;
   esac
-  if ! [[ ${2:-} =~ [0-9] ]] || ! hm=$(date -d "$2" +%H:%M 2>/dev/null); then
-    die "can't read a time of day in: ${2:-(nothing after $1)}"
+  if ! [[ $spec =~ ^[0-9]{1,2}(:[0-9]{2})?\ ?([aApP][mM])?$ ]] || ! hm=$(date -d "$spec" +%H:%M 2>/dev/null); then
+    die "can't read a time of day in: ${spec:-(nothing after $1)}"
   fi
   repeat="$days $hm"
 }
@@ -154,10 +160,10 @@ parse() {
   now=$(date +%s)
   repeat=""
   if is_day_word "$1"; then
-    parse_repeat "$1" "${2:-}"
+    parse_repeat "$1" "${2:-}" "${3:-}"
     occurrences
     when=$next kind=alarm
-    shift $(($# < 2 ? $# : 2))
+    shift $((1 + time_words))
     rest=$*
     return
   fi
@@ -304,6 +310,9 @@ cmd_prompt() {
   if line=$(cmd_add $out 2>&1); then
     IFS=$'\t' read -r _ desc label <<<"$line"
     notify-send -a Alarm -i alarm -t 3000 "$label" "$desc"
+    # Replaying a one-shot sets it again (another 10m tea); replaying a repeating one would duplicate its series.
+    # shellcheck disable=SC2086 # the typed line splits into words
+    if [[ $desc == *⟳* ]]; then repeat record alarm prompt; else repeat record alarm add $out; fi
   else
     notify-send -a Alarm -i dialog-error "Alarm not set" "${line#alarm: }"
   fi
@@ -357,19 +366,18 @@ cmd_sync() {
   done
 }
 
-# Ends ring $1 of the loaded alarm $2 (an epoch, or a repeat tag): a one-shot is deleted, a snoozed
-# ring of a repeating alarm clears its at=, and an occurrence is marked handled at $3 when $4 is set.
+# Ends ring $2 (an epoch, or a repeat tag) of the loaded alarm $1, due at $3: a one-shot is deleted,
+# a snoozed ring of a repeating alarm clears its at=, and an occurrence is marked handled.
+# Every host that timed out writes the same bytes, so Syncthing sees no conflict.
 finish() {
   if [ -z "$repeat" ]; then
-    rm -f -- "${store:?}/$2"
-  elif [[ $1 == r* ]]; then
-    [ -z "$4" ] || {
-      handled=$3
-      save "$2"
-    }
+    rm -f -- "${store:?}/$1"
+  elif [[ $2 == r* ]]; then
+    handled=$3
+    save "$1"
   else
     at=""
-    save "$2"
+    save "$1"
   fi
 }
 
@@ -382,7 +390,7 @@ cmd_ring() {
     [[ -n $repeat && $(repeat_tag) == "$2" ]] || exit 0
     occurrences
     due=$prev
-    # Dismissed or snoozed on another host before this one woke.
+    # Dismissed or snoozed on another host before this one woke (or no occurrence: a DST gap).
     [ "$handled" -lt "$due" ] || exit 0
   else
     [ "$at" = "$2" ] || exit 0
@@ -390,7 +398,7 @@ cmd_ring() {
   fi
   late=$(($(date +%s) - due))
   if [ "$late" -gt "$ring_secs" ]; then
-    [[ $2 == r* ]] || finish "$2" "$id"
+    [[ $2 == r* ]] || finish "$id" "$2" "$due"
     notify-send -a Alarm -i alarm "Missed: $label" "Due $(date -d "@$due" '+%a %H:%M') while this machine was off or asleep"
     exit 0
   fi
@@ -432,8 +440,7 @@ cmd_ring() {
       [[ $2 != r* ]] || handled=$due
       save "$id"
       ;;
-    # Unanswered, every host times out together, so a repeating occurrence writes nothing to collide on.
-    *) finish "$2" "$id" "$due" "$([ "$rc" -gt 128 ] || echo 1)" ;;
+    *) finish "$id" "$2" "$due" ;;
   esac
 }
 

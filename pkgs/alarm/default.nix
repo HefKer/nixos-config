@@ -1,4 +1,5 @@
 {
+  callPackage,
   coreutils,
   findutils,
   fuzzel,
@@ -26,6 +27,7 @@ writeShellApplication {
     pipewire
     procps
     systemd
+    (callPackage ../repeat { })
   ];
   text = ''
     store=${lib.escapeShellArg store}
