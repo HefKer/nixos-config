@@ -11,6 +11,7 @@ in
     ./display.nix
     ./fonts.nix
     ./input.nix
+    ./mic-mute-warn.nix
     ./networking.nix
     ./packages.nix
     ./printing.nix
