@@ -324,7 +324,10 @@ together](#how-it-fits-together) for what that means when you copy one.
   ring after a suspend. Ringing loops a sound under a critical notification
   with Dismiss and Snooze. Dismissing on one machine deletes the file, which
   silences the other, and alarms missed while a machine was off are reported
-  rather than rung. `alarm ls --json` feeds a DMS bar countdown in the dotfiles.
+  rather than rung. `alarm weekdays 7:30 gym` (or `daily`, `mon,wed,fri`) sets a
+  repeating one: a calendar timer that stays after ringing, whose snooze delays
+  only the ring going off now. `alarm ls --json` feeds a DMS bar countdown in
+  the dotfiles.
   [`pkgs/alarm/`](pkgs/alarm/) ·
   [`alarm.nix`](homes/modules/alarm.nix)
 - <a id="backlog"></a>**Ideas straight into a project's GitHub backlog.**
