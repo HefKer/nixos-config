@@ -399,11 +399,11 @@ cmd_ring() {
 
   # Also run when another host's dismiss deletes the file and sync stops this unit.
   quiet() {
-    if [ -n "$loop" ]; then
+    if [ -n "${loop:-}" ]; then
       pkill -P "$loop" 2>/dev/null || true
       kill "$loop" 2>/dev/null || true
     fi
-    [ -z "$nid" ] || gdbus call --session --dest org.freedesktop.Notifications --object-path /org/freedesktop/Notifications \
+    [ -z "${nid:-}" ] || gdbus call --session --dest org.freedesktop.Notifications --object-path /org/freedesktop/Notifications \
       --method org.freedesktop.Notifications.CloseNotification "$nid" >/dev/null 2>&1 || true
   }
   trap quiet EXIT
