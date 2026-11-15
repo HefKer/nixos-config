@@ -88,6 +88,7 @@ in
           AlternativeUIEnabled = true;
           RootFolder = "${pkgs.vuetorrent}/share/vuetorrent";
           LocalHostAuth = false;
+          # Accepted risk: host traffic arrives from the bridge address, so any local process can drive the WebUI without a password (and so run code as qbittorrent via "run on finish"). Browser pages are stopped by the CSRF and Host-header checks, and a process running as the user can already do worse; a password would need its hash in sops merged into qBittorrent.conf at start.
           AuthSubnetWhitelistEnabled = true;
           AuthSubnetWhitelist = "${config.vpnNamespaces.${netns}.bridgeAddress}/32";
         };
