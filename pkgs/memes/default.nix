@@ -253,7 +253,10 @@ let
             slug=''${slug%/}
             slug=''${slug##*/}
             [ -r ${lib.escapeShellArg klipyKey} ] || fail "no Klipy API key; see klipy-api in secrets/shared.yaml"
-            url=$(curl -fsS "https://api.klipy.com/api/v1/$(<${lib.escapeShellArg klipyKey})/gifs/$slug" |
+            [[ $slug =~ ^[A-Za-z0-9_-]+$ ]] || fail "not a Klipy GIF slug: $slug"
+            # The key is part of the URL, so curl reads it from a config on stdin, keeping it out of argv and so out of ps.
+            url=$(printf 'url = "https://api.klipy.com/api/v1/%s/gifs/%s"\n' "$(<${lib.escapeShellArg klipyKey})" "$slug" |
+              curl -fsS -K - |
               jq -r 'first(.. | objects | (.hd?, .md?) | objects | .gif?.url // empty)') ||
               fail "Klipy has no GIF $slug"
             [ -n "$url" ] || fail "Klipy has no GIF $slug"
