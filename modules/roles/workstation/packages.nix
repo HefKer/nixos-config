@@ -26,6 +26,9 @@ in
       owner = consts.username;
     };
 
+    # Insecure for trusting eMudhra's roots, which ~/.pki/nssdb distrusts (certutil); the pinned version makes a bump re-raise it.
+    nixpkgs.config.permittedInsecurePackages = [ "qutebrowser-3.7.0" ];
+
     nixpkgs.overlays = [
       # DRM, plus caret.js's <style> via textContent: Trusted Types pages (YouTube, GitHub) reject its innerHTML, aborting caret mode
       (final: prev: {
