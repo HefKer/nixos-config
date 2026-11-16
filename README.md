@@ -72,8 +72,10 @@ together](#how-it-fits-together) for what that means when you copy one.
   nixpkgs bump can change the `/etc` that `buildFHSEnv` builds, so that an
   app's own bubblewrap arguments no longer apply and it dies before it logs
   anything. `scripts/fhs-smoke [host]` builds the host, then starts every
-  bubblewrap launcher in its closure with `true` in place of the app and
-  prints any `bwrap:` error. [`scripts/fhs-smoke`](scripts/fhs-smoke)
+  bubblewrap launcher in its closure with a checker in place of the app. It
+  prints any `bwrap:` error, and any library `ldd` can't resolve in the new
+  build that resolves for the same app on the running system.
+  [`scripts/fhs-smoke`](scripts/fhs-smoke)
 
 ### Dotfile links
 

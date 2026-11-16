@@ -1,45 +1,117 @@
 #!/usr/bin/env bash
 # Usage: scripts/fhs-smoke [host | system path, e.g. /run/current-system]
 # Builds the host's system from the working tree (default: this machine) without switching, then starts
-# every bubblewrap (buildFHSEnv / appimageTools) sandbox in its closure with `true` in place of the app,
+# every bubblewrap (buildFHSEnv / appimageTools) sandbox in its closure with a checker in place of the app,
 # so a sandbox that can no longer be set up on this machine's /etc shows before a switch. No window opens.
-# Exits 1 when any sandbox fails.
+# Inside, the checker runs ldd on the app's own files: a library unresolved in the new build but resolved
+# for the same app in /run/current-system fails it; one unresolved in both is only counted, as most are
+# optional (tray icons, toolkit shims). Exits 1 when any sandbox fails.
 set -euo pipefail
 
-root=$(git rev-parse --show-toplevel)
 target=${1:-$(hostname)}
 
 if [[ $target = /* ]]; then
   system=$(readlink -f "$target")
 else
+  root=$(git rev-parse --show-toplevel)
   if [ -n "$(git -C "$root" ls-files --others --exclude-standard -- '*.nix')" ]; then
     echo "warning: untracked .nix files are invisible to the flake; git add them first" >&2
   fi
   system=$(nix build --no-link --print-out-paths "git+file://$root#nixosConfigurations.$target.config.system.build.toplevel")
 fi
+current=$(readlink -f /run/current-system)
 
-true_bin=$(nix build --no-link --print-out-paths nixpkgs#coreutils)/bin/true
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 
-# buildFHSEnv's launcher is a store path that is itself a script, named NAME-bwrap, which execs bwrap
-# with container-init as the sandbox's command.
-mapfile -t launchers < <(nix-store -qR "$system" | grep -- '-bwrap$' |
-  while read -r p; do [ -f "$p" ] && grep -qF -- '-container-init "$@"' "$p" && echo "$p"; done)
+# Runs as the sandbox's /init, after container-init has written ld.so.conf and run ldconfig. It scans the
+# store paths the app's own init names, plus the store path of the command that init execs. It sits in
+# the store because Steam-style sandboxes don't share the host's /tmp.
+bash_bin=$(readlink -f "$BASH")
+{
+  echo "#!$bash_bin"
+  cat <<'EOF'
+source /etc/profile >/dev/null 2>&1
+roots=()
+for p in $(grep -o '/nix/store/[a-z0-9]\{32\}-[^/ "]*' "$FHS_SMOKE_INIT" | sort -u); do
+  case $p in *-bash-[0-9]*) continue ;; esac
+  [ -d "$p" ] && roots+=("$p")
+done
+cmd=$(awk '$1 == "exec" { print $2 }' "$FHS_SMOKE_INIT" | tail -1)
+case $cmd in
+  appimage-exec.sh | /nix/store/* | '') ;;
+  *) r=$(realpath -e "$(command -v "$cmd")" 2>/dev/null) && [[ $r = /nix/store/* ]] && roots+=("$(cut -d/ -f1-4 <<<"$r")") ;;
+esac
+[ ${#roots[@]} -gt 0 ] || exit 0
 
+# A library the app ships itself is found at run time through its launcher's LD_LIBRARY_PATH or rpath.
+declare -A bundled
+while IFS= read -r f; do bundled[${f##*/}]=1; done < <(find "${roots[@]}" \( -type f -o -type l \) 2>/dev/null)
+declare -A missing
+while IFS= read -r f; do
+  while read -r lib _; do
+    [ -n "${bundled[$lib]:-}" ] || missing[$lib]=${missing[$lib]:-${f#/nix/store/*/}}
+  done < <(ldd "$f" 2>/dev/null | grep '=> not found')
+done < <(find "${roots[@]}" -type f \( -name '*.so*' -o -perm -u+x \) -size +1k 2>/dev/null)
+for lib in "${!missing[@]}"; do echo "missing $lib (needed by ${missing[$lib]})"; done | sort
+EOF
+} >"$tmp/fhs-smoke-check"
+chmod +x "$tmp/fhs-smoke-check"
+check=$(nix-store --add "$tmp/fhs-smoke-check")
+
+# buildFHSEnv's launcher is a store path that is itself a script, named NAME-bwrap, which execs bwrap
+# with container-init as the sandbox's command and the app's init symlinked at /init.
+launchers() {
+  nix-store -qR "$1" | grep -- '-bwrap$' |
+    while read -r p; do [ -f "$p" ] && grep -qF -- '-container-init "$@"' "$p" && echo "$p"; done
+}
+
+# Prints the checker's output for one launcher; returns non-zero when the sandbox itself fails.
+run() {
+  local init
+  init=$(grep -oE -- '--symlink /nix/store/[a-z0-9]{32}-[^ ]*-init /init' "$1" | awk '{ print $2 }')
+  sed -E "s|--symlink /nix/store/[a-z0-9]{32}-[^ ]*-init /init|--symlink $check /init|" "$1" >"$tmp/launcher"
+  (cd / && FHS_SMOKE_INIT=$init timeout 120 bash "$tmp/launcher" </dev/null 2>&1)
+}
+
+label() { local n=${1#/nix/store/*-}; echo "${n%-bwrap}"; }
+app() { local n; n=$(label "$1"); echo "${n%%-[0-9]*}"; }
+
+declare -A baseline
+if [ "$system" != "$current" ]; then
+  while IFS= read -r l; do
+    baseline[$(app "$l")]+=$( (run "$l" || true) | sed -n 's/^missing \([^ ]*\) .*/\1/p')$'\n'
+  done < <(launchers "$current")
+fi
+
+mapfile -t list < <(launchers "$system")
 status=0
-for l in "${launchers[@]}"; do
-  name=${l#/nix/store/*-}
-  name=${name%-bwrap}
-  copy=$tmp/launcher
-  sed -E "s|/nix/store/[a-z0-9]{32}-container-init \"\\\$@\"|$true_bin|" "$l" >"$copy"
-  if out=$(timeout 30 bash "$copy" 2>&1); then
-    echo "ok    $name"
-  else
+for l in "${list[@]}"; do
+  name=$(label "$l")
+  if ! out=$(run "$l"); then
     echo "FAIL  $name"
     sed 's/^/      /' <<<"$out" | head -5
     status=1
+    continue
+  fi
+  a=$(app "$l") new="" known=0
+  while IFS= read -r line; do
+    lib=$(cut -d' ' -f2 <<<"$line")
+    if [ -z "${baseline[$a]+x}" ] || grep -qxF "$lib" <<<"${baseline[$a]}"; then
+      known=$((known + 1))
+    else
+      new+="      $line"$'\n'
+    fi
+  done < <(grep '^missing ' <<<"$out" || true)
+  if [ -n "$new" ]; then
+    echo "FAIL  $name: libraries unresolved here but resolved in the running system"
+    printf %s "$new"
+    status=1
+  else
+    note=""
+    [ $known -eq 0 ] || note=" ($known unresolved, none new)"
+    echo "ok    $name$note"
   fi
 done
-[ ${#launchers[@]} -gt 0 ] || echo "no bubblewrap launchers found in $system"
+[ ${#list[@]} -gt 0 ] || echo "no bubblewrap launchers found in $system"
 exit $status
