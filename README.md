@@ -68,6 +68,12 @@ together](#how-it-fits-together) for what that means when you copy one.
   aborts activation. `scripts/link-drift [host]` evaluates the host's
   `home.file` targets and lists any in `$HOME` that aren't Home Manager's
   links. [`scripts/link-drift`](scripts/link-drift)
+- <a id="fhs-smoke"></a>**Catch broken FHS sandboxes before a switch.** A
+  nixpkgs bump can change the `/etc` that `buildFHSEnv` builds, so that an
+  app's own bubblewrap arguments no longer apply and it dies before it logs
+  anything. `scripts/fhs-smoke [host]` builds the host, then starts every
+  bubblewrap launcher in its closure with `true` in place of the app and
+  prints any `bwrap:` error. [`scripts/fhs-smoke`](scripts/fhs-smoke)
 
 ### Dotfile links
 
@@ -445,7 +451,7 @@ This repository is structured in a modularized format, with each directory servi
 
 **checks**: Tests `nix flake check` runs on top of evaluating every host: formatting (`nix fmt`) and the module conventions. `.githooks/pre-commit` runs them on every commit once enabled with `git config core.hooksPath .githooks`.
 
-**scripts**: `same-system` proves a refactor leaves every host's build unchanged; `link-drift` lists files in `$HOME` that would block Home Manager's links.
+**scripts**: `same-system` proves a refactor leaves every host's build unchanged; `link-drift` lists files in `$HOME` that would block Home Manager's links; `fhs-smoke` starts every bubblewrap sandbox in a host's build, so one that no longer sets up shows before a switch.
 
 **homes**: Home Manager — the home layer. It *wires* dotfiles into `$HOME`; it does not hold them. Their content lives in a separate dotfiles root, and packages stay at the system layer, in `modules`. See [Dotfiles](#dotfiles).
 

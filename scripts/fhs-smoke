@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# Usage: scripts/fhs-smoke [host | system path, e.g. /run/current-system]
+# Builds the host's system from the working tree (default: this machine) without switching, then starts
+# every bubblewrap (buildFHSEnv / appimageTools) sandbox in its closure with `true` in place of the app,
+# so a sandbox that can no longer be set up on this machine's /etc shows before a switch. No window opens.
+# Exits 1 when any sandbox fails.
+set -euo pipefail
+
+root=$(git rev-parse --show-toplevel)
+target=${1:-$(hostname)}
+
+if [[ $target = /* ]]; then
+  system=$(readlink -f "$target")
+else
+  if [ -n "$(git -C "$root" ls-files --others --exclude-standard -- '*.nix')" ]; then
+    echo "warning: untracked .nix files are invisible to the flake; git add them first" >&2
+  fi
+  system=$(nix build --no-link --print-out-paths "git+file://$root#nixosConfigurations.$target.config.system.build.toplevel")
+fi
+
+true_bin=$(nix build --no-link --print-out-paths nixpkgs#coreutils)/bin/true
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+
+# buildFHSEnv's launcher is a store path that is itself a script, named NAME-bwrap, which execs bwrap
+# with container-init as the sandbox's command.
+mapfile -t launchers < <(nix-store -qR "$system" | grep -- '-bwrap$' |
+  while read -r p; do [ -f "$p" ] && grep -qF -- '-container-init "$@"' "$p" && echo "$p"; done)
+
+status=0
+for l in "${launchers[@]}"; do
+  name=${l#/nix/store/*-}
+  name=${name%-bwrap}
+  copy=$tmp/launcher
+  sed -E "s|/nix/store/[a-z0-9]{32}-container-init \"\\\$@\"|$true_bin|" "$l" >"$copy"
+  if out=$(timeout 30 bash "$copy" 2>&1); then
+    echo "ok    $name"
+  else
+    echo "FAIL  $name"
+    sed 's/^/      /' <<<"$out" | head -5
+    status=1
+  fi
+done
+[ ${#launchers[@]} -gt 0 ] || echo "no bubblewrap launchers found in $system"
+exit $status
