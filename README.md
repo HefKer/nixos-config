@@ -209,6 +209,12 @@ together](#how-it-fits-together) for what that means when you copy one.
   `~/.termux/tasker` on each call and runs one by name with its data on stdin,
   so no text handed to Tasker is ever run.
   [`phone/termux/`](phone/termux/)
+- <a id="phone-capture"></a>**Phone quick capture into a synced notes inbox.** A
+  Tasker project: share text or a link from any app, or tap a Quick Settings
+  tile and type, and it lands as one new markdown file in a Syncthing folder's
+  inbox, never an append, so the phone can't make sync-conflict copies. A
+  failed write keeps the text in a notification.
+  [`phone/automations/capture.prj.xml`](phone/automations/capture.prj.xml)
 - <a id="package-skills"></a>**Skills bundled with packages.** Linking
   `/share/skills` into the system profile gives skills that ship with packages
   (like hunk's) a path that survives upgrades.
