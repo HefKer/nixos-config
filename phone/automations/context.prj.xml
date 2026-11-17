@@ -20,7 +20,7 @@
 		<nme>Context Home</nme>
 		<State sr="con0" ve="2">
 			<code>160</code>
-			<Str sr="arg0" ve="3">%ContextHomeSsid</Str>
+			<Str sr="arg0" ve="3">%HomeSsid</Str>
 			<Str sr="arg1" ve="3"/>
 			<Str sr="arg2" ve="3"/>
 			<Int sr="arg3" val="2"/>
