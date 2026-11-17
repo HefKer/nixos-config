@@ -12,7 +12,7 @@
 			<Str sr="arg0" ve="3">%HomeSsid</Str>
 			<Str sr="arg1" ve="3"/>
 			<Str sr="arg2" ve="3"/>
-			<Int sr="arg3" val="0"/>
+			<Int sr="arg3" val="2"/>
 		</State>
 	</Profile>
 	<Profile sr="prof21" ve="2">
