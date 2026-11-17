@@ -191,6 +191,12 @@ agents. Unattended, it only reads and notifies, unless its changes are fixed and
 were reviewed in advance.
 _Avoid_: phone script, routine, macro
 
+**Termux script**:
+A shell script in `phone/termux/` that a phone automation running on the phone
+calls by name. It holds the automation's logic, so that logic is reviewed and
+tested in this repo; Tasker keeps only the trigger.
+_Avoid_: Tasker script, phone-side script
+
 **Phone baseline**:
 The settings and apps the user wants held on the phone, reapplied on demand.
 The closest the phone gets to configuration, but nothing builds it, and drift

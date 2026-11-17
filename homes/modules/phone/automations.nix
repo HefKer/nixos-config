@@ -1,6 +1,7 @@
 {
   android-tools,
   coreutils,
+  diffutils,
   gnugrep,
   phone,
   writeShellApplication,
@@ -25,4 +26,13 @@ in
     android-tools
     gnugrep
   ] ./settings-changes.sh;
+
+  termuxDeliver = writeShellApplication {
+    name = "phone-termux-deliver";
+    runtimeInputs = [
+      coreutils
+      diffutils
+    ];
+    text = builtins.readFile ./termux-deliver.sh;
+  };
 }

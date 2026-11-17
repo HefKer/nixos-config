@@ -71,6 +71,17 @@ The launcher is Nova: it has no "add app" menu; an app reaches a homescreen by d
 - `adb pull` / `adb push`, user storage under `/sdcard` (screenshots in `/sdcard/DCIM/Screenshots`).
 - `scrcpy` mirrors the phone into a desktop window when the user wants to watch.
 
+## Termux scripts
+
+A phone automation that runs on the phone keeps its logic in a Termux script, `phone/termux/<name>.sh` in the nixos repo; Tasker holds only the trigger.
+
+- **Add one:** write `phone/termux/<name>.sh` with the shebang its neighbours use and a name of lowercase letters, digits and `-`. It takes its data on stdin and no arguments, and prints one status line. `nix flake check` shellchecks it and runs `run.sh` against it.
+- **Delivery:** the user's next switch on the desktop copies the scripts into the vault (`~/polaris/.polaris/termux/`), Syncthing carries them to the phone, and `run.sh` installs them into Termux's `~/.termux/tasker/` on the next call. adb reaches neither that directory nor Termux's shell, so a draft is tested by delivering it.
+- **Call from Tasker:** Perform Task `Termux Script` (project `phone/automations/termux.prj.xml`) with `%par1` the name and `%par2` the stdin; it flashes the result and returns stdout. Every automation goes through this task, so `run.sh` stays the one place a name becomes a script.
+- **Call from a host:** `adb shell am broadcast -a nixos.phone.TERMUX --es script selftest`, then read the result with `adb logcat -d -s TermuxCommand`. `selftest` reports battery, Wi-Fi and whether the delivered scripts are readable: run it first when a script misbehaves.
+
+Gotchas: a Termux:API command hangs when the Termux:API app is missing, so wrap each in `timeout`; stdout lands in logcat, so print status, never the data; a script called without `%par2` reads the literal text `%par2` on stdin.
+
 ## Gotchas
 
 - `enabled=4` (disabled-until-used) in `dumpsys package` is Samsung putting an unused app to sleep, not the user disabling it; `pm list packages -d` lists these too. Leave them alone.

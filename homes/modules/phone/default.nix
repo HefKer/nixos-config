@@ -11,6 +11,7 @@ let
   automations = pkgs.callPackage ./automations.nix { inherit phone; };
   # This host's tailnet address, kept where Syncthing's peers already dial it.
   tailnetAddress = (import ../syncthing/table.nix).peers.${osConfig.networking.hostName}.address;
+  vault = "${config.home.homeDirectory}/${(import ../syncthing/table.nix).folders.polaris.path}";
 in
 {
   options.custom.home.phone = {
@@ -24,6 +25,11 @@ in
 
   config = lib.mkIf cfg.enable {
     custom.health.probes.phone-adb.script = automations.adbProbe;
+
+    # The phone's Termux can only read what lands under /sdcard, and the vault is the folder already synced there.
+    home.activation.phoneTermuxScripts = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      run ${lib.getExe automations.termuxDeliver} ${../../../phone/termux} ${lib.escapeShellArg "${vault}/.polaris/termux"}
+    '';
 
     systemd.user.services.phone-settings-changes = {
       Unit.Description = "Record the settings the phone's Settings app changed";
