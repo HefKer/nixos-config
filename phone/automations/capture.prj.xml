@@ -1,9 +1,10 @@
 <TaskerData sr="" dvi="1" tv="6.7.9">
 	<Profile sr="prof20" ve="2">
-		<cdate>1794873600000</cdate>
+		<cdate>1794937808163</cdate>
+		<clp>true</clp>
 		<edate>1794873600000</edate>
 		<id>20</id>
-		<mid0>31</mid0>
+		<mid0>16</mid0>
 		<nme>Capture Share</nme>
 		<Event sr="con0" ve="2">
 			<code>2101</code>
@@ -51,10 +52,11 @@ The title shared to Tasker from another app. Many apps don't send this field.&lt
 		</Event>
 	</Profile>
 	<Profile sr="prof21" ve="2">
-		<cdate>1794873600000</cdate>
+		<cdate>1794937808164</cdate>
+		<clp>true</clp>
 		<edate>1794873600000</edate>
 		<id>21</id>
-		<mid0>33</mid0>
+		<mid0>18</mid0>
 		<nme>Capture Intent</nme>
 		<Event sr="con0" ve="2">
 			<code>599</code>
@@ -67,10 +69,11 @@ The title shared to Tasker from another app. Many apps don't send this field.&lt
 		</Event>
 	</Profile>
 	<Profile sr="prof22" ve="2">
-		<cdate>1794873600000</cdate>
+		<cdate>1794937808164</cdate>
+		<clp>true</clp>
 		<edate>1794873600000</edate>
 		<id>22</id>
-		<mid0>34</mid0>
+		<mid0>19</mid0>
 		<nme>Capture Tile Setup</nme>
 		<Event sr="con0" ve="2">
 			<code>599</code>
@@ -84,14 +87,15 @@ The title shared to Tasker from another app. Many apps don't send this field.&lt
 	</Profile>
 	<Project sr="proj0" ve="2">
 		<cdate>1794873600000</cdate>
+		<id>0d4076dc-15ab-42ff-89dd-b5f9109aae33</id>
 		<name>capture</name>
 		<pids>20,21,22</pids>
-		<tids>30,31,32,33,34</tids>
+		<tids>15,16,17,18,19</tids>
 	</Project>
-	<Task sr="task30">
+	<Task sr="task15">
 		<cdate>1794873600000</cdate>
 		<edate>1794873600000</edate>
-		<id>30</id>
+		<id>15</id>
 		<nme>Capture Write</nme>
 		<Action sr="act0" ve="7">
 			<code>37</code>
@@ -121,94 +125,6 @@ The title shared to Tasker from another app. Many apps don't send this field.&lt
 			<Str sr="arg7" ve="3"/>
 			<Str sr="arg8" ve="3"/>
 			<Int sr="arg9" val="1"/>
-		</Action>
-		<Action sr="act2" ve="7">
-			<code>137</code>
-			<Int sr="arg0" val="0"/>
-			<Str sr="arg1" ve="3"/>
-		</Action>
-		<Action sr="act3" ve="7">
-			<code>38</code>
-		</Action>
-		<Action sr="act4" ve="7">
-			<code>547</code>
-			<Str sr="arg0" ve="3">%dir</Str>
-			<Str sr="arg1" ve="3">/sdcard/Sync/polaris/+</Str>
-			<Int sr="arg2" val="0"/>
-			<Int sr="arg3" val="0"/>
-			<Int sr="arg4" val="0"/>
-			<Int sr="arg5" val="3"/>
-			<Int sr="arg6" val="0"/>
-		</Action>
-		<Action sr="act5" ve="7">
-			<code>342</code>
-			<se>false</se>
-			<Int sr="arg0" val="4"/>
-			<Str sr="arg1" ve="3">%dir</Str>
-			<Str sr="arg2" ve="3">%inbox</Str>
-			<Int sr="arg3" val="0"/>
-			<Int sr="arg4" val="1"/>
-		</Action>
-		<Action sr="act6" ve="7">
-			<code>37</code>
-			<ConditionList sr="if">
-				<Condition sr="c0" ve="3">
-					<lhs>%inbox</lhs>
-					<op>12</op>
-					<rhs></rhs>
-				</Condition>
-			</ConditionList>
-		</Action>
-		<Action sr="act7" ve="7">
-			<code>394</code>
-			<Bundle sr="arg0">
-				<Vals sr="val">
-					<net.dinglisch.android.tasker.RELEVANT_VARIABLES>&lt;StringArray sr=""&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;%formatted
-00. Formatted
-&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;%dt_millis
-1. MilliSeconds
-Milliseconds Since Epoch&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES2&gt;%dt_seconds
-2. Seconds
-Seconds Since Epoch&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES2&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES3&gt;%dt_day_of_month
-3. Day Of Month
-&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES3&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES4&gt;%dt_month_of_year
-4. Month Of Year
-&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES4&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES5&gt;%dt_year
-5. Year
-&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES5&gt;&lt;/StringArray&gt;</net.dinglisch.android.tasker.RELEVANT_VARIABLES>
-					<net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>[Ljava.lang.String;</net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>
-				</Vals>
-			</Bundle>
-			<Int sr="arg1" val="1"/>
-			<Int sr="arg10" val="0"/>
-			<Str sr="arg11" ve="3"/>
-			<Str sr="arg12" ve="3"/>
-			<Str sr="arg2" ve="3"/>
-			<Str sr="arg3" ve="3"/>
-			<Str sr="arg4" ve="3"/>
-			<Str sr="arg5" ve="3">yyyy-MM-dd-HHmmss</Str>
-			<Str sr="arg6" ve="3"/>
-			<Str sr="arg7" ve="3"/>
-			<Int sr="arg8" val="0"/>
-			<Int sr="arg9" val="0"/>
-		</Action>
-		<Action sr="act8" ve="7">
-			<code>547</code>
-			<Str sr="arg0" ve="3">%stamp</Str>
-			<Str sr="arg1" ve="3">%formatted</Str>
-			<Int sr="arg2" val="0"/>
-			<Int sr="arg3" val="0"/>
-			<Int sr="arg4" val="0"/>
-			<Int sr="arg5" val="3"/>
-			<Int sr="arg6" val="0"/>
-		</Action>
-		<Action sr="act9" ve="7">
-			<code>597</code>
-			<Str sr="arg0" ve="3">%stamp</Str>
-			<Int sr="arg1" val="1"/>
-			<Int sr="arg2" val="10"/>
-			<Int sr="arg3" val="0"/>
-			<Str sr="arg4" ve="3">%day</Str>
 		</Action>
 		<Action sr="act10" ve="7">
 			<code>547</code>
@@ -303,6 +219,11 @@ Seconds Since Epoch&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES2&
 			<Int sr="arg4" val="0"/>
 			<Int sr="arg5" val="3"/>
 			<Int sr="arg6" val="0"/>
+		</Action>
+		<Action sr="act2" ve="7">
+			<code>137</code>
+			<Int sr="arg0" val="0"/>
+			<Str sr="arg1" ve="3"/>
 		</Action>
 		<Action sr="act20" ve="7">
 			<code>598</code>
@@ -400,6 +321,9 @@ Seconds Since Epoch&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES2&
 			<Int sr="arg0" val="1"/>
 			<Int sr="arg1" val="1"/>
 			<Str sr="arg2" ve="3">probe</Str>
+		</Action>
+		<Action sr="act3" ve="7">
+			<code>38</code>
 		</Action>
 		<Action sr="act30" ve="7">
 			<code>38</code>
@@ -513,6 +437,16 @@ source: %urls1</Str>
 				</Condition>
 			</ConditionList>
 		</Action>
+		<Action sr="act4" ve="7">
+			<code>547</code>
+			<Str sr="arg0" ve="3">%dir</Str>
+			<Str sr="arg1" ve="3">/sdcard/Sync/polaris/+</Str>
+			<Int sr="arg2" val="0"/>
+			<Int sr="arg3" val="0"/>
+			<Int sr="arg4" val="0"/>
+			<Int sr="arg5" val="3"/>
+			<Int sr="arg6" val="0"/>
+		</Action>
 		<Action sr="act40" ve="7">
 			<code>548</code>
 			<Str sr="arg0" ve="3">Inbox: saved %stem</Str>
@@ -581,11 +515,81 @@ source: %urls1</Str>
 			<Str sr="arg8" ve="3"/>
 			<Int sr="arg9" val="1"/>
 		</Action>
+		<Action sr="act5" ve="7">
+			<code>342</code>
+			<se>false</se>
+			<Int sr="arg0" val="4"/>
+			<Str sr="arg1" ve="3">%dir</Str>
+			<Str sr="arg2" ve="3">%inbox</Str>
+			<Int sr="arg3" val="0"/>
+			<Int sr="arg4" val="1"/>
+		</Action>
+		<Action sr="act6" ve="7">
+			<code>37</code>
+			<ConditionList sr="if">
+				<Condition sr="c0" ve="3">
+					<lhs>%inbox</lhs>
+					<op>12</op>
+					<rhs></rhs>
+				</Condition>
+			</ConditionList>
+		</Action>
+		<Action sr="act7" ve="7">
+			<code>394</code>
+			<Bundle sr="arg0">
+				<Vals sr="val">
+					<net.dinglisch.android.tasker.RELEVANT_VARIABLES>&lt;StringArray sr=""&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;%formatted
+00. Formatted
+&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;%dt_millis
+1. MilliSeconds
+Milliseconds Since Epoch&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES2&gt;%dt_seconds
+2. Seconds
+Seconds Since Epoch&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES2&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES3&gt;%dt_day_of_month
+3. Day Of Month
+&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES3&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES4&gt;%dt_month_of_year
+4. Month Of Year
+&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES4&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES5&gt;%dt_year
+5. Year
+&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES5&gt;&lt;/StringArray&gt;</net.dinglisch.android.tasker.RELEVANT_VARIABLES>
+					<net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>[Ljava.lang.String;</net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>
+				</Vals>
+			</Bundle>
+			<Int sr="arg1" val="1"/>
+			<Int sr="arg10" val="0"/>
+			<Str sr="arg11" ve="3"/>
+			<Str sr="arg12" ve="3"/>
+			<Str sr="arg2" ve="3"/>
+			<Str sr="arg3" ve="3"/>
+			<Str sr="arg4" ve="3"/>
+			<Str sr="arg5" ve="3">yyyy-MM-dd-HHmmss</Str>
+			<Str sr="arg6" ve="3"/>
+			<Str sr="arg7" ve="3"/>
+			<Int sr="arg8" val="0"/>
+			<Int sr="arg9" val="0"/>
+		</Action>
+		<Action sr="act8" ve="7">
+			<code>547</code>
+			<Str sr="arg0" ve="3">%stamp</Str>
+			<Str sr="arg1" ve="3">%formatted</Str>
+			<Int sr="arg2" val="0"/>
+			<Int sr="arg3" val="0"/>
+			<Int sr="arg4" val="0"/>
+			<Int sr="arg5" val="3"/>
+			<Int sr="arg6" val="0"/>
+		</Action>
+		<Action sr="act9" ve="7">
+			<code>597</code>
+			<Str sr="arg0" ve="3">%stamp</Str>
+			<Int sr="arg1" val="1"/>
+			<Int sr="arg2" val="10"/>
+			<Int sr="arg3" val="0"/>
+			<Str sr="arg4" ve="3">%day</Str>
+		</Action>
 	</Task>
-	<Task sr="task31">
+	<Task sr="task16">
 		<cdate>1794873600000</cdate>
 		<edate>1794873600000</edate>
-		<id>31</id>
+		<id>16</id>
 		<nme>Capture Share</nme>
 		<Action sr="act0" ve="7">
 			<code>37</code>
@@ -727,10 +731,10 @@ source: %urls1</Str>
 			</ConditionList>
 		</Action>
 	</Task>
-	<Task sr="task32">
+	<Task sr="task17">
 		<cdate>1794873600000</cdate>
 		<edate>1794873600000</edate>
-		<id>32</id>
+		<id>17</id>
 		<nme>Capture Note</nme>
 		<Action sr="act0" ve="7">
 			<code>360</code>
@@ -802,11 +806,12 @@ The text that was inserted in the dialog&lt;/_array_net.dinglisch.android.tasker
 			<code>38</code>
 		</Action>
 	</Task>
-	<Task sr="task33">
+	<Task sr="task18">
 		<cdate>1794873600000</cdate>
 		<edate>1794873600000</edate>
-		<id>33</id>
+		<id>18</id>
 		<nme>Capture Intent</nme>
+		<pri>6</pri>
 		<Action sr="act0" ve="7">
 			<code>130</code>
 			<Str sr="arg0" ve="3">Capture Write</Str>
@@ -850,11 +855,12 @@ The text that was inserted in the dialog&lt;/_array_net.dinglisch.android.tasker
 			</ConditionList>
 		</Action>
 	</Task>
-	<Task sr="task34">
+	<Task sr="task19">
 		<cdate>1794873600000</cdate>
 		<edate>1794873600000</edate>
-		<id>34</id>
+		<id>19</id>
 		<nme>Capture Tile Setup</nme>
+		<pri>6</pri>
 		<Action sr="act0" ve="7">
 			<code>162</code>
 			<Int sr="arg0" val="2"/>
@@ -862,6 +868,7 @@ The text that was inserted in the dialog&lt;/_array_net.dinglisch.android.tasker
 			<Str sr="arg10" ve="3"/>
 			<Str sr="arg11" ve="3"/>
 			<Str sr="arg12" ve="3"/>
+			<Int sr="arg13" val="0"/>
 			<Int sr="arg2" val="0"/>
 			<Int sr="arg3" val="0"/>
 			<Str sr="arg4" ve="3"/>

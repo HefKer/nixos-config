@@ -215,6 +215,12 @@ together](#how-it-fits-together) for what that means when you copy one.
   inbox, never an append, so the phone can't make sync-conflict copies. A
   failed write keeps the text in a notification.
   [`phone/automations/capture.prj.xml`](phone/automations/capture.prj.xml)
+- <a id="phone-tasker"></a>**Leaving home without a geofence.** A Tasker
+  profile treats three minutes off the home Wi-Fi as leaving: it sets vibrate
+  and mutes the speaker, leaves headphones alone, and puts both back on
+  reconnect. The SSID is a Tasker variable set by an `am broadcast`, so the
+  export names no network. Written as XML on the desktop and imported over adb.
+  [`phone/automations/away.prj.xml`](phone/automations/away.prj.xml)
 - <a id="package-skills"></a>**Skills bundled with packages.** Linking
   `/share/skills` into the system profile gives skills that ship with packages
   (like hunk's) a path that survives upgrades.

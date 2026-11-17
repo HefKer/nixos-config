@@ -1,9 +1,10 @@
 <TaskerData sr="" dvi="1" tv="6.7.9">
-	<Profile sr="prof20" ve="2">
-		<cdate>1794873600000</cdate>
+	<Profile sr="prof6" ve="2">
+		<cdate>1794937758470</cdate>
+		<clp>true</clp>
 		<edate>1794873600000</edate>
-		<id>20</id>
-		<mid0>21</mid0>
+		<id>6</id>
+		<mid0>5</mid0>
 		<nme>Termux Script</nme>
 		<Event sr="con0" ve="2">
 			<code>599</code>
@@ -17,15 +18,17 @@
 	</Profile>
 	<Project sr="proj0" ve="2">
 		<cdate>1794873600000</cdate>
+		<id>e22018a7-95c4-43da-859c-1fce25c3bb6a</id>
 		<name>termux</name>
-		<pids>20</pids>
-		<tids>21</tids>
+		<pids>6</pids>
+		<tids>5</tids>
 	</Project>
-	<Task sr="task21">
+	<Task sr="task5">
 		<cdate>1794873600000</cdate>
 		<edate>1794873600000</edate>
-		<id>21</id>
+		<id>5</id>
 		<nme>Termux Script</nme>
+		<pri>6</pri>
 		<Action sr="act0" ve="7">
 			<code>547</code>
 			<label>The name comes from Perform Task's %par1, or from the broadcast's script extra</label>
@@ -35,6 +38,7 @@
 			<Int sr="arg3" val="0"/>
 			<Int sr="arg4" val="0"/>
 			<Int sr="arg5" val="3"/>
+			<Int sr="arg6" val="0"/>
 			<ConditionList sr="if">
 				<Condition sr="c0" ve="3">
 					<lhs>%par1</lhs>
@@ -86,11 +90,26 @@ The &amp;lt;B&amp;gt;exit code&amp;lt;/B&amp;gt; of the command. 0 often means s
 			<Str sr="arg1" ve="3">com.termux.tasker</Str>
 			<Str sr="arg2" ve="3">com.termux.tasker.EditConfigurationActivity</Str>
 			<Int sr="arg3" val="10"/>
+			<Int sr="arg4" val="0"/>
 		</Action>
 		<Action sr="act2" ve="7">
 			<code>548</code>
 			<Str sr="arg0" ve="3">%script: %stdout</Str>
 			<Int sr="arg1" val="1"/>
+			<Str sr="arg10" ve="3"/>
+			<Int sr="arg11" val="1"/>
+			<Int sr="arg12" val="0"/>
+			<Str sr="arg13" ve="3"/>
+			<Int sr="arg14" val="0"/>
+			<Str sr="arg15" ve="3"/>
+			<Int sr="arg2" val="0"/>
+			<Str sr="arg3" ve="3"/>
+			<Str sr="arg4" ve="3"/>
+			<Str sr="arg5" ve="3"/>
+			<Str sr="arg6" ve="3"/>
+			<Str sr="arg7" ve="3"/>
+			<Str sr="arg8" ve="3"/>
+			<Int sr="arg9" val="1"/>
 			<ConditionList sr="if">
 				<Condition sr="c0" ve="3">
 					<lhs>%result</lhs>
@@ -103,6 +122,20 @@ The &amp;lt;B&amp;gt;exit code&amp;lt;/B&amp;gt; of the command. 0 often means s
 			<code>548</code>
 			<Str sr="arg0" ve="3">%script failed: %errmsg %stderr</Str>
 			<Int sr="arg1" val="1"/>
+			<Str sr="arg10" ve="3"/>
+			<Int sr="arg11" val="1"/>
+			<Int sr="arg12" val="0"/>
+			<Str sr="arg13" ve="3"/>
+			<Int sr="arg14" val="0"/>
+			<Str sr="arg15" ve="3"/>
+			<Int sr="arg2" val="0"/>
+			<Str sr="arg3" ve="3"/>
+			<Str sr="arg4" ve="3"/>
+			<Str sr="arg5" ve="3"/>
+			<Str sr="arg6" ve="3"/>
+			<Str sr="arg7" ve="3"/>
+			<Str sr="arg8" ve="3"/>
+			<Int sr="arg9" val="1"/>
 			<ConditionList sr="if">
 				<Condition sr="c0" ve="3">
 					<lhs>%result</lhs>
@@ -115,6 +148,9 @@ The &amp;lt;B&amp;gt;exit code&amp;lt;/B&amp;gt; of the command. 0 often means s
 			<code>126</code>
 			<Str sr="arg0" ve="3">%stdout</Str>
 			<Int sr="arg1" val="1"/>
+			<Int sr="arg2" val="0"/>
+			<Int sr="arg3" val="0"/>
+			<Str sr="arg4" ve="3"/>
 		</Action>
 	</Task>
 </TaskerData>
