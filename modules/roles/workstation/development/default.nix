@@ -2,6 +2,7 @@
 {
   imports = [
     ./packages.nix
+    ./phone.nix
   ];
 
   options.custom.roles.workstation.development = with lib; {

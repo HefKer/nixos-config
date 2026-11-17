@@ -30,6 +30,15 @@ Shell commands work with the screen off or locked.
 - `dumpsys notification --noredact` (count `NotificationRecord` lines by `pkg=`), `dumpsys usagestats` (`lastTimeVisible` per package), `dumpsys package <pkg>`.
 - `du -sk /sdcard/*`; the phone's toybox shell lacks GNU flags such as `sort -h`, so pipe output back and process it on the desktop.
 
+## Context
+
+Without adb, and with the phone out of reach, `phone-context` says what the phone last reported about itself: `power` (`plugged`, `unplugged`), `place` (`home`, `away`) and `dnd` (`off`, `priority`, `alarms`, `silence`).
+
+- `phone-context` prints all three with how long each has held and when the phone was last heard; `phone-context place` prints one value.
+- The phone reports on every change and every 15 minutes. After 45 minutes of silence (`--max-age SECONDS` to change it) the context is stale: a key prints `unknown` and the exit status is 1. Treat that as not knowing, never as `away`.
+- The file is `~/.local/state/phone/context.tsv` on the host that runs phone automations, one line per key: key, value, since (when this host first heard that value), heard (the last report).
+- The phone side is the Tasker project `phone/automations/context.prj.xml`. It posts to `http://desktop:8377/context`, where a socket unit on the tailnet address hands each post to `phone-context receive`; a refused post is logged in `journalctl --user -u 'phone-context@*'`.
+
 ## Settings
 
 - Read with `adb shell settings list|get {global,secure,system} [key]`.

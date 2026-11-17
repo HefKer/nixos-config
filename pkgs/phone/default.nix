@@ -38,6 +38,16 @@ symlinkJoin {
       ];
       text = builtins.readFile ./phone-set.sh;
     })
+    (writeShellApplication {
+      name = "phone-context";
+      runtimeInputs = [
+        coreutils
+        gawk
+        jq
+        tailscale
+      ];
+      text = builtins.readFile ./phone-context.sh;
+    })
     (writeTextDir "share/skills/phone/phone/SKILL.md" (builtins.readFile ./SKILL.md))
   ];
 }
