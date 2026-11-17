@@ -1,6 +1,7 @@
 {
   callPackage,
   runCommandLocal,
+  shellcheck,
   writeShellScriptBin,
 }:
 let
@@ -14,6 +15,17 @@ let
     cat "$PHONE/history"
   '';
 
+  # Answer as Termux:API does while $PHONE/api exists.
+  fakeBattery = writeShellScriptBin "termux-battery-status" ''
+    [ -e "$PHONE/api" ] || exit 1
+    printf '{\n  "health": "GOOD",\n  "percentage": 87,\n  "plugged": "UNPLUGGED",\n  "status": "DISCHARGING"\n}\n'
+  '';
+  fakeWifi = writeShellScriptBin "termux-wifi-connectioninfo" ''
+    [ -e "$PHONE/api" ] || exit 1
+    printf '{\n  "rssi": -52,\n  "ssid": "Home Net",\n  "supplicant_state": "COMPLETED"\n}\n'
+  '';
+  termuxScripts = ../../../phone/termux;
+
   automations = callPackage ./automations.nix {
     android-tools = fakeAdb;
     phone = fakePhone;
@@ -24,6 +36,10 @@ runCommandLocal "phone-automations-tests"
     nativeBuildInputs = [
       automations.adbProbe
       automations.settingsChanges
+      automations.termuxDeliver
+      fakeBattery
+      fakeWifi
+      shellcheck
     ];
   }
   ''
@@ -77,6 +93,44 @@ runCommandLocal "phone-automations-tests"
 
     touch -d '25 hours ago' "$state/unreached-since"
     expect "$(health-probe-phone-adb)" "" "a probe run that reaches the phone is clean"
+
+    shellcheck ${termuxScripts}/*.sh || fail=1
+
+    vault=$PWD/vault
+    phone-termux-deliver ${termuxScripts} "$vault/.polaris/termux" 2>/dev/null
+    [ ! -e "$vault" ] || { echo "FAIL delivering created a vault that wasn't there"; fail=1; }
+    mkdir -p "$vault/.polaris/termux"
+    echo stale >"$vault/.polaris/termux/gone.sh"
+    echo old >"$vault/.polaris/termux/run.sh"
+    phone-termux-deliver ${termuxScripts} "$vault/.polaris/termux"
+    expect "$(cd "$vault/.polaris/termux" && echo *)" "run.sh selftest.sh" "delivering mirrors the scripts and drops one the repo no longer has"
+    cmp -s ${termuxScripts}/run.sh "$vault/.polaris/termux/run.sh" || { echo "FAIL a changed script is not replaced"; fail=1; }
+    [ -w "$vault/.polaris/termux/run.sh" ] || { echo "FAIL a delivered script is read-only, so Syncthing can't replace it"; fail=1; }
+
+    # Termux's side: ~/.termux/tasker holds only the run.sh copied by hand, and the vault is the delivered copy.
+    tasker=$HOME/.termux/tasker
+    mkdir -p "$tasker"
+    cp ${termuxScripts}/run.sh "$tasker/run.sh"
+    chmod u+w "$tasker/run.sh"
+    echo stale >"$tasker/gone.sh"
+    run() { TERMUX_SCRIPTS_SOURCE=$vault/.polaris/termux bash "$tasker/run.sh" "$@"; }
+
+    expect "$(run selftest)" "battery unknown (Termux:API did not answer), wifi off, scripts in sync" "selftest answers in one line without Termux:API"
+    [ ! -e "$tasker/gone.sh" ] || { echo "FAIL a script no longer delivered stays installed"; fail=1; }
+    touch "$PHONE/api"
+    expect "$(run selftest)" "battery 87% discharging, wifi Home Net -52 dBm, scripts in sync" "selftest reports battery and Wi-Fi"
+
+    echo 'echo "got $(cat)"' >"$vault/.polaris/termux/echo.sh"
+    expect "$(echo "a b; 'c'" | run echo)" "got a b; 'c'" "a newly delivered script runs on the next call, with stdin as its data"
+
+    for bad in "" run ../echo "echo extra" /bin/sh nope; do
+      # shellcheck disable=SC2086
+      if run $bad >/dev/null 2>&1; then echo "FAIL run accepted: $bad"; fail=1; fi
+    done
+    if run echo "; touch pwned" >/dev/null 2>&1; then echo "FAIL run accepted a second argument"; fail=1; fi
+
+    mv "$vault" "$vault.away"
+    expect "$(run selftest)" "battery 87% discharging, wifi Home Net -52 dBm, delivered scripts unreadable" "with the vault unreadable the installed scripts still run"
 
     if [ "$fail" != 0 ]; then exit 1; fi
     touch $out
