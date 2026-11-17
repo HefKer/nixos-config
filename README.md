@@ -192,6 +192,23 @@ together](#how-it-fits-together) for what that means when you copy one.
   `settings_change_history` (the last 10 settings changed by hand) into a
   local TSV before it rolls over.
   [`homes/modules/phone/`](homes/modules/phone/)
+- <a id="phone-context"></a>**The phone tells a host where it is.** A Tasker
+  project posts power, home Wi-Fi and Do Not Disturb to a host over the tailnet
+  on every change and every 15 minutes. A systemd socket unit bound to the
+  tailnet address hands each post to a shell script, which accepts it only from
+  the tailnet's Android peer (`tailscale whois`, so no token lives on the
+  phone) and only as fixed keys and values. `phone-context place` then prints
+  `home`, `away`, or `unknown` once the phone has been silent too long.
+  [`pkgs/phone/phone-context.sh`](pkgs/phone/phone-context.sh) ·
+  [`phone/automations/context.prj.xml`](phone/automations/context.prj.xml)
+- <a id="phone-termux-scripts"></a>**Tasker holds the trigger, git holds the logic.**
+  Phone-side automation logic is shell in `phone/termux/`, shellchecked and
+  tested by `nix flake check`. A switch mirrors it into a folder Syncthing
+  already carries to the phone, and `run.sh`, the one executable the
+  Termux:Tasker plugin is pointed at, installs the scripts into
+  `~/.termux/tasker` on each call and runs one by name with its data on stdin,
+  so no text handed to Tasker is ever run.
+  [`phone/termux/`](phone/termux/)
 - <a id="package-skills"></a>**Skills bundled with packages.** Linking
   `/share/skills` into the system profile gives skills that ship with packages
   (like hunk's) a path that survives upgrades.
