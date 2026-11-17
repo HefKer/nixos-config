@@ -202,6 +202,13 @@ The record of every change an agent makes to the phone, each with the value it
 replaced, so any of them can be undone after the session that made it is gone.
 _Avoid_: change log, history
 
+**Phone context**:
+What the phone reports about its surroundings to the host that runs phone
+automations: whether it is on power, on the home Wi-Fi, and its Do Not Disturb
+mode. The host keeps only the latest report and when it heard it, and the
+context counts as unknown once the phone has been silent too long.
+_Avoid_: phone state, presence, phone status
+
 ### Health
 
 **Probe**:
