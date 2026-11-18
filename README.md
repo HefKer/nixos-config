@@ -354,6 +354,14 @@ together](#how-it-fits-together) for what that means when you copy one.
   stream the window starts, so a site can be turned down before it plays.
   [`pkgs/window-volume/`](pkgs/window-volume/),
   [`modules/roles/workstation/window-volume.nix`](modules/roles/workstation/window-volume.nix)
+- <a id="notify-focus"></a>**Notification clicks focus the app, without
+  letting any app steal focus.** DMS sends no xdg-activation token, so niri
+  refuses an app's own focus request after a click unless it honors invalid
+  serials for everyone. A user service watches the session bus instead: it
+  ties each notification id to its `sender-pid`, and when its default action
+  is invoked it focuses that pid's most recent niri window.
+  [`homes/modules/notify-focus.nix`](homes/modules/notify-focus.nix),
+  [`pkgs/notify-focus/`](pkgs/notify-focus/)
 - <a id="mic-mute-warn"></a>**A toast when an app records a muted mic.** A
   user service watches `pw-dump --monitor` for capture streams linking to a
   real `Audio/Source`; if the source it links to (not necessarily the default)

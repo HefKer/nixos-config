@@ -314,4 +314,11 @@ in
         python3 ${../pkgs/game-focus-watcher/test.py} ${../pkgs/game-focus-watcher/game-focus-watcher.py}
         touch $out
       '';
+
+  notify-focus =
+    pkgs.runCommandLocal "check-notify-focus" { nativeBuildInputs = [ pkgs.python3 ]; }
+      ''
+        python3 ${../pkgs/notify-focus/test.py} ${../pkgs/notify-focus/notify-focus.py}
+        touch $out
+      '';
 }
