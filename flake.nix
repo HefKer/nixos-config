@@ -24,11 +24,6 @@
 
     nix-flatpak.url = "github:gmodena/nix-flatpak";
 
-    pyroclear = {
-      url = "github:shreyanth-sureshkrishnaa/pyroclear";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     sops-nix = {
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
