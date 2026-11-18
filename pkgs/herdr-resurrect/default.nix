@@ -48,6 +48,15 @@ stdenvNoCC.mkDerivation {
       '    livePanes = orderLive(livePanes);
         if (tab.panes.every((p) => livePanes.some((l) => l.pane_id === p.pane_id)))
           livePanes = tab.panes.map((p) => livePanes.find((l) => l.pane_id === p.pane_id));'
+    # The startup hook restores each boot once a client attaches and agents resume; events only autosave, and not before that restore is done.
+    substituteInPlace bin/on-event.js --replace-fail \
+      "if (st === 'restoring') return;" "if (st !== 'done') return;"
+    cat >>herdr-plugin.toml <<'EOF'
+
+    [[startup]]
+    command = ["${lib.getExe nodejs}", "bin/boot-restore.js"]
+    EOF
+    cp ${./boot-restore.js} bin/boot-restore.js
   '';
 
   dontBuild = true;
