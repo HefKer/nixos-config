@@ -156,7 +156,7 @@ together](#how-it-fits-together) for what that means when you copy one.
   A patch to herdr-auto-title makes its length setting bound only tab titles,
   cut back to a word boundary and with the tab's position added on top, so a
   12-column cap fits many tabs to a row. Pane labels, which herdr's goto panel
-  lists, keep the whole title.
+  lists, keep the whole title while icons and pane IDs are off.
   [`pkgs/herdr-auto-title/tab-labels.patch`](pkgs/herdr-auto-title/tab-labels.patch)
 - <a id="attention"></a>**One bind to whatever needs you most.** `attention
   next` jumps to the top of a queue ranked in fixed bands: Urgent, blocked

@@ -1,3 +1,36 @@
+diff --git a/docs/architecture/title-resolution.md b/docs/architecture/title-resolution.md
+index d830a87..6e42e33 100644
+--- a/docs/architecture/title-resolution.md
++++ b/docs/architecture/title-resolution.md
+@@ -852,13 +852,8 @@ Three things follow from what the tab bar does with a title:
+   for a key. In front it also puts every number in one column.
+ - **The mark is `·`, not `›`.** The parts separator would read as if the
+   position were one more thing the title says about the tab.
+-- **It is counted against `MaxLength`, not added to it.** The decorator reads
+-  that bound off the resolver it wraps rather than being handed one of its own,
+-  so there are not two numbers to keep in step. The body is only cut to what
+-  the prefix leaves — it arrives sanitized, and truncating an already-truncated
+-  title again is the same cut, one column further in. Where nothing would be
+-  left — a tab bar narrower than the number itself — the number goes and the
+-  name stays.
++- **It is added on top of `MaxLength`, not counted against it.** The name
++  keeps the whole bound, so a short bound still leaves a readable word.
+ 
+ `HERDR_AUTO_TITLE_POSITION=false` drops the decorator.
+ 
+diff --git a/internal/app/app.go b/internal/app/app.go
+index c269c8f..11af1a3 100644
+--- a/internal/app/app.go
++++ b/internal/app/app.go
+@@ -125,7 +125,7 @@ func Resolvers(
+ 	}
+ 
+ 	if cfg.ShowPosition {
+-		titles = resolver.NewNumbered(titles, cfg.MaxLength)
++		titles = resolver.NewNumbered(titles)
+ 	}
+ 
+ 	topics := topicsFor(cfg)
 diff --git a/internal/app/panes_test.go b/internal/app/panes_test.go
 index a5ab130..b0a2e83 100644
 --- a/internal/app/panes_test.go
@@ -53,37 +86,73 @@ index d0a2182..d8675ed 100644
  	}
  }
  
+diff --git a/internal/resolver/icons_test.go b/internal/resolver/icons_test.go
+index 3fce6e5..17dd4c0 100644
+--- a/internal/resolver/icons_test.go
++++ b/internal/resolver/icons_test.go
+@@ -75,7 +75,7 @@ func TestIconSitsInsideThePosition(t *testing.T) {
+ 	tab := atPosition(2, dashboard)
+ 
+ 	want := "2 · " + iconShell + " dashboard"
+-	if got := NewNumbered(inner, 0).Resolve(tab); got.Name != want {
++	if got := NewNumbered(inner).Resolve(tab); got.Name != want {
+ 		t.Errorf("name = %q, want %q", got.Name, want)
+ 	}
+ }
 diff --git a/internal/resolver/position.go b/internal/resolver/position.go
-index ecc5844..2ca275c 100644
+index ecc5844..d19986c 100644
 --- a/internal/resolver/position.go
 +++ b/internal/resolver/position.go
-@@ -16,9 +16,8 @@ const positionMark = " · "
+@@ -14,35 +14,26 @@ const positionMark = " · "
+ // Numbered prefixes every title with its tab's position, which is the key that
+ // switches to that tab. It wraps a resolver rather than being part of one: the
  // position says nothing about what a tab holds, so no source can supply it.
++//
++// The position is added on top of the bound inner was built with, so a
++// numbered title keeps the whole bound for its name.
  type Numbered struct {
  	inner TitleResolver
 -	// maxLength is the bound inner was built with, not a second one: the
 -	// position is counted against it rather than added on top, so a numbered
 -	// title is never wider than an unnumbered one.
-+	// maxLength is the bound inner was built with. The position is added on
-+	// top of it, so a numbered title keeps the whole bound for its name.
- 	maxLength int
+-	maxLength int
  }
  
-@@ -42,7 +41,8 @@ func (n *Numbered) Resolve(tab state.TabState) Decision {
- 	// The prefix goes in front because truncation cuts the tail: a position at
- 	// the end is the first thing a title too wide for the tab bar would lose.
- 	// The name arrives sanitized, so only the fitting is left.
+ var _ TitleResolver = (*Numbered)(nil)
+ 
+-// NewNumbered wraps inner, which must have been given the same maxLength.
+-// Zero or less takes the default, as New does.
+-func NewNumbered(inner TitleResolver, maxLength int) *Numbered {
+-	if maxLength <= 0 {
+-		maxLength = DefaultMaxLength
+-	}
+-
+-	return &Numbered{inner: inner, maxLength: maxLength}
++// NewNumbered wraps inner.
++func NewNumbered(inner TitleResolver) *Numbered {
++	return &Numbered{inner: inner}
+ }
+ 
+-// Resolve names the tab and puts its position in front, unless the tab bar is
+-// too narrow to carry both.
++// Resolve names the tab and puts its position in front.
+ func (n *Numbered) Resolve(tab state.TabState) Decision {
+ 	decision := n.inner.Resolve(tab)
+ 
+-	// The prefix goes in front because truncation cuts the tail: a position at
+-	// the end is the first thing a title too wide for the tab bar would lose.
+-	// The name arrives sanitized, so only the fitting is left.
 -	decision.Name = withPrefix(strconv.Itoa(tab.Position)+positionMark, decision.Name, n.maxLength)
-+	// The position is added on top of the bound, not counted against it.
++	// The prefix goes in front so every number sits in one column.
 +	decision.Name = strconv.Itoa(tab.Position) + positionMark + decision.Name
  
  	return decision
  }
 diff --git a/internal/resolver/position_test.go b/internal/resolver/position_test.go
-index eb88d56..ec90791 100644
+index eb88d56..5dfd9c2 100644
 --- a/internal/resolver/position_test.go
 +++ b/internal/resolver/position_test.go
-@@ -1,11 +1,8 @@
+@@ -1,18 +1,15 @@
  package resolver
  
  import (
@@ -95,7 +164,15 @@ index eb88d56..ec90791 100644
  	"github.com/kryptamine/herdr-auto-title/internal/herdr/herdrtest"
  	"github.com/kryptamine/herdr-auto-title/internal/state"
  )
-@@ -62,31 +59,12 @@ func TestPositionKeepsTheDecisionItWraps(t *testing.T) {
+ 
+ // numberedCWD names a tab after its directory and puts its position in front.
+ func numberedCWD(maxLength int) *Numbered {
+-	return NewNumbered(New(Options{MaxLength: maxLength}, NewCWD("")), maxLength)
++	return NewNumbered(New(Options{MaxLength: maxLength}, NewCWD("")))
+ }
+ 
+ func atPosition(position int, dir string) state.TabState {
+@@ -62,42 +59,12 @@ func TestPositionKeepsTheDecisionItWraps(t *testing.T) {
  	}
  }
  
@@ -125,12 +202,32 @@ index eb88d56..ec90791 100644
  	got := numberedCWD(3).Resolve(atPosition(10, dashboard))
 -	if got.Name != "das" {
 -		t.Errorf("name = %q, want the bare title", got.Name)
+-	}
+-}
+-
+-func TestNumberedWithoutAWidthTakesTheDefault(t *testing.T) {
+-	t.Parallel()
+-
+-	// Zero means "no bound" to Sanitize but would leave no room at all here,
+-	// so every tab would quietly lose the position instead.
+-	got := NewNumbered(New(Options{}, NewCWD("")), 0).Resolve(atPosition(2, api))
+-	if got.Name != "2 · api" {
+-		t.Errorf("name = %q, want the position kept", got.Name)
 +	if got.Name != "10 · das" {
 +		t.Errorf("name = %q, want %q", got.Name, "10 · das")
  	}
  }
  
-@@ -131,16 +109,3 @@ func TestAnyResolverCanBeNumbered(t *testing.T) {
+@@ -120,7 +87,7 @@ func TestAnyResolverCanBeNumbered(t *testing.T) {
+ 		Reason:     "test_source",
+ 	}}
+ 
+-	got := NewNumbered(inner, DefaultMaxLength).Resolve(atPosition(4, api))
++	got := NewNumbered(inner).Resolve(atPosition(4, api))
+ 	want := Decision{
+ 		Name:       "4 · release notes",
+ 		Confidence: ConfidenceAgent,
+@@ -131,16 +98,3 @@ func TestAnyResolverCanBeNumbered(t *testing.T) {
  		t.Errorf("decision = %+v, want %+v", got, want)
  	}
  }
@@ -148,16 +245,15 @@ index eb88d56..ec90791 100644
 -	}
 -}
 diff --git a/internal/resolver/resolver.go b/internal/resolver/resolver.go
-index 1c177ba..29d2340 100644
+index 1c177ba..536f4bc 100644
 --- a/internal/resolver/resolver.go
 +++ b/internal/resolver/resolver.go
-@@ -248,7 +248,14 @@ func (d *Deterministic) nameUnder(
+@@ -248,7 +248,13 @@ func (d *Deterministic) nameUnder(
  		parts = withoutAbove(withoutRepetition(parts), Parts{Context: workspace})
  	}
  
 -	name := Format(parts, d.maxLength)
-+	// Only a tab title is bounded: a pane label is what the goto panel lists,
-+	// where the full title has room.
++	// A pane label is unbounded: the goto panel lists it, with room for it whole.
 +	maxLength := 0
 +	if tab {
 +		maxLength = d.maxLength
@@ -199,6 +295,19 @@ index a99afe0..16b28e8 100644
  		// Non-ASCII on purpose: cutting these two-byte characters by byte
  		// count would corrupt the result. They are one column each, so the
  		// limit still reaches eight of them.
+diff --git a/internal/resolver/status_test.go b/internal/resolver/status_test.go
+index 5f09f7b..fccabea 100644
+--- a/internal/resolver/status_test.go
++++ b/internal/resolver/status_test.go
+@@ -48,7 +48,7 @@ func TestStatusSitsBetweenThePositionAndTheIcon(t *testing.T) {
+ 	tab.AgentStatus = herdr.AgentStatusWorking
+ 
+ 	want := "2 · ◐ " + iconShell + " dashboard"
+-	if got := NewNumbered(inner, 0).Resolve(tab); got.Name != want {
++	if got := NewNumbered(inner).Resolve(tab); got.Name != want {
+ 		t.Errorf("name = %q, want %q", got.Name, want)
+ 	}
+ }
 diff --git a/internal/resolver/topics_test.go b/internal/resolver/topics_test.go
 index c3dd380..d1abacb 100644
 --- a/internal/resolver/topics_test.go
