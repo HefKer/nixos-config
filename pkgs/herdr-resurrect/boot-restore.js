@@ -13,6 +13,9 @@ const { loadModel, restore } = require('../lib/restore');
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 // herdr staggers resumes (startup_per_agent_delay_ms); a reference it can't resume never gets an agent.
 const RESUME_TIMEOUT_MS = 20000;
+const POLL_MS = 500;
+// Events autosave once the restore is done: the relaunched programs need this long to replace their shells.
+const RELAUNCH_SETTLE_MS = 5000;
 
 // herdr has no attach event, and resumes agents only once a client attaches; its
 // server log records that client after this boot's start line.
@@ -38,7 +41,7 @@ function attachWatcher() {
 }
 
 // A pane herdr will resume keeps its agent and session reference from the saved
-// layout, so it reads as resumed only once its shell runs something.
+// layout, so it reads as resumed only once its shell runs something; herdr unreachable counts as still resuming.
 function resuming() {
   try {
     return herdr.paneList().some((p) => {
@@ -62,17 +65,16 @@ async function main() {
     const attached = attachWatcher();
     while (!attached()) {
       if (!live()) return;
-      await sleep(500);
+      await sleep(POLL_MS);
     }
     const deadline = Date.now() + RESUME_TIMEOUT_MS;
-    while (resuming() && Date.now() < deadline) await sleep(500);
+    while (resuming() && Date.now() < deadline) await sleep(POLL_MS);
     await sleep(settings.autoRestoreSettleMs);
     if (!live()) return;
     const res = restore(model, { mode: 'rehydrate', log: (l) => console.log('[boot-restore] ' + l) });
     console.log(`herdr-resurrect: boot restore ran ${res.actions.length} action(s)`);
     notify.restored(res, { auto: true });
-    // Events autosave once this is done: give the relaunched programs time to replace their shells.
-    await sleep(5000);
+    await sleep(RELAUNCH_SETTLE_MS);
   } catch (e) {
     console.error('herdr-resurrect boot restore failed:', e.message);
     notify.restoreFailed(e, { auto: true });
