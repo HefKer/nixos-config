@@ -227,6 +227,38 @@ One instance of breakage a probe reports, open until a later run no longer
 reports it.
 _Avoid_: alert, warning, issue
 
+### Herdr
+
+**Herdr session**:
+One herdr server and everything it holds, attached to by name. Each is one
+context the user works in independently of the others, such as work or this
+configuration; a single ticket never gets its own. Sessions do not see each
+other's spaces.
+_Avoid_: session (bare), server
+
+**Space**:
+The tabs for one repo or worktree inside a herdr session, shown as one row in
+herdr's sidebar. Which space a tab belongs to follows from its directory, not
+from where the user put it; work outside any repo shares one catch-all space.
+"Workspace" is niri's term and is not used for this.
+_Avoid_: workspace, project
+
+**Stale tab**:
+A tab whose agent is done and handled, that the user has left untouched for
+days and that holds nothing else alive. It is marked before it is closed, and
+closing it loses nothing: its Claude session can be resumed.
+_Avoid_: dead tab, old tab
+
+**Claude session**:
+One conversation with Claude, resumable by its id under the account that holds
+it. It outlives the pane it ran in.
+_Avoid_: session (bare), chat
+
+**Prompt pane**:
+The editor pane opened over a Claude pane, where a prompt is written before it
+is sent.
+_Avoid_: nvim-claude pane, prompt editor
+
 ### Claude
 
 **Account**:
