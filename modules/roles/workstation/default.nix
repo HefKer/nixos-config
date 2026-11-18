@@ -5,6 +5,7 @@ in
 {
   imports = [
     ./audio.nix
+    ./build-priority.nix
     ./bluetooth.nix
     ./chromium.nix
     ./development

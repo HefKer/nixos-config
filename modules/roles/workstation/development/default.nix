@@ -1,6 +1,7 @@
 { lib, ... }:
 {
   imports = [
+    ./agents.nix
     ./packages.nix
     ./phone.nix
   ];

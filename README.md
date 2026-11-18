@@ -167,6 +167,14 @@ together](#how-it-fits-together) for what that means when you copy one.
   the old version after every upgrade. This one follows the package and finds
   the tailnet hosts from `tailscale status` at each start.
   [`homes/modules/collie.nix`](homes/modules/collie.nix)
+- <a id="agents-slice"></a>**Agents yield the CPU to the desktop.** Claude
+  sessions start in a user `agents.slice` with a low CPU weight and a memory
+  ceiling, so a batch of agents can't stall the apps you're using; systemd-oomd
+  kills a thrashing session's scope (it `--resume`s) rather than letting the
+  desktop freeze. nix-daemon builds run at idle CPU and IO priority in a slice
+  of their own for the same reason.
+  [`modules/roles/workstation/development/agents.nix`](modules/roles/workstation/development/agents.nix),
+  [`modules/roles/workstation/build-priority.nix`](modules/roles/workstation/build-priority.nix)
 - <a id="claude-second-account"></a>**A second Claude Code account sharing
   your setup.** Links the read-only pieces into a second config dir: skills
   and agents from `~/.claude`, commands, keybindings and `CLAUDE.md` straight
