@@ -33,11 +33,21 @@ stdenvNoCC.mkDerivation {
       --replace-fail '| jq ' '| ${lib.getExe jq} '
     substituteInPlace lib/restore.js --replace-fail \
       'if (resume) return resume;' 'if (resume || !require("./settings").load().agentResume) return resume;'
-    # A store program's cmdline is a wrapper's unquoted args and a path GC can remove, so it relaunches by name.
+    # settings.json's labelCommands (by pane label) and programCommands (by program) override the relaunch; a store program's cmdline is a wrapper's unquoted args and a path GC can remove, so it relaunches by name.
     substituteInPlace lib/restore.js --replace-fail \
       '  if (pane.command && pane.command.restorable) {' \
-      '  if (pane.command && pane.command.restorable) {
-        if (String(pane.command.cmdline || "").startsWith("${builtins.storeDir}/")) return allowlist.baseName((pane.command.argv || [])[0] || pane.command.name);'
+      '  const relaunch = require("./settings").load();
+      if (pane.label && (relaunch.labelCommands || {})[pane.label]) return relaunch.labelCommands[pane.label];
+      if (pane.command && pane.command.restorable) {
+        const name = allowlist.baseName((pane.command.argv || [])[0] || pane.command.name);
+        if ((relaunch.programCommands || {})[name]) return relaunch.programCommands[name];
+        if (String(pane.command.cmdline || "").startsWith("${builtins.storeDir}/")) return name;'
+    # herdr keeps pane ids across a restart, so rehydrate pairs panes by id when the tab still has every one; id order needn't match layout order.
+    substituteInPlace lib/restore.js --replace-fail \
+      '    livePanes = orderLive(livePanes);' \
+      '    livePanes = orderLive(livePanes);
+        if (tab.panes.every((p) => livePanes.some((l) => l.pane_id === p.pane_id)))
+          livePanes = tab.panes.map((p) => livePanes.find((l) => l.pane_id === p.pane_id));'
   '';
 
   dontBuild = true;
