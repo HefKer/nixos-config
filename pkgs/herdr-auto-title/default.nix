@@ -18,6 +18,9 @@ buildGoModule rec {
 
   subPackages = [ "cmd/herdr-auto-title" ];
 
+  # MAX_LENGTH bounds only tab titles, cut at a word, with the position on top; goto's pane labels keep the whole title.
+  patches = [ ./tab-labels.patch ];
+
   # The plugin root is read-only in the store, so [[build]] can't place a binary there and herdr gets the store path instead.
   postPatch = ''
     substituteInPlace herdr-plugin.toml \

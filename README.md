@@ -152,6 +152,12 @@ together](#how-it-fits-together) for what that means when you copy one.
   watches the server log for the first client, and holds autosave off until
   then so the bare shells never overwrite the snapshot.
   [`pkgs/herdr-resurrect/boot-restore.js`](pkgs/herdr-resurrect/boot-restore.js)
+- <a id="herdr-short-tabs"></a>**Short herdr tab labels, full titles in goto.**
+  A patch to herdr-auto-title makes its length setting bound only tab titles,
+  cut back to a word boundary and with the tab's position added on top, so a
+  12-column cap fits many tabs to a row. Pane labels, which herdr's goto panel
+  lists, keep the whole title while icons and pane IDs are off.
+  [`pkgs/herdr-auto-title/tab-labels.patch`](pkgs/herdr-auto-title/tab-labels.patch)
 - <a id="attention"></a>**One bind to whatever needs you most.** `attention
   next` jumps to the top of a queue ranked in fixed bands: Urgent, blocked
   agent, Reply soon, finished agent, Later, oldest first within each. Agent
