@@ -6,6 +6,7 @@ in
   imports = [
     ./audio.nix
     ./bluetooth.nix
+    ./build-priority.nix
     ./chromium.nix
     ./development
     ./display.nix
