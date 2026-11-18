@@ -145,6 +145,13 @@ together](#how-it-fits-together) for what that means when you copy one.
   [`homes/modules/herdr-plugins.nix`](homes/modules/herdr-plugins.nix),
   [`pkgs/herdr-plugins-sync/`](pkgs/herdr-plugins-sync/) ·
   [df23f3c](https://github.com/HefKer/nixos-config/commit/df23f3c)
+- <a id="herdr-boot-restore"></a>**A reboot costs a herdr session nothing.** On
+  the first attach after a server start, once herdr has resumed its agents,
+  herdr-resurrect relaunches what each pane ran, with per-label and per-program
+  commands from its settings. herdr has no attach event, so a startup hook
+  watches the server log for the first client, and holds autosave off until
+  then so the bare shells never overwrite the snapshot.
+  [`pkgs/herdr-resurrect/boot-restore.js`](pkgs/herdr-resurrect/boot-restore.js)
 - <a id="attention"></a>**One bind to whatever needs you most.** `attention
   next` jumps to the top of a queue ranked in fixed bands: Urgent, blocked
   agent, Reply soon, finished agent, Later, oldest first within each. Agent
