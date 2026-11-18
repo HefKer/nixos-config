@@ -14,7 +14,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    zen-browser.url = "github:0xc000022070/zen-browser-flake";
+    zen-browser = {
+      url = "github:0xc000022070/zen-browser-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
+    };
 
     # Not `follows`-ed: cache.numtide.com only hits against its own nixpkgs pin.
     llm-agents.url = "github:numtide/llm-agents.nix";
@@ -23,11 +27,6 @@
     nix-gaming.url = "github:fufexan/nix-gaming";
 
     nix-flatpak.url = "github:gmodena/nix-flatpak";
-
-    pyroclear = {
-      url = "github:shreyanth-sureshkrishnaa/pyroclear";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
 
     sops-nix = {
       url = "github:Mic92/sops-nix";
