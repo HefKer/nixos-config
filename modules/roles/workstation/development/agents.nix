@@ -9,7 +9,6 @@ in
       description = "Coding agents and low-priority jobs";
       sliceConfig = {
         CPUWeight = 20;
-        # Relative to physical RAM: about 20 GB on the desktop's 32 GB.
         MemoryHigh = "60%";
         # oomd kills the scope (one claude session) that is thrashing, not the whole slice.
         ManagedOOMMemoryPressure = "kill";
