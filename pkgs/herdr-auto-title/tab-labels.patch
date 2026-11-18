@@ -1,0 +1,214 @@
+diff --git a/internal/app/panes_test.go b/internal/app/panes_test.go
+index a5ab130..b0a2e83 100644
+--- a/internal/app/panes_test.go
++++ b/internal/app/panes_test.go
+@@ -279,9 +279,9 @@ func TestTheSettingsThatShapeATitleShapeAPaneLabel(t *testing.T) {
+ 			"dashboard",
+ 		},
+ 		{
+-			"the length limit binds a pane too",
++			"the length limit binds the tab and leaves the pane whole",
+ 			func(c *Config) { c.MaxLength = 6 },
+-			"billin",
++			"billing › claude",
+ 			"dashbo",
+ 		},
+ 		{
+diff --git a/internal/resolver/handle_test.go b/internal/resolver/handle_test.go
+index d0a2182..d8675ed 100644
+--- a/internal/resolver/handle_test.go
++++ b/internal/resolver/handle_test.go
+@@ -4,8 +4,6 @@ import (
+ 	"strings"
+ 	"testing"
+ 
+-	"github.com/rivo/uniseg"
+-
+ 	"github.com/kryptamine/herdr-auto-title/internal/state"
+ )
+ 
+@@ -132,19 +130,15 @@ func TestAHandleIsSanitized(t *testing.T) {
+ 	}
+ }
+ 
+-func TestAHandleWiderThanTheLabelIsCutNotDropped(t *testing.T) {
++// A pane label is not bounded, so a handle wider than a tab title is kept whole.
++func TestAHandleWiderThanATabTitleIsKeptWhole(t *testing.T) {
+ 	t.Parallel()
+ 
+-	// A cut handle still tells two panes apart; a dropped one does not.
+-	const maxLength = 12
+-
+-	got := handleChain(maxLength).ResolvePanes(handleTab(strings.Repeat("reviewer", 3), ""))[1].Name
+-	if width := uniseg.StringWidth(got); width > maxLength {
+-		t.Errorf("pane %q is %d columns wide, want at most %d", got, width, maxLength)
+-	}
++	handle := strings.Repeat("reviewer", 3)
+ 
+-	if !strings.HasPrefix(got, "reviewer") {
+-		t.Errorf("pane = %q, want it to start with the handle", got)
++	got := handleChain(12).ResolvePanes(handleTab(handle, ""))[1].Name
++	if got != handle+" › api" {
++		t.Errorf("pane = %q, want %q", got, handle+" › api")
+ 	}
+ }
+ 
+diff --git a/internal/resolver/position.go b/internal/resolver/position.go
+index ecc5844..2ca275c 100644
+--- a/internal/resolver/position.go
++++ b/internal/resolver/position.go
+@@ -16,9 +16,8 @@ const positionMark = " · "
+ // position says nothing about what a tab holds, so no source can supply it.
+ type Numbered struct {
+ 	inner TitleResolver
+-	// maxLength is the bound inner was built with, not a second one: the
+-	// position is counted against it rather than added on top, so a numbered
+-	// title is never wider than an unnumbered one.
++	// maxLength is the bound inner was built with. The position is added on
++	// top of it, so a numbered title keeps the whole bound for its name.
+ 	maxLength int
+ }
+ 
+@@ -42,7 +41,8 @@ func (n *Numbered) Resolve(tab state.TabState) Decision {
+ 	// The prefix goes in front because truncation cuts the tail: a position at
+ 	// the end is the first thing a title too wide for the tab bar would lose.
+ 	// The name arrives sanitized, so only the fitting is left.
+-	decision.Name = withPrefix(strconv.Itoa(tab.Position)+positionMark, decision.Name, n.maxLength)
++	// The position is added on top of the bound, not counted against it.
++	decision.Name = strconv.Itoa(tab.Position) + positionMark + decision.Name
+ 
+ 	return decision
+ }
+diff --git a/internal/resolver/position_test.go b/internal/resolver/position_test.go
+index eb88d56..ec90791 100644
+--- a/internal/resolver/position_test.go
++++ b/internal/resolver/position_test.go
+@@ -1,11 +1,8 @@
+ package resolver
+ 
+ import (
+-	"strings"
+ 	"testing"
+ 
+-	"github.com/rivo/uniseg"
+-
+ 	"github.com/kryptamine/herdr-auto-title/internal/herdr/herdrtest"
+ 	"github.com/kryptamine/herdr-auto-title/internal/state"
+ )
+@@ -62,31 +59,12 @@ func TestPositionKeepsTheDecisionItWraps(t *testing.T) {
+ 	}
+ }
+ 
+-func TestAPositionIsCountedAgainstTheWidth(t *testing.T) {
+-	t.Parallel()
+-
+-	const maxLength = 16
+-
+-	long := herdrtest.Dir("work", strings.Repeat("a", 40))
+-
+-	got := numberedCWD(maxLength).Resolve(atPosition(7, long))
+-	if width := uniseg.StringWidth(got.Name); width > maxLength {
+-		t.Errorf("name %q is %d columns wide, want at most %d", got.Name, width, maxLength)
+-	}
+-
+-	if !strings.HasPrefix(got.Name, "7 · ") {
+-		t.Errorf("name = %q, want it to lead with its position", got.Name)
+-	}
+-}
+-
+-// A tab bar narrower than the position itself keeps the name over the number:
+-// a title cut down to nothing has lost more than the position is worth.
+-func TestAPositionWithNoRoomIsDropped(t *testing.T) {
++func TestAPositionIsAddedOnTopOfTheWidth(t *testing.T) {
+ 	t.Parallel()
+ 
+ 	got := numberedCWD(3).Resolve(atPosition(10, dashboard))
+-	if got.Name != "das" {
+-		t.Errorf("name = %q, want the bare title", got.Name)
++	if got.Name != "10 · das" {
++		t.Errorf("name = %q, want %q", got.Name, "10 · das")
+ 	}
+ }
+ 
+@@ -131,16 +109,3 @@ func TestAnyResolverCanBeNumbered(t *testing.T) {
+ 		t.Errorf("decision = %+v, want %+v", got, want)
+ 	}
+ }
+-
+-// Making room for the position is the one thing Numbered does to a name, and a
+-// cut that lands on a separator says a part was lost without saying which.
+-func TestANumberedTitleLeavesNoDanglingSeparator(t *testing.T) {
+-	t.Parallel()
+-
+-	inner := fixedResolver{decision: Decision{Name: "dashboard › nvim"}}
+-
+-	got := NewNumbered(inner, 16).Resolve(atPosition(1, dashboard))
+-	if got.Name != "1 · dashboard" {
+-		t.Errorf("name = %q, want %q", got.Name, "1 · dashboard")
+-	}
+-}
+diff --git a/internal/resolver/resolver.go b/internal/resolver/resolver.go
+index 1c177ba..29d2340 100644
+--- a/internal/resolver/resolver.go
++++ b/internal/resolver/resolver.go
+@@ -248,7 +248,14 @@ func (d *Deterministic) nameUnder(
+ 		parts = withoutAbove(withoutRepetition(parts), Parts{Context: workspace})
+ 	}
+ 
+-	name := Format(parts, d.maxLength)
++	// Only a tab title is bounded: a pane label is what the goto panel lists,
++	// where the full title has room.
++	maxLength := 0
++	if tab {
++		maxLength = d.maxLength
++	}
++
++	name := Format(parts, maxLength)
+ 	if name == "" {
+ 		return Decision{
+ 			Name:       GenericFallback,
+diff --git a/internal/resolver/sanitize.go b/internal/resolver/sanitize.go
+index 0c6b073..0ddfd3e 100644
+--- a/internal/resolver/sanitize.go
++++ b/internal/resolver/sanitize.go
+@@ -98,6 +98,14 @@ func truncate(s string, maxWidth int) string {
+ 		return s
+ 	}
+ 
++	// Cut at a word boundary: a cut through a word goes back to the space
++	// before it, unless the word is all there is.
++	if !strings.HasSuffix(head, " ") && !strings.HasPrefix(rest, " ") {
++		if i := strings.LastIndexByte(head, ' '); i > 0 {
++			head = head[:i]
++		}
++	}
++
+ 	cut := strings.TrimRight(head, trimmable)
+ 
+ 	return strings.TrimSpace(cut)
+diff --git a/internal/resolver/sanitize_test.go b/internal/resolver/sanitize_test.go
+index a99afe0..16b28e8 100644
+--- a/internal/resolver/sanitize_test.go
++++ b/internal/resolver/sanitize_test.go
+@@ -35,6 +35,8 @@ func TestSanitize(t *testing.T) {
+ 		{"value at the limit is kept whole", "abcdefghij", 10, "abcdefghij"},
+ 		{"value over the limit is truncated", "abcdefghijk", 10, "abcdefghij"},
+ 		{"truncation leaves no dangling separator", "abcdefg › hij", 9, "abcdefg"},
++		{"a cut through a word goes back to the space before it", "NVMe media errors on", 12, "NVMe media"},
++		{"a cut at a space keeps the whole word", "Qutebrowser Outlook account", 12, "Qutebrowser"},
+ 		// Non-ASCII on purpose: cutting these two-byte characters by byte
+ 		// count would corrupt the result. They are one column each, so the
+ 		// limit still reaches eight of them.
+diff --git a/internal/resolver/topics_test.go b/internal/resolver/topics_test.go
+index c3dd380..d1abacb 100644
+--- a/internal/resolver/topics_test.go
++++ b/internal/resolver/topics_test.go
+@@ -95,7 +95,7 @@ func TestATopicIsBoundOnlyWhenABoundIsSet(t *testing.T) {
+ 		want   string
+ 	}{
+ 		{maxLen: 0, want: "claude › " + activity},
+-		{maxLen: 20, want: "claude › Reconcile t"},
++		{maxLen: 20, want: "claude › Reconcile"},
+ 		{maxLen: 8, want: "claude"},
+ 	} {
+ 		bounded := NewTopics(Options{BranchMax: DefaultBranchMaxLength}, test.maxLen)
