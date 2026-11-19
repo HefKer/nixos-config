@@ -7,7 +7,7 @@
   niri,
   callPackage,
 }:
-# herdr, dms, wezterm and jev (~/.local/bin) come from the session's PATH, as for agent-notify in ~/dots.
+# herdr, dms, wezterm, nvim and jev (~/.local/bin) come from the session's PATH, as for agent-notify in ~/dots.
 stdenvNoCC.mkDerivation {
   pname = "attention";
   version = "0.1.0";
@@ -17,7 +17,7 @@ stdenvNoCC.mkDerivation {
   nativeCheckInputs = [ python3 ];
   checkPhase = ''
     runHook preCheck
-    HOME=$TMPDIR PYTHONPATH=. python3 -m unittest tests/test_attention.py
+    HOME=$TMPDIR PYTHONPATH=. python3 -m unittest tests/test_attention.py tests/test_stale.py
     runHook postCheck
   '';
   installPhase = ''

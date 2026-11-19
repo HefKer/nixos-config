@@ -13,6 +13,7 @@ from . import claude
 AGENT_NOTIFY = Path(
     os.environ.get("ATTENTION_AGENT_NOTIFY") or Path.home() / "dots/herdr/plugins/agent-notify/agent-notify.py"
 )
+PROMPT_TAB = Path(os.environ.get("ATTENTION_PROMPT_TAB") or Path.home() / "dots/scripts/claude-prompt-tab")
 
 
 class HerdrError(Exception):
@@ -72,6 +73,8 @@ class Agent:
     title: str
     place: str
     in_view: bool
+    tab_id: str = ""
+    cwd: str = ""
 
     @property
     def key(self):
@@ -106,20 +109,32 @@ def agents_of(session, path, snap):
             title=a.get("terminal_title_stripped") or "",
             place=place,
             in_view=in_view(a["pane_id"], snap),
+            tab_id=a.get("tab_id") or "",
+            cwd=a.get("cwd") or "",
         )
 
 
-def agents():
-    """(every agent in every session that answered, the names of the sessions that didn't)."""
-    found, unreachable = [], set()
+def snapshots():
+    """({session name: (socket path, snapshot)} for every session that answered, the names of those that didn't)."""
+    found, unreachable = {}, set()
     for session, path in sockets().items():
         try:
             result = request(path, "session.snapshot", {})
         except HerdrError:
             unreachable.add(session)
             continue
-        found.extend(agents_of(session, path, result.get("snapshot", result)))
+        found[session] = (path, result.get("snapshot", result))
     return found, unreachable
+
+
+def agents_in(snaps):
+    return [agent for session, (path, snap) in snaps.items() for agent in agents_of(session, path, snap)]
+
+
+def agents():
+    """(every agent in every session that answered, the names of the sessions that didn't)."""
+    snaps, unreachable = snapshots()
+    return agents_in(snaps), unreachable
 
 
 def background_busy(agent):
@@ -150,3 +165,18 @@ def go(agent):
     done = agent_notify(agent, "go")
     if done.returncode:
         raise HerdrError(done.stderr.strip() or f"agent-notify go exited {done.returncode}")
+
+
+def resume(socket_path, session_id, config_dir, cwd):
+    """A Claude session resumed in a new tab of the herdr session at socket_path, by claude-prompt-tab."""
+    env = dict(os.environ, HERDR_SOCKET_PATH=socket_path)
+    done = subprocess.run(
+        [str(PROMPT_TAB), "--resume", session_id, config_dir, cwd],
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=60,
+    )
+    if done.returncode:
+        raise HerdrError(done.stderr.strip() or f"claude-prompt-tab exited {done.returncode}")

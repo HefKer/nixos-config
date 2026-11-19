@@ -168,6 +168,13 @@ together](#how-it-fits-together) for what that means when you copy one.
   it behind its peers. Discord and phone notifications are banded by rules,
   then by TypeSafe's Jev from a few yes/no judgments that a truth table in
   code combines. [`pkgs/attention/`](pkgs/attention/)
+- <a id="stale-tabs"></a>**Finished herdr tabs close themselves, resumably.**
+  A tab whose Claude is done and handled, untouched for 3 days, with nothing
+  else alive in it (an idle shell, or an nvim with no unsaved buffers) gets a
+  `⌫` in its tab bar label for a day, then closes. Its notification stays in
+  the notification center and resumes the Claude session in a new tab. The
+  mark is a rename herdr-auto-title takes as manual, so it holds, and clearing
+  it hands the tab back. [`pkgs/attention/attention/stale.py`](pkgs/attention/attention/stale.py)
 - <a id="herdr-resurrect"></a>**herdr-resurrect without node on herdr's PATH.**
   The Node plugin runs from the store with node, bash, fzf and jq patched to
   store paths, and with its `agentResume` off it leaves agent panes to herdr's
