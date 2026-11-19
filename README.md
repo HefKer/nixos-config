@@ -207,6 +207,14 @@ together](#how-it-fits-together) for what that means when you copy one.
   next reboot, and prints the serial for `ANDROID_SERIAL`. A bundled `phone`
   skill gives agents the toolbox and which actions need a yes first.
   [`pkgs/phone/`](pkgs/phone/)
+- <a id="phone-adb-boot"></a>**Wireless Debugging that comes back after a reboot.**
+  Android 17 restarts it by itself on rejoining a trusted Wi-Fi, so only a
+  reboot can leave the setting reading 1 with nothing listening. A Tasker
+  profile on the home Wi-Fi writes `adb_wifi_enabled` 0 then 1 (Custom
+  Setting, `WRITE_SECURE_SETTINGS` granted once over adb) once per boot,
+  told by uptime falling below the last run's: the toggle restarts adbd, so
+  doing it on every reconnect would drop live sessions.
+  [`phone/automations/adb.prj.xml`](phone/automations/adb.prj.xml)
 - <a id="phone-journal"></a>**Undo for an agent's phone changes.** `phone-set
   {global,secure,system} <key> <value|--delete>` reads the old value, applies
   the change over adb, reads it back and appends both to a journal, so a

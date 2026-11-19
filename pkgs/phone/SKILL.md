@@ -11,7 +11,7 @@ description: "Reach and drive the user's Android phone over adb. Use when a task
 export ANDROID_SERIAL=$(phone-connect)
 ```
 
-`phone-connect` finds the phone (the tailnet's online Android peer, or `PHONE_HOST`), pins adb to port 5555 until the next reboot (reachable off Wi-Fi from then on), and prints the serial; every later `adb` call then targets the phone. When it exits non-zero, ask the user to turn on Settings → Developer options → Wireless debugging, with the phone on Wi-Fi, then rerun it. Pairing is already done; ask for a pairing code only when adb reports the device `unauthorized`.
+`phone-connect` finds the phone (the tailnet's online Android peer, or `PHONE_HOST`), pins adb to port 5555 until the next reboot (reachable off Wi-Fi from then on), and prints the serial; every later `adb` call then targets the phone. Wireless debugging comes back without the user: Android restarts it on rejoining the home Wi-Fi, and the Tasker project `phone/automations/adb.prj.xml` toggles it once after each reboot, as soon as the phone is unlocked and on the home Wi-Fi. So when `phone-connect` exits non-zero, first check the phone is home and has been unlocked since its last reboot; only then ask the user to turn on Settings → Developer options → Wireless debugging, with the phone on Wi-Fi, and rerun it. Turning `adb_wifi_enabled` off restarts adbd and drops every adb session, the 5555 pin included until `phone-connect` reconnects; don't write it mid-errand. Pairing is already done; ask for a pairing code only when adb reports the device `unauthorized`.
 
 ## What needs the user's yes
 

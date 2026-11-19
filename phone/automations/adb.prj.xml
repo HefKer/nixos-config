@@ -1,0 +1,87 @@
+<TaskerData sr="" dvi="1" tv="6.7.9">
+	<Profile sr="prof82" ve="2">
+		<cdate>1795075270610</cdate>
+		<clp>true</clp>
+		<edate>1795046400000</edate>
+		<flags>24</flags>
+		<id>82</id>
+		<mid0>81</mid0>
+		<nme>Wireless debugging at home</nme>
+		<State sr="con0" ve="2">
+			<code>160</code>
+			<Str sr="arg0" ve="3">%HomeSsid</Str>
+			<Str sr="arg1" ve="3"/>
+			<Str sr="arg2" ve="3"/>
+			<Int sr="arg3" val="2"/>
+			<Int sr="arg4" val="1"/>
+		</State>
+	</Profile>
+	<Project sr="proj0" ve="2">
+		<cdate>1795046400000</cdate>
+		<id>c125a39b-3115-4279-8bac-5543ad2e86b9</id>
+		<name>adb</name>
+		<pids>82</pids>
+		<tids>81</tids>
+	</Project>
+	<Task sr="task81">
+		<cdate>1795046400000</cdate>
+		<edate>1795046400000</edate>
+		<id>81</id>
+		<nme>Wireless debugging on</nme>
+		<Action sr="act0" ve="7">
+			<code>37</code>
+			<label>Once per boot: uptime below the last run's means a reboot. Android restarts Wireless debugging itself on rejoining a trusted Wi-Fi, and this toggle restarts adbd</label>
+			<ConditionList sr="if">
+				<bool0>Or</bool0>
+				<Condition sr="c0" ve="3">
+					<lhs>%AdbUptime</lhs>
+					<op>13</op>
+					<rhs></rhs>
+				</Condition>
+				<Condition sr="c1" ve="3">
+					<lhs>%UPS</lhs>
+					<op>6</op>
+					<rhs>%AdbUptime</rhs>
+				</Condition>
+			</ConditionList>
+		</Action>
+		<Action sr="act1" ve="7">
+			<code>235</code>
+			<label>Off first: after a reboot the setting can still read 1 while nothing listens, and writing 1 over 1 starts nothing</label>
+			<Int sr="arg0" val="0"/>
+			<Str sr="arg1" ve="3">adb_wifi_enabled</Str>
+			<Str sr="arg2" ve="3">0</Str>
+			<Int sr="arg3" val="0"/>
+			<Str sr="arg4" ve="3"/>
+		</Action>
+		<Action sr="act2" ve="7">
+			<code>30</code>
+			<Int sr="arg0" val="0"/>
+			<Int sr="arg1" val="2"/>
+			<Int sr="arg2" val="0"/>
+			<Int sr="arg3" val="0"/>
+			<Int sr="arg4" val="0"/>
+		</Action>
+		<Action sr="act3" ve="7">
+			<code>235</code>
+			<Int sr="arg0" val="0"/>
+			<Str sr="arg1" ve="3">adb_wifi_enabled</Str>
+			<Str sr="arg2" ve="3">1</Str>
+			<Int sr="arg3" val="0"/>
+			<Str sr="arg4" ve="3"/>
+		</Action>
+		<Action sr="act4" ve="7">
+			<code>38</code>
+		</Action>
+		<Action sr="act5" ve="7">
+			<code>547</code>
+			<Str sr="arg0" ve="3">%AdbUptime</Str>
+			<Str sr="arg1" ve="3">%UPS</Str>
+			<Int sr="arg2" val="0"/>
+			<Int sr="arg3" val="0"/>
+			<Int sr="arg4" val="0"/>
+			<Int sr="arg5" val="3"/>
+			<Int sr="arg6" val="0"/>
+		</Action>
+	</Task>
+</TaskerData>
