@@ -330,6 +330,20 @@ seconds or given it a new prompt. A message from another app is handled once the
 user goes to it. Leaving an agent before then does not handle it.
 _Avoid_: dismissed, seen, read
 
+### Audio
+
+**Soundboard mic**:
+The microphone that voice chat records: the user's voice with soundboard
+sounds mixed in. It is never the default microphone, so an app has to be
+pointed at it.
+_Avoid_: virtual mic
+
+**Mic voice**:
+A named effect that changes how the user's voice sounds on the soundboard
+mic, such as a bad webcam microphone or a lower pitch. At most one is active;
+with none, the voice is normal. Soundboard sounds are never changed by it.
+_Avoid_: voice changer, filter, preset
+
 ### Backlog
 
 **Draft**:
