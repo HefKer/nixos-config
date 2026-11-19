@@ -212,8 +212,9 @@ together](#how-it-fits-together) for what that means when you copy one.
   reboot can leave the setting reading 1 with nothing listening. A Tasker
   profile on the home Wi-Fi writes `adb_wifi_enabled` 0 then 1 (Custom
   Setting, `WRITE_SECURE_SETTINGS` granted once over adb) once per boot,
-  told by uptime falling below the last run's: the toggle restarts adbd, so
-  doing it on every reconnect would drop live sessions.
+  told by clock minus uptime being newer than the boot it last handled: the
+  toggle restarts adbd, so doing it on every reconnect would drop live
+  sessions.
   [`phone/automations/adb.prj.xml`](phone/automations/adb.prj.xml)
 - <a id="phone-journal"></a>**Undo for an agent's phone changes.** `phone-set
   {global,secure,system} <key> <value|--delete>` reads the old value, applies
