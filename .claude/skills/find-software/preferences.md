@@ -19,6 +19,10 @@ One failure rules the candidate out.
   - permissions requested (Flatpak, Android), where relevant
 - **Data that can't leave.** The data must be exportable in an open or documented
   format, or already stored that way. Obsidian passes: plain markdown on disk.
+  Asset licences (voice models, datasets) that only bar commercial use or redistribution
+  are not a dealbreaker when the flake fetches the asset for personal use instead of
+  shipping it: the research-only lessac Piper voice won by ear over CC0 voices
+  (HefKer/nixos-issues#186).
 - **Too expensive to justify the price.** No fixed ceiling: weigh the price (yearly for
   subscriptions) against the best free option and what the money buys. A subscription that
   holds data hostage weighs heavily against.
