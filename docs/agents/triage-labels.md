@@ -14,3 +14,8 @@ label strings used in this repo's tracker. They are identical — the labels exi
 
 When a skill mentions a role ("apply the AFK-ready triage label"), use the label string from
 the right-hand column.
+
+## `capture` comes off at triage
+
+`capture` marks a raw idea from backlog quick capture that nobody has reviewed. Remove it in
+the same edit that gives the issue any state other than `needs-triage`, or closes it.
