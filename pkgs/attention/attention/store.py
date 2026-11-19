@@ -25,9 +25,10 @@ def locked():
 
 
 class State:
-    """`agents`: marks on herdr's agent states, keyed to them. `messages`: stored third-party items."""
+    """`agents`: marks on herdr's agent states, keyed to them. `messages`: stored third-party items.
+    `stale`: the tabs marked stale, with what closing and resuming them needs."""
 
-    FILES = ("agents", "messages")
+    FILES = ("agents", "messages", "stale")
 
     def __init__(self, directory):
         self.directory = directory
