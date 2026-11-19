@@ -5,6 +5,9 @@
     attention go ID     go to one item (a popup's click)
     attention ingest    read a DMS notification as JSON on stdin; store and pop up an item if it is one
     attention watch     the watcher: keeps the agent marks current and counts watching time
+    attention stale     marks stale herdr tabs, and closes those marked a day (GLOSSARY.md › Stale tab)
+    attention resume SOCKET SESSION CONFIG CWD
+                        resumes a closed stale tab's Claude session in a new tab (its notification's action)
 """
 
 import json
@@ -14,7 +17,7 @@ import sys
 import time
 
 from . import agents as agent_items
-from . import bands, herdr, messages, store
+from . import bands, herdr, messages, stale, store
 from .ranking import build, ranked, requeue
 
 TICK = 1
@@ -81,20 +84,24 @@ def cmd_go(item_id):
     return 0
 
 
-def popup(item):
-    """A popup for a third-party item that became one; clicking it goes there. Detached, since it waits for the click."""
-    title = f"{bands.NAMES[item['band']]} · {item['title']}"
+def notify(title, body, button, *command, transient=True):
+    """A notification whose click on `button` runs `attention COMMAND...`. Detached, since it waits for the click."""
     script = (
-        'action=$(notify-send --app-name=Attention --transient --action=default=Open "$1" "$2"); '
-        '[ "$action" = default ] && exec "$3" go "$4"'
+        'action=$(notify-send --app-name=Attention $1 --action=default="$2" "$3" "$4"); '
+        '[ "$action" = default ] || exit 0; bin=$5; shift 5; exec "$bin" "$@"'
     )
     subprocess.Popen(
-        ["sh", "-c", script, "popup", title, item["detail"], sys.argv[0], item["id"]],
+        ["sh", "-c", script, "notify", "--transient" if transient else "", button, title, body, sys.argv[0], *command],
         start_new_session=True,
         stdin=subprocess.DEVNULL,
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
     )
+
+
+def popup(item):
+    """A popup for a third-party item that became one; clicking it goes there."""
+    notify(f"{bands.NAMES[item['band']]} · {item['title']}", item["detail"], "Open", "go", item["id"])
 
 
 def cmd_ingest():
@@ -127,6 +134,70 @@ def cmd_watch():
         time.sleep(TICK)
 
 
+class TabOps:
+    Error = herdr.HerdrError
+
+    @staticmethod
+    def rename(path, tab_id, label):
+        herdr.request(path, "tab.rename", {"tab_id": tab_id, "label": label})
+
+    @staticmethod
+    def close(path, tab_id):
+        herdr.request(path, "tab.close", {"tab_id": tab_id})
+
+    @staticmethod
+    def closed(mark):
+        """Not transient: it stays in the notification center, since the tab it names is gone."""
+        body = " · ".join(filter(None, [mark["title"] or mark["body"], mark["space"]]))
+        notify("Closed stale tab", body, "Resume", "resume", mark["socket"], mark["session_id"], mark["config"], mark["cwd"], transient=False)
+
+
+def judge(path, agent, others):
+    """The config dir of the account holding a tab's Claude session if the tab is stale, else None."""
+    found = stale.transcript(agent.session_id)
+    if found is None:
+        return None
+    at = stale.last_input(agent, found[1])
+    if at is None or time.time() - at < stale.IDLE_SECONDS or herdr.background_busy(agent):
+        return None
+    for pane in others:
+        try:
+            info = herdr.request(path, "pane.process_info", {"pane_id": pane["pane_id"]})
+        except herdr.HerdrError:
+            return None
+        if not stale.quiet(info.get("process_info"), stale.nvim_clean):
+            return None
+    return found[0]
+
+
+def cmd_stale():
+    now = time.time()
+    snaps, unreachable = herdr.snapshots()
+    live = herdr.agents_in(snaps)
+    with store.locked() as state:
+        queue = build(state, live, now, unreachable=unreachable)
+        open_ids = {item["id"] for item in queue if item["kind"] == "agent"}
+        stale.sweep(state.stale, snaps, unreachable, live, open_ids, agent_items.mark_key, now, judge, TabOps)
+    return 0
+
+
+def cmd_resume(socket_path, session_id, config_dir, cwd):
+    """claude-prompt-tab focuses the new tab in herdr; going to its agent raises the terminal too."""
+    try:
+        herdr.resume(socket_path, session_id, config_dir, cwd)
+    except (herdr.HerdrError, OSError, subprocess.TimeoutExpired) as error:
+        toast(f"Couldn't resume: {error}")
+        return 1
+    for _ in range(25):
+        snaps, _ = herdr.snapshots()
+        agent = next((a for a in herdr.agents_in(snaps) if a.session_id == session_id and a.socket == socket_path), None)
+        if agent is not None:
+            herdr.go(agent)
+            return 0
+        time.sleep(0.2)
+    return 0
+
+
 def main(argv):
     command = argv[1] if len(argv) > 1 else ""
     if command == "next":
@@ -139,6 +210,10 @@ def main(argv):
         return cmd_ingest()
     if command == "watch":
         return cmd_watch()
+    if command == "stale":
+        return cmd_stale()
+    if command == "resume" and len(argv) == 6:
+        return cmd_resume(*argv[2:])
     print(__doc__.strip(), file=sys.stderr if command not in ("-h", "--help") else sys.stdout)
     return 0 if command in ("-h", "--help") else 2
 
