@@ -129,6 +129,8 @@ in
     Unit = {
       Description = "Run the health probes and notify on new findings";
       After = [ "graphical-session.target" ];
+      # A switch never waits on a run: health.path starts one once the switch is done.
+      X-SwitchMethod = "keep-old";
     };
     Service = {
       Type = "oneshot";

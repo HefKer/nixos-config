@@ -39,10 +39,10 @@ writeShellApplication {
       *) usage ;;
     esac
 
-    # Prefixes each stdout line with the probe name; a probe that exits non-zero is a finding itself.
+    # Prefixes each stdout line with the probe name; a probe that exits non-zero is a finding itself; fd 9 is closed so a daemon a probe spawns can't hold the lock.
     run() {
       local name=$1 out status=0 line
-      out=$("$2") || status=$?
+      out=$("$2" 9>&-) || status=$?
       while IFS= read -r line; do
         if [ -n "$line" ]; then printf '%s %s\n' "$name" "$line"; fi
       done <<<"$out"
