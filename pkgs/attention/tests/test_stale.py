@@ -154,6 +154,18 @@ class Sweep(unittest.TestCase):
         self.assertEqual(self.ops.renamed[-1], ("t1", ""))
         self.assertEqual(self.marks, {})
 
+    def test_a_name_the_user_gave_comes_back_with_the_mark_off(self):
+        config = Path(tempfile.mkdtemp())
+        os.environ["XDG_CONFIG_HOME"] = str(config)
+        (config / "herdr-auto-title").mkdir()
+        (config / "herdr-auto-title/manual-names.json").write_text('{"locked_tabs": {"t1": "1 · mine"}}')
+        try:
+            self.sweep(snap(("t1", "1 · mine"), ("t2", "2 · auto")), [agent("t1"), agent("t2")], 0)
+            self.sweep(snap(("t1", "x"), ("t2", "y")), [agent("t1"), agent("t2")], 10, verdict=False)
+        finally:
+            del os.environ["XDG_CONFIG_HOME"]
+        self.assertEqual(self.ops.renamed[-2:], [("t1", "1 · mine"), ("t2", "")])
+
     def test_a_marked_tab_follows_its_position(self):
         live = [agent("t1"), agent("t2")]
         self.sweep(snap(("t1", "1 · a"), ("t2", "2 · b")), live[1:], 0)

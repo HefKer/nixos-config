@@ -5,7 +5,7 @@
     attention go ID     go to one item (a popup's click)
     attention ingest    read a DMS notification as JSON on stdin; store and pop up an item if it is one
     attention watch     the watcher: keeps the agent marks current and counts watching time
-    attention stale     marks stale herdr tabs, and closes those marked a day (GLOSSARY.md › Stale tab)
+    attention stale     marks stale herdr tabs, and closes those marked a day (GLOSSARY.md › Herdr)
     attention resume SOCKET SESSION CONFIG CWD
                         resumes a closed stale tab's Claude session in a new tab (its notification's action)
 """
@@ -90,8 +90,12 @@ def notify(title, body, button, *command, transient=True):
         'action=$(notify-send --app-name=Attention $1 --action=default="$2" "$3" "$4"); '
         '[ "$action" = default ] || exit 0; bin=$5; shift 5; exec "$bin" "$@"'
     )
+    argv = ["sh", "-c", script, "notify", "--transient" if transient else "", button, title, body, sys.argv[0], *command]
+    if not transient:
+        # A unit of its own: a oneshot service (attention stale) has its leftover processes killed when it exits.
+        argv = ["systemd-run", "--user", "--quiet", "--collect", "-E", "PATH", "--", *argv]
     subprocess.Popen(
-        ["sh", "-c", script, "notify", "--transient" if transient else "", button, title, body, sys.argv[0], *command],
+        argv,
         start_new_session=True,
         stdin=subprocess.DEVNULL,
         stdout=subprocess.DEVNULL,
@@ -192,7 +196,10 @@ def cmd_resume(socket_path, session_id, config_dir, cwd):
         snaps, _ = herdr.snapshots()
         agent = next((a for a in herdr.agents_in(snaps) if a.session_id == session_id and a.socket == socket_path), None)
         if agent is not None:
-            herdr.go(agent)
+            try:
+                herdr.go(agent)
+            except (herdr.HerdrError, subprocess.TimeoutExpired) as error:
+                toast(f"Resumed, but couldn't raise it: {error}")
             return 0
         time.sleep(0.2)
     return 0

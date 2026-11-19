@@ -6,6 +6,7 @@ own rule (agents.py), its last input is IDLE_SECONDS old, and its other panes ho
 alive. Whatever can't be read keeps the tab.
 """
 
+import json
 import os
 import re
 import subprocess
@@ -47,6 +48,16 @@ def unmarked(label):
 def marked_label(position, numbered, body):
     marked = f"{MARK} {body}".rstrip()
     return f"{position} · {marked}" if numbered else marked
+
+
+def named_by_hand(tab):
+    """Whether herdr-auto-title holds the tab's label as one the user gave it (its manual-names.json)."""
+    base = Path(os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config")
+    try:
+        locked = json.loads((base / "herdr-auto-title/manual-names.json").read_text(encoding="utf-8")).get("locked_tabs") or {}
+    except (OSError, ValueError, AttributeError):
+        return False
+    return bool(tab.get("label")) and locked.get(tab["tab_id"]) == tab.get("label")
 
 
 def candidates(snap, agents, open_ids, mark_key):
@@ -174,8 +185,9 @@ def sweep(marks, snaps, unreachable, agents, open_ids, mark_key, now, judge, ops
 
 def apply(marks, k, action, tab, agent, config, session, path, snap, place, now, ops):
     if action == "unmark":
+        # An empty label hands the tab back to herdr-auto-title; a name the user gave it is put back instead.
         if tab is not None:
-            ops.rename(path, tab["tab_id"], "")
+            ops.rename(path, tab["tab_id"], marks[k].get("manual") or "")
         del marks[k]
     elif action == "mark":
         numbered, body = unmarked(tab.get("label"))
@@ -190,6 +202,7 @@ def apply(marks, k, action, tab, agent, config, session, path, snap, place, now,
             "numbered": numbered,
             "body": body,
             "label": label,
+            "manual": tab.get("label") if named_by_hand(tab) else None,
             "title": agent.title,
             "space": spaces.get(tab.get("workspace_id")) or "",
             "session_id": agent.session_id,
