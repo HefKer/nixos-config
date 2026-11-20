@@ -381,7 +381,11 @@ together](#how-it-fits-together) for what that means when you copy one.
   and a hand-picked list of fish's binds, minus any fish no longer binds, into
   one fuzzel list, each trigger beside its action, so searching
   "backspace" finds `Fn1+P`. Window-manager, shell and leader rows run; app
-  rows copy their trigger. `bind-palette list` prints the rows as TSV.
+  rows copy their trigger. Binds already learned get out of the way: Alt+H
+  hides the selected row and reopens the palette without it, Alt+Shift+H
+  lists the hidden rows to bring one back, and `~regex` lines in the ignore
+  file hide whole families (`~^kanata\t`). `bind-palette list` prints the
+  shown rows as TSV, `list --all` every row.
   [`pkgs/bind-palette/`](pkgs/bind-palette/)
 - <a id="window-volume"></a>**Volume keys for the focused window.**
   `window-volume up|down|mute` finds the PipeWire streams of the app in niri's

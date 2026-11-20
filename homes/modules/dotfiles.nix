@@ -45,6 +45,8 @@ let
     "claude/.claude/CLAUDE.md"
     "claude/.claude/keybindings.json"
     "claude/.claude/statusline.sh"
+    # The palette appends to its ignore file through the link.
+    "bind-palette/.config/bind-palette"
     "DankMaterialShell/.config/DankMaterialShell"
     # The shell reads ~/.config/dms, but its regenerated nvim colorscheme reads this path.
     {

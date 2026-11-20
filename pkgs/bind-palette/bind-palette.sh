@@ -1,13 +1,20 @@
 # One fuzzy search over every scope's binds: niri and DMS, the desktop leader,
 # qutebrowser, nvim, fish and kanata. Each row shows the trigger beside its action, so
 # searching teaches the bind. Window-manager, shell and leader rows run; app rows
-# copy their trigger.
-#   bind-palette        pick in fuzzel
-#   bind-palette list   print the rows as TSV: scope, trigger, action, command
+# copy their trigger. Rows the ignore file names are hidden: Alt+H hides the selected
+# row, Alt+Shift+H switches to the hidden rows, where Alt+H un-hides one.
+#   bind-palette                 pick in fuzzel
+#   bind-palette list            print the shown rows as TSV: scope, trigger, action, command
+#   bind-palette list --all      every row, ignoring the ignore file
+#   bind-palette list --hidden   the hidden rows, each with what hides it as a fifth field
 
 # Every reader's rows go through this: tabs and newlines inside a field become spaces, and no escaping, which @tsv adds and the shell would keep.
 tsv='map(. // "" | tostring | gsub("[\t\n]"; " ")) | join("\t")'
 leader_config="${XDG_CONFIG_HOME:-$HOME/.config}/wlr-which-key/config.yaml"
+# dots: bind-palette/. Blank lines and # comments aside, each line is a scope and a trigger
+# joined by a tab, hiding that row, or ~ and an extended regex matched against the row's
+# scope, trigger and action joined by tabs.
+ignore_file="${XDG_CONFIG_HOME:-$HOME/.config}/bind-palette/ignore"
 
 # niri prints spawn arguments shell-quoted, and spawn-sh's script as one quoted string.
 niri_rows() {
@@ -111,7 +118,7 @@ kanata_rows() {
     }' "$kanata_keymap"
 }
 
-list() {
+all_rows() {
   # Each source fails alone, so one broken reader drops one scope, not the palette.
   niri_rows || true
   leader_rows || true
@@ -121,33 +128,143 @@ list() {
   kanata_rows || true
 }
 
+# The ignore file's lines that apply. A pattern that doesn't compile is reported on stderr and skipped, so it hides nothing rather than ending the filter.
+ignore_lines() {
+  [[ -r $ignore_file ]] || return 0
+  local line
+  while IFS= read -r line || [[ -n $line ]]; do
+    line=${line%$'\r'}
+    [[ -z $line || $line == '#'* ]] && continue
+    # Through the environment, as the filter reads it, so the backslashes mean the same.
+    if [[ $line == '~'* ]] && ! re=${line:1} gawk 'BEGIN { if ("" ~ ENVIRON["re"]) {} }' 2>/dev/null; then
+      echo "bind-palette: invalid pattern skipped: $line" >&2
+      continue
+    fi
+    printf '%s\n' "$line"
+  done <"$ignore_file"
+}
+
+# Rows on stdin. shown prints those no line hides; hidden prints the others, with a fifth field: "row" for an exact-row line, or the ~pattern.
+classify() {
+  local rules
+  rules=$(ignore_lines)
+  rules=$rules gawk -F'\t' -v OFS='\t' -v view="$1" '
+    BEGIN {
+      n = split(ENVIRON["rules"], r, "\n")
+      for (i = 1; i <= n; i++)
+        if (substr(r[i], 1, 1) == "~") pat[++np] = substr(r[i], 2)
+        else if (r[i] != "") exact[r[i]]
+    }
+    {
+      by = ""
+      if (($1 "\t" $2) in exact) by = "row"
+      else for (i = 1; i <= np; i++) if (($1 "\t" $2 "\t" $3) ~ pat[i]) { by = "~" pat[i]; break }
+    }
+    view == "shown" && by == "" { print; next }
+    view == "hidden" && by != "" { print $1, $2, $3, $4, by }'
+}
+
+list() {
+  case "${1:-}" in
+    "") all_rows | classify shown ;;
+    --all) all_rows ;;
+    --hidden) all_rows | classify hidden ;;
+    *) usage ;;
+  esac
+}
+
+hide() {
+  mkdir -p "$(dirname "$ignore_file")"
+  # A last line without its newline would swallow the new one.
+  if [[ -s $ignore_file && -n $(tail -c1 "$ignore_file") ]]; then echo >>"$ignore_file"; fi
+  # Appending, and the rewrite in unhide, write through the link into dots.
+  printf '%s\t%s\n' "$1" "$2" >>"$ignore_file"
+}
+
+unhide() {
+  local rest
+  rest=$(line="$1"$'\t'"$2" gawk '{ l = $0; sub(/\r$/, "", l) } l != ENVIRON["line"]' "$ignore_file")
+  if [[ -n $rest ]]; then printf '%s\n' "$rest" >"$ignore_file"; else : >"$ignore_file"; fi
+}
+
 pick() {
-  local rows idx row scope trigger action cmd
-  rows=$(list)
-  idx=$(awk -F'\t' '{ printf "%-12s %-28s %s\n", "[" $1 "]", $2, $3 }' <<<"$rows" |
-    fuzzel --dmenu --index --prompt "bind › " --width 90) || return 0
-  # Typed text matching no row comes back as -1.
-  ((idx >= 0)) || return 0
-  row=$(sed -n "$((idx + 1))p" <<<"$rows")
-  # cut, not read: read collapses runs of tabs, which shifts an empty field.
-  scope=$(cut -f1 <<<"$row")
-  trigger=$(cut -f2 <<<"$row")
-  action=$(cut -f3 <<<"$row")
-  cmd=$(cut -f4 <<<"$row")
-  if [[ -n $cmd ]]; then
-    # Detached, as niri's own spawn runs it.
-    setsid -f sh -c "$cmd" >/dev/null 2>&1
-  else
-    printf '%s' "$trigger" | wl-copy
-    notify-send -a "Bind palette" "$scope: $trigger" "$action (trigger copied)"
-  fi
+  local all rows view=shown sel=0 prompt hint idx rc row scope trigger action cmd by errs
+  errs=$(ignore_lines 2>&1 >/dev/null)
+  [[ -z $errs ]] || notify-send -a "Bind palette" "Ignore file: pattern skipped" "$errs"
+  # Read once: the readers are the slow part, and a hide only reclassifies.
+  all=$(all_rows)
+  while true; do
+    rows=$(classify "$view" <<<"$all")
+    if [[ $view == shown ]]; then
+      prompt="bind › " hint="Alt+H hide · Alt+Shift+H hidden"
+    else
+      prompt="hidden › " hint="Alt+H un-hide · Alt+Shift+H back"
+    fi
+    # custom-1 and custom-2 exit 10 and 11 with the row; set here, so fuzzel's other callers keep its defaults. The other custom-N keys stay on Alt+3.. and cancel.
+    rc=0
+    idx=$(awk -F'\t' '{ printf "%-12s %-28s %s%s\n", "[" $1 "]", $2, $3, ($5 ~ /^~/ ? "   ⟵ " $5 : "") }' <<<"$rows" |
+      fuzzel --dmenu --index --prompt "$prompt" --placeholder "$hint" --width 90 --select-index "$sel" \
+        --override=key-bindings.custom-1=Mod1+h --override=key-bindings.custom-2=Mod1+Shift+h) || rc=$?
+    case $rc in
+      0 | 10) ;;
+      11)
+        if [[ $view == shown ]]; then
+          if [[ -z $(classify hidden <<<"$all") ]]; then
+            notify-send -a "Bind palette" "Nothing hidden" "Alt+H on a row hides it"
+          else
+            view=hidden
+          fi
+        else
+          view=shown
+        fi
+        sel=0
+        continue
+        ;;
+      *) return 0 ;;
+    esac
+    # Typed text matching no row comes back as -1.
+    [[ -n $idx ]] && ((idx >= 0)) || return 0
+    row=$(sed -n "$((idx + 1))p" <<<"$rows")
+    # cut, not read: read collapses runs of tabs, which shifts an empty field.
+    scope=$(cut -f1 <<<"$row")
+    trigger=$(cut -f2 <<<"$row")
+    action=$(cut -f3 <<<"$row")
+    cmd=$(cut -f4 <<<"$row")
+    if ((rc == 10)); then
+      # The palette reopens on the row after, so several can go one after another.
+      sel=$idx
+      if [[ $view == shown ]]; then
+        hide "$scope" "$trigger"
+      else
+        by=$(cut -f5 <<<"$row")
+        if [[ $by == row ]]; then
+          unhide "$scope" "$trigger"
+          # The last one un-hidden leaves nothing to show here.
+          [[ -n $(classify hidden <<<"$all") ]] || view=shown sel=0
+        else
+          notify-send -a "Bind palette" "Hidden by a pattern" "$by"$'\n'"Edit $ignore_file to show it"
+        fi
+      fi
+      continue
+    fi
+    if [[ -n $cmd ]]; then
+      # Detached, as niri's own spawn runs it.
+      setsid -f sh -c "$cmd" >/dev/null 2>&1
+    else
+      printf '%s' "$trigger" | wl-copy
+      notify-send -a "Bind palette" "$scope: $trigger" "$action (trigger copied)"
+    fi
+    return 0
+  done
+}
+
+usage() {
+  echo "usage: bind-palette [pick | list [--all | --hidden]]" >&2
+  exit 2
 }
 
 case "${1:-pick}" in
   pick) pick ;;
-  list) list ;;
-  *)
-    echo "usage: bind-palette [pick|list]" >&2
-    exit 2
-    ;;
+  list) list "${2:-}" ;;
+  *) usage ;;
 esac

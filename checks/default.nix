@@ -24,6 +24,7 @@ let
       ".claude/keybindings.json" = "claude/.claude/keybindings.json";
       ".claude/statusline.sh" = "claude/.claude/statusline.sh";
       ".config/backlog" = "backlog/.config/backlog";
+      ".config/bind-palette" = "bind-palette/.config/bind-palette";
       ".config/btop" = "btop/.config/btop";
       ".config/DankMaterialShell" = "DankMaterialShell/.config/DankMaterialShell";
       ".config/Dux Shell" = "DankMaterialShell/.config/DankMaterialShell";
@@ -78,6 +79,7 @@ let
       ".claude/keybindings.json" = "claude/.claude/keybindings.json";
       ".claude/statusline.sh" = "claude/.claude/statusline.sh";
       ".config/backlog" = "backlog/.config/backlog";
+      ".config/bind-palette" = "bind-palette/.config/bind-palette";
       ".config/btop" = "btop/.config/btop";
       ".config/DankMaterialShell" = "DankMaterialShell/.config/DankMaterialShell";
       ".config/Dux Shell" = "DankMaterialShell/.config/DankMaterialShell";
