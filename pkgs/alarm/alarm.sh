@@ -398,13 +398,13 @@ cmd_sync() {
 }
 
 # Ends ring $2 (an epoch, or a repeat tag) of the loaded alarm $1, due at $3: a one-shot is deleted,
-# a snoozed ring of a repeating alarm clears its at=, and an occurrence is marked handled.
+# a snoozed ring of a repeating alarm clears its at=, and an occurrence is marked handled (never lowered, so a skip stays).
 # Every host that timed out writes the same bytes, so Syncthing sees no conflict.
 finish() {
   if [ -z "$repeat" ]; then
     rm -f -- "${store:?}/$1"
   elif [[ $2 == r* ]]; then
-    handled=$3
+    [ "$handled" -ge "$3" ] || handled=$3
     save "$1"
   else
     at=""
@@ -468,7 +468,7 @@ cmd_ring() {
   case $action in
     snooze)
       at=$(($(date +%s) + 300))
-      [[ $2 != r* ]] || handled=$due
+      [[ $2 != r* || $handled -ge $due ]] || handled=$due
       save "$id"
       ;;
     *) finish "$id" "$2" "$due" ;;
