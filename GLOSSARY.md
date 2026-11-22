@@ -295,7 +295,7 @@ _Avoid_: countdown
 **Repeating alarm**:
 An alarm that rings at the same time on chosen days of the week and stays
 after ringing. Removing it ends the series; snoozing it delays only the ring
-going off now.
+going off now; skipping it silences only its next ring.
 _Avoid_: recurring alarm, schedule
 
 ### Attention
