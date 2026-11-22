@@ -93,6 +93,10 @@ in
       oscclip # osc-copy/osc-paste: pipe to local clipboard over SSH via OSC 52
       wiremix
       wl-clipboard
+      # claude-shot --gui (dots): shoots a GUI app in a headless cage, typing into it with wtype
+      cage
+      grim
+      wtype
 
       # --- System Information & Diagnostics ---
       pciutils
