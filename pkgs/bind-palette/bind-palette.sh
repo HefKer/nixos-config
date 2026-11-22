@@ -81,7 +81,7 @@ fish_rows() {
     $1 ~ / / || key in bound { printf "fish\t%s\t%s\t\n", $1, $2 }' "$list"
 }
 
-# kanata's home-row mods and held layers: Fn1 is Caps held, Fn2 is Tab inside Fn1. Aliases (@...) and keys mapped to themselves are skipped.
+# kanata's home-row mods and held layers: Fn1 is Caps held, Fn2 is Tab inside Fn1, Nav is Space held. Aliases (@...) without a name below and keys mapped to themselves are skipped.
 kanata_rows() {
   [[ -r $kanata_keymap ]] || return 0
   awk '
@@ -92,8 +92,23 @@ kanata_rows() {
             "menu Menu tab Tab spc Space ralt RightAlt rmet RightSuper rctl RightCtrl " \
             "lmet Super lalt Alt lctl Ctrl lsft Shift rsft Shift", pairs, " ")
       for (i = 1; i < length(pairs); i += 2) name[pairs[i]] = pairs[i + 1]
+      # Macro aliases, named after what they do.
+      name["@nva"] = "Open a line below (with f: above)"
+      name["@nvx"] = "Delete the line (with f: to its end)"
+      name["@nve"] = "Change the word (with f: to the line end)"
+      name["@nvy"] = "Copy the line"
+      name["@fnl"] = "Fn Lock"
     }
-    function key(k) { return (k in name) ? name[k] : toupper(k) }
+    # No match() here: the home-row loop below relies on its RSTART.
+    function key(k,   mods, m) {
+      if (k in name) return name[k]
+      # C-rght, C-S-z: modifier prefixes.
+      while (length(k) > 2 && substr(k, 2, 1) == "-" && index("CSAM", m = substr(k, 1, 1))) {
+        mods = mods (m == "C" ? "Ctrl+" : m == "S" ? "Shift+" : m == "A" ? "Alt+" : "Super+")
+        k = substr(k, 3)
+      }
+      return mods ((k in name) ? name[k] : toupper(k))
+    }
     # A home-row mod alias: hra (t! hrm a lmet $left-mods), several per line.
     /\(t! hrm / {
       line = $0
@@ -106,13 +121,15 @@ kanata_rows() {
     }
     /^\(deflayermap \(fn1\)/ { layer = "Fn1"; next }
     /^\(deflayermap \(fn2\)/ { layer = "Fn1+Tab"; next }
-    /^\(deflayermap/ { layer = ""; next }
+    /^\(deflayermap \(nav\)/ { layer = "Space"; next }
+    # Any other top-level form ends the layer: a defalias after it is not its keys.
+    /^\(/ { layer = ""; next }
     layer == "" || /^[[:space:]]*;/ { next }
     {
       sub(/\)[[:space:]]*$/, "")
       for (i = 1; i < NF; i += 2) {
         src = $i; dst = $(i + 1)
-        if (dst ~ /^@/ || src == dst) continue
+        if ((dst ~ /^@/ && !(dst in name)) || src == dst) continue
         printf "kanata\t%s+%s\t%s\t\n", layer, key(src), key(dst)
       }
     }' "$kanata_keymap"
