@@ -317,6 +317,12 @@ one; most do not. It stays until handled, and leaving it unhandled puts it
 back in the queue.
 _Avoid_: notification, task, todo
 
+**Conversation**:
+Where third-party messages arrive together: a Discord channel, group chat or
+direct message, or a phone notification's app and title. Its open messages
+share one attention item, however many people wrote them.
+_Avoid_: thread, chat
+
 **Attention queue**:
 Every open attention item, ranked by how much each one needs the user. A
 blocked agent outranks a finished one; within a rank the oldest comes first,
@@ -326,8 +332,9 @@ _Avoid_: inbox, notification list
 **Handled**:
 An attention item the user has dealt with. A blocked agent is handled once it
 is no longer blocked; a finished agent once the user has watched it for a few
-seconds or given it a new prompt. A message from another app is handled once the
-user goes to it. Leaving an agent before then does not handle it.
+seconds or given it a new prompt. A conversation's messages are handled
+together once the user goes to it. Leaving an agent before then does not
+handle it.
 _Avoid_: dismissed, seen, read
 
 ### Audio

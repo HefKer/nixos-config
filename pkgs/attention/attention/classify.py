@@ -90,6 +90,16 @@ def discord_origin(summary):
     return match["sender"], where, None
 
 
+def conversation(notification):
+    """The key messages share when they belong to one conversation: a Discord channel, group chat or
+    direct message, or the phone notification's app and title."""
+    summary = notification.get("summary", "")
+    if source(notification) == "discord":
+        sender, channel, server = discord_origin(summary)
+        return ["discord", server, channel] if channel else ["discord", "dm", sender]
+    return ["phone", summary.translate(ISOLATES).strip()]
+
+
 
 
 def contacts_path():
