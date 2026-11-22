@@ -92,15 +92,15 @@ in
         name:
         let
           peer = table.peers.${name};
+          # Discovery is off, so a peer is reachable only at its Tailscale address.
+          address = peer.address or (throw "syncthing: peer ${name} in table.nix has no Tailscale address");
         in
         {
           inherit (peer) id;
-          addresses =
-            lib.optionals (peer ? address) [
-              "tcp://${peer.address}:22000"
-              "quic://${peer.address}:22000"
-            ]
-            ++ [ "dynamic" ];
+          addresses = [
+            "tcp://${address}:22000"
+            "quic://${address}:22000"
+          ];
         }
       );
 
@@ -117,7 +117,15 @@ in
         // lib.optionalAttrs (isAppState row) { maxConflicts = 0; }
       ) rows;
 
-      options.urAccepted = 3;
+      # Sync is Tailscale-only: nothing announces this device or dials it through a relay, so the public device IDs resolve to no IP.
+      options = {
+        urAccepted = 3;
+        globalAnnounceEnabled = false;
+        localAnnounceEnabled = false;
+        relaysEnabled = false;
+        natEnabled = false;
+        crashReportingEnabled = false;
+      };
     };
   };
 

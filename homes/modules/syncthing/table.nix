@@ -14,7 +14,7 @@ let
   };
 in
 {
-  # Device IDs are public keys; a peer named after a host is that host. Read one with `nix run nixpkgs#syncthing -- device-id`.
+  # Device IDs are public keys; a peer named after a host is that host, and every peer needs its Tailscale address. Read one with `nix run nixpkgs#syncthing -- device-id`.
   peers = {
     desktop = {
       id = "GTGPGV7-IG4TW7R-SNXTIVC-ZWFKAAE-WDEMBKF-CFXT7NX-HT7ITHX-VAHQSA5";
@@ -24,7 +24,10 @@ in
       id = "B6QRXT2-62YMLWX-TVMBC6L-ZTJIDRT-MLI6GFD-NK6PXWR-WLNYBKK-WUNWHQI";
       address = "100.90.76.120";
     };
-    phone.id = "32NQBTH-U4ZQR7J-EA5YTDY-Y3LJ5QH-S3KPBG6-ZRE74KW-Y2DOA6W-JZNNZA4";
+    phone = {
+      id = "32NQBTH-U4ZQR7J-EA5YTDY-Y3LJ5QH-S3KPBG6-ZRE74KW-Y2DOA6W-JZNNZA4";
+      address = "100.87.103.16";
+    };
   };
 
   # Folder IDs must match on every peer; changing one orphans the folder.

@@ -474,7 +474,8 @@ together](#how-it-fits-together) for what that means when you copy one.
   folder's whole `.stignore` is composed from shared lists and written by
   activation before the service starts, since `ignorePatterns` only lands
   after the first scan. App-state folders sync only named paths, and the
-  host's identity comes from sops.
+  host's identity comes from sops. Discovery, relays and NAT are off, so peers
+  meet only at their Tailscale addresses.
   [`homes/modules/syncthing/`](homes/modules/syncthing/)
 - <a id="sync-resolve"></a>**Settle sync conflicts without the busywork.**
   `sync-resolve` deletes conflict copies that are identical, stale app state
