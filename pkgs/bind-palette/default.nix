@@ -1,12 +1,13 @@
 {
   coreutils,
-  fuzzel,
+  fzf,
   gawk,
   gnused,
   jq,
   lib,
   libnotify,
   util-linux,
+  wezterm,
   wl-clipboard,
   writeShellApplication,
   yq-go,
@@ -18,12 +19,13 @@ writeShellApplication {
   name = "bind-palette";
   runtimeInputs = [
     coreutils
-    fuzzel
+    fzf
     gawk
     gnused
     jq
     libnotify
     util-linux
+    wezterm
     wl-clipboard
     yq-go
   ];

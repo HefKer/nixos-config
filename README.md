@@ -379,11 +379,11 @@ together](#how-it-fits-together) for what that means when you copy one.
   the desktop leader's wlr-which-key menu, qutebrowser's effective binds (from
   the cache its config writes on load), nvim's global maps, kanata's held layers
   and a hand-picked list of fish's binds, minus any fish no longer binds, into
-  one fuzzel list, each trigger beside its action, so searching
+  one fzf list in a floating WezTerm, each trigger beside its action, so searching
   "backspace" finds `Fn1+P`. Window-manager, shell and leader rows run; app
   rows copy their trigger. Binds already learned get out of the way: Alt+H
-  hides the selected row and reopens the palette without it, Alt+Shift+H
-  lists the hidden rows to bring one back, and `~regex` lines in the ignore
+  hides the selected row and reloads the list in place, keeping the search,
+  Alt+Shift+H lists the hidden rows to bring one back, and `~regex` lines in the ignore
   file hide whole families (`~^kanata\t`). `bind-palette list` prints the
   shown rows as TSV, `list --all` every row.
   [`pkgs/bind-palette/`](pkgs/bind-palette/)

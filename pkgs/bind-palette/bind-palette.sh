@@ -3,7 +3,7 @@
 # searching teaches the bind. Window-manager, shell and leader rows run; app rows
 # copy their trigger. Rows the ignore file names are hidden: Alt+H hides the selected
 # row, Alt+Shift+H switches to the hidden rows, where Alt+H un-hides one.
-#   bind-palette                 pick in fuzzel
+#   bind-palette                 pick in fzf, in a floating WezTerm
 #   bind-palette list            print the shown rows as TSV: scope, trigger, action, command
 #   bind-palette list --all      every row, ignoring the ignore file
 #   bind-palette list --hidden   the hidden rows, each with what hides it as a fifth field
@@ -204,75 +204,105 @@ unhide() {
   if [[ -n $rest ]]; then printf '%s\n' "$rest" >"$ignore_file"; else : >"$ignore_file"; fi
 }
 
+# The palette runs in two processes. pick opens a floating WezTerm (niri's window-rule for
+# app-id bind-palette) and waits for it to close; the terminal runs palette, which reads the
+# rows once into $BIND_PALETTE_DIR and searches them in fzf. Alt+H and Alt+Shift+H call back
+# into this script (key), which rewrites the ignore file and has fzf reload the list (rows),
+# so the query and the cursor stay. Enter leaves the picked line in the dir for pick.
+self=$(realpath "$0")
+
 pick() {
-  local all rows view=shown sel=0 prompt hint idx rc row scope trigger action cmd by errs
+  local dir line scope trigger action cmd
+  dir=$(mktemp -d)
+  # shellcheck disable=SC2064 # expand now: the local is gone by the time EXIT fires.
+  trap "rm -rf '$dir'" EXIT
+  # exit_behavior: Esc exits fzf non-zero, which would otherwise leave the window open.
+  BIND_PALETTE_DIR=$dir wezterm --config 'exit_behavior="Close"' \
+    start --always-new-process --class bind-palette -- "$BASH" "$self" palette || true
+  [[ -s $dir/pick ]] || return 0
+  line=$(<"$dir/pick")
+  # The fields after the display column: scope, trigger, action, command.
+  scope=$(cut -f1 <<<"$line")
+  trigger=$(cut -f2 <<<"$line")
+  action=$(cut -f3 <<<"$line")
+  cmd=$(cut -f4 <<<"$line")
+  # Run once the terminal is gone, so a window action lands on the window that was focused before it.
+  if [[ -n $cmd ]]; then
+    # Detached, as niri's own spawn runs it.
+    setsid -f sh -c "$cmd" </dev/null >/dev/null 2>&1
+  else
+    printf '%s' "$trigger" | wl-copy
+    notify-send -a "Bind palette" "$scope: $trigger" "$action (trigger copied)"
+  fi
+}
+
+# fzf's lines for the current view: scope, trigger, action, command, what hides it (empty when
+# shown), then the column fzf shows and searches.
+rows() {
+  classify "$(<"$BIND_PALETTE_DIR/view")" <"$BIND_PALETTE_DIR/all" |
+    awk -F'\t' -v OFS='\t' '{ print $1, $2, $3, $4, $5, sprintf("%-12s %-28s %s%s", "[" $1 "]", $2, $3, ($5 ~ /^~/ ? "   ⟵ " $5 : "")) }'
+}
+
+# The fzf actions that show $1's view: its prompt and hint, then its rows.
+show_view() {
+  local reload
+  printf '%s\n' "$1" >"$BIND_PALETTE_DIR/view"
+  reload=$(printf '%q ' "$BASH" "$self" rows)
+  if [[ $1 == shown ]]; then
+    printf 'change-prompt(bind › )+change-header(Alt+H hide · Alt+Shift+H hidden)+reload:%s' "$reload"
+  else
+    printf 'change-prompt(hidden › )+change-header(Alt+H un-hide · Alt+Shift+H back)+reload:%s' "$reload"
+  fi
+}
+
+# fzf's transform for Alt+H (key hide LINE) and Alt+Shift+H (key view): prints the actions to run, or nothing.
+key() {
+  local view line scope trigger by
+  view=$(<"$BIND_PALETTE_DIR/view")
+  if [[ ${1:-} == view ]]; then
+    if [[ $view == hidden ]]; then
+      show_view shown
+    elif [[ -z $(classify hidden <"$BIND_PALETTE_DIR/all") ]]; then
+      notify-send -a "Bind palette" "Nothing hidden" "Alt+H on a row hides it"
+    else
+      show_view hidden
+    fi
+    return 0
+  fi
+  line=${2:-}
+  # No row under the cursor: the query matches nothing.
+  [[ -n $line ]] || return 0
+  # cut, not read: read collapses runs of tabs, which shifts an empty field.
+  scope=$(cut -f1 <<<"$line")
+  trigger=$(cut -f2 <<<"$line")
+  if [[ $view == shown ]]; then
+    hide "$scope" "$trigger"
+    show_view shown
+    return 0
+  fi
+  by=$(cut -f5 <<<"$line")
+  if [[ $by != row ]]; then
+    notify-send -a "Bind palette" "Hidden by a pattern" "$by"$'\n'"Edit $ignore_file to show it"
+    return 0
+  fi
+  unhide "$scope" "$trigger"
+  # The last one un-hidden leaves nothing to show here.
+  if [[ -n $(classify hidden <"$BIND_PALETTE_DIR/all") ]]; then show_view hidden; else show_view shown; fi
+}
+
+# Inside the terminal pick opens. Always exits 0, so the window closes.
+palette() {
+  local errs key_cmd line
   errs=$(ignore_lines 2>&1 >/dev/null)
   [[ -z $errs ]] || notify-send -a "Bind palette" "Ignore file: pattern skipped" "$errs"
   # Read once: the readers are the slow part, and a hide only reclassifies.
-  all=$(all_rows)
-  while true; do
-    rows=$(classify "$view" <<<"$all")
-    if [[ $view == shown ]]; then
-      prompt="bind › " hint="Alt+H hide · Alt+Shift+H hidden"
-    else
-      prompt="hidden › " hint="Alt+H un-hide · Alt+Shift+H back"
-    fi
-    # custom-1 and custom-2 exit 10 and 11 with the row; set here, so fuzzel's other callers keep its defaults. The other custom-N keys stay on Alt+3.. and cancel.
-    rc=0
-    idx=$(awk -F'\t' '{ printf "%-12s %-28s %s%s\n", "[" $1 "]", $2, $3, ($5 ~ /^~/ ? "   ⟵ " $5 : "") }' <<<"$rows" |
-      fuzzel --dmenu --index --prompt "$prompt" --placeholder "$hint" --width 90 --select-index "$sel" \
-        --override=key-bindings.custom-1=Mod1+h --override=key-bindings.custom-2=Mod1+Shift+h) || rc=$?
-    case $rc in
-      0 | 10) ;;
-      11)
-        if [[ $view == shown ]]; then
-          if [[ -z $(classify hidden <<<"$all") ]]; then
-            notify-send -a "Bind palette" "Nothing hidden" "Alt+H on a row hides it"
-          else
-            view=hidden
-          fi
-        else
-          view=shown
-        fi
-        sel=0
-        continue
-        ;;
-      *) return 0 ;;
-    esac
-    # Typed text matching no row comes back as -1.
-    [[ -n $idx ]] && ((idx >= 0)) || return 0
-    row=$(sed -n "$((idx + 1))p" <<<"$rows")
-    # cut, not read: read collapses runs of tabs, which shifts an empty field.
-    scope=$(cut -f1 <<<"$row")
-    trigger=$(cut -f2 <<<"$row")
-    action=$(cut -f3 <<<"$row")
-    cmd=$(cut -f4 <<<"$row")
-    if ((rc == 10)); then
-      # The palette reopens on the row after, so several can go one after another.
-      sel=$idx
-      if [[ $view == shown ]]; then
-        hide "$scope" "$trigger"
-      else
-        by=$(cut -f5 <<<"$row")
-        if [[ $by == row ]]; then
-          unhide "$scope" "$trigger"
-          # The last one un-hidden leaves nothing to show here.
-          [[ -n $(classify hidden <<<"$all") ]] || view=shown sel=0
-        else
-          notify-send -a "Bind palette" "Hidden by a pattern" "$by"$'\n'"Edit $ignore_file to show it"
-        fi
-      fi
-      continue
-    fi
-    if [[ -n $cmd ]]; then
-      # Detached, as niri's own spawn runs it.
-      setsid -f sh -c "$cmd" >/dev/null 2>&1
-    else
-      printf '%s' "$trigger" | wl-copy
-      notify-send -a "Bind palette" "$scope: $trigger" "$action (trigger copied)"
-    fi
-    return 0
-  done
+  all_rows >"$BIND_PALETTE_DIR/all"
+  echo shown >"$BIND_PALETTE_DIR/view"
+  key_cmd=$(printf '%q ' "$BASH" "$self" key)
+  line=$(rows | fzf --delimiter '\t' --with-nth 6 --layout reverse --info inline-right \
+    --prompt 'bind › ' --header 'Alt+H hide · Alt+Shift+H hidden' \
+    --bind "alt-h:transform:$key_cmd hide {}" --bind "alt-H:transform:$key_cmd view") || return 0
+  printf '%s\n' "$line" >"$BIND_PALETTE_DIR/pick"
 }
 
 usage() {
@@ -282,6 +312,10 @@ usage() {
 
 case "${1:-pick}" in
   pick) pick ;;
+  # pick's own: inside its terminal, and fzf's callbacks.
+  palette) palette || true ;;
+  rows) rows ;;
+  key) key "${@:2}" ;;
   list) list "${2:-}" ;;
   *) usage ;;
 esac
