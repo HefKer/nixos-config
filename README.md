@@ -459,6 +459,14 @@ together](#how-it-fits-together) for what that means when you copy one.
   decrypt. [`homes/modules/spotify.nix`](homes/modules/spotify.nix),
   [`pkgs/soloist-mpris/`](pkgs/soloist-mpris/)
 
+- <a id="mpv-anilist-updater"></a>**mpv sets AniList progress, token from
+  sops.** mpv-anilist-updater keeps its token, cache and queue beside the
+  script, which is read-only in the store, so the package patches the token to
+  a sops secret's path and the cache and queue to
+  `~/.local/state/mpv/anilist-updater/`, and pins its Python.
+  [`pkgs/mpv-anilist-updater/`](pkgs/mpv-anilist-updater/),
+  [`modules/roles/workstation/packages.nix`](modules/roles/workstation/packages.nix)
+
 ### Sync
 
 - <a id="syncthing"></a>**Syncthing with no first-scan gap.** One table of

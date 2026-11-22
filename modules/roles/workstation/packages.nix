@@ -26,6 +26,12 @@ in
       owner = consts.username;
     };
 
+    # mpv-anilist-updater reads its AniList token here instead of beside the script.
+    sops.secrets.anilist-token = {
+      sopsFile = ../../../secrets/shared.yaml;
+      owner = consts.username;
+    };
+
     # Insecure for trusting eMudhra's roots, which ~/.pki/nssdb distrusts (certutil); the pinned version makes a bump re-raise it.
     nixpkgs.config.permittedInsecurePackages = [ "qutebrowser-3.7.0" ];
 
@@ -193,6 +199,12 @@ in
         scripts = [
           mpvScripts.uosc
           mpvScripts.sponsorblock
+          mpvScripts.thumbfast # timeline hover previews, drawn by uosc
+          mpvScripts.mpris # media keys, playerctl, DMS media widget
+          mpvScripts.memo # recently played menu, opened in uosc
+          (callPackage ../../../pkgs/mpv-anilist-updater {
+            tokenPath = config.sops.secrets.anilist-token.path;
+          }) # AniList progress at 85%
         ];
       })
 
