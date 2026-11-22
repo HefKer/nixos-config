@@ -14,7 +14,11 @@ let
   };
 in
 {
-  # Device IDs are public keys; a peer named after a host is that host, and every peer needs its Tailscale address. Read one with `nix run nixpkgs#syncthing -- device-id`.
+  # Peers dial each other here, over Tailscale only.
+  port = 22000;
+  tailnet = "tail827fb7.ts.net";
+
+  # Device IDs are public keys; a peer named after a host is that host, also dialled at <dnsName>.<tailnet> (dnsName defaults to its name). Read one with `nix run nixpkgs#syncthing -- device-id`.
   peers = {
     desktop = {
       id = "GTGPGV7-IG4TW7R-SNXTIVC-ZWFKAAE-WDEMBKF-CFXT7NX-HT7ITHX-VAHQSA5";
@@ -27,6 +31,8 @@ in
     phone = {
       id = "32NQBTH-U4ZQR7J-EA5YTDY-Y3LJ5QH-S3KPBG6-ZRE74KW-Y2DOA6W-JZNNZA4";
       address = "100.87.103.16";
+      # Its tailnet machine name isn't "phone"; renaming it there would let this line go.
+      dnsName = null;
     };
   };
 

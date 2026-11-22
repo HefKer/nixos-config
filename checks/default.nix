@@ -264,11 +264,18 @@ in
           folder: row: map (peer: "${folder}: ${peer}") (lib.filter (peer: !table.peers ? ${peer}) row.peers)
         ) table.folders
       );
+      # Discovery is off, so a peer without its Tailscale address could never be reached.
+      unaddressed = lib.attrNames (lib.filterAttrs (_: peer: !peer ? address) table.peers);
     in
     pkgs.runCommandLocal "check-syncthing-peers" { } ''
       ${lib.optionalString (unknown != [ ]) ''
         echo "Syncthing folder rows name peers missing from the peer table:"
         echo ${lib.escapeShellArg (lib.concatLines unknown)}
+        exit 1
+      ''}
+      ${lib.optionalString (unaddressed != [ ]) ''
+        echo "Syncthing peers with no Tailscale address:"
+        echo ${lib.escapeShellArg (lib.concatLines unaddressed)}
         exit 1
       ''}
       touch $out

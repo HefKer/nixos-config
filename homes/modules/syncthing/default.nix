@@ -92,15 +92,19 @@ in
         name:
         let
           peer = table.peers.${name};
-          # Discovery is off, so a peer is reachable only at its Tailscale address.
-          address = peer.address or (throw "syncthing: peer ${name} in table.nix has no Tailscale address");
+          dnsName = peer.dnsName or name;
+          # MagicDNS name first, so a re-registered node's new IP still connects; the IP for when tailnet DNS is down.
+          hosts = lib.optional (dnsName != null) "${dnsName}.${table.tailnet}" ++ [ peer.address ];
         in
         {
           inherit (peer) id;
-          addresses = [
-            "tcp://${address}:22000"
-            "quic://${address}:22000"
-          ];
+          addresses = lib.concatMap (
+            host:
+            map (proto: "${proto}://${host}:${toString table.port}") [
+              "tcp"
+              "quic"
+            ]
+          ) hosts;
         }
       );
 
@@ -117,7 +121,7 @@ in
         // lib.optionalAttrs (isAppState row) { maxConflicts = 0; }
       ) rows;
 
-      # Sync is Tailscale-only: nothing announces this device or dials it through a relay, so the public device IDs resolve to no IP.
+      # Sync is Tailscale-only: nothing announces this device or dials it through a relay.
       options = {
         urAccepted = 3;
         globalAnnounceEnabled = false;
