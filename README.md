@@ -167,7 +167,9 @@ together](#how-it-fits-together) for what that means when you copy one.
   for 5 s or prompted; pressing the bind on one you haven't dealt with sends
   it behind its peers. Discord and phone notifications are banded by rules,
   then by TypeSafe's Jev from a few yes/no judgments that a truth table in
-  code combines. [`pkgs/attention/`](pkgs/attention/)
+  code combines. A burst from one channel, group chat or direct message is
+  one item with a count, in the highest band any of its messages earned, so
+  one press gets past it. [`pkgs/attention/`](pkgs/attention/)
 - <a id="stale-tabs"></a>**Finished herdr tabs close themselves, resumably.**
   A tab whose Claude is done and handled, untouched for 3 days, with nothing
   else alive in it (an idle shell, or an nvim with no unsaved buffers) gets a

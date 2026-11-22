@@ -3,7 +3,7 @@
     attention next      go to the top item; on an unhandled agent you're watching, requeue it first
     attention list      the queue, highest first (--json for the bar widget)
     attention go ID     go to one item (a popup's click)
-    attention ingest    read a DMS notification as JSON on stdin; store and pop up an item if it is one
+    attention ingest    read a DMS notification as JSON on stdin; store it if it is an item; pop up a new one, or one it raised
     attention watch     the watcher: keeps the agent marks current and counts watching time
     attention stale     marks stale herdr tabs, and closes those marked a day (GLOSSARY.md › Herdr)
     attention resume SOCKET SESSION CONFIG CWD
@@ -59,7 +59,7 @@ def cmd_next():
 
 
 def public(item):
-    return {k: v for k, v in item.items() if k != "agent"} | {"band_name": bands.NAMES[item["band"]]}
+    return {k: v for k, v in item.items() if k not in ("agent", "conversation")} | {"band_name": bands.NAMES[item["band"]]}
 
 
 def cmd_list(as_json):
@@ -69,7 +69,7 @@ def cmd_list(as_json):
         print(json.dumps([public(item) for item in queue]))
         return 0
     for item in queue:
-        print(f"{bands.NAMES[item['band']]:<14} {item['title']}" + (f" · {item['detail'].splitlines()[0]}" if item["detail"] else ""))
+        print(f"{bands.NAMES[item['band']]:<14} {messages.heading(item)}" + (f" · {item['detail'].splitlines()[0]}" if item["detail"] else ""))
     return 0
 
 
@@ -105,7 +105,7 @@ def notify(title, body, button, *command, transient=True):
 
 def popup(item):
     """A popup for a third-party item that became one; clicking it goes there."""
-    notify(f"{bands.NAMES[item['band']]} · {item['title']}", item["detail"], "Open", "go", item["id"])
+    notify(f"{bands.NAMES[item['band']]} · {messages.heading(item)}", item["detail"], "Open", "go", item["id"])
 
 
 def cmd_ingest():
@@ -113,9 +113,9 @@ def cmd_ingest():
         notification = json.load(sys.stdin)
     except ValueError:
         sys.exit("attention ingest: expected a notification as JSON on stdin")
-    item = messages.ingest(notification, time.time())
+    item, pops_up = messages.ingest(notification, time.time())
     print(bands.NAMES[item["band"]] if item else "not an item")
-    if item:
+    if pops_up:
         popup(item)
     return 0
 

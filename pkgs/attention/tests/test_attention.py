@@ -110,15 +110,126 @@ class Queue(unittest.TestCase):
         self.assertEqual(len(self.build([agent("a", "blocked")], 10)), 1)
 
     def test_going_to_a_message_handles_it(self):
-        item = messages.ingest({"summary": "Sam", "body": "hi", "id": 4}, 1, place=lambda _: "reply_soon")
+        item, _ = messages.ingest({"summary": "Sam", "body": "hi", "id": 4}, 1, place=lambda _: "reply_soon")
         self.assertEqual(ids(self.build([], 2)), [item["id"]])
         messages.invoke = lambda _id, _summary: True
         messages.go(item)
         self.assertEqual(self.build([], 3), [])
 
     def test_a_notification_that_is_no_item_is_not_stored(self):
-        self.assertIsNone(messages.ingest({"summary": "x", "body": "y"}, 1, place=lambda _: None))
+        self.assertEqual(messages.ingest({"summary": "x", "body": "y"}, 1, place=lambda _: None), (None, False))
         self.assertEqual(self.build([], 2), [])
+
+
+def discord(summary, body="hi", dms_id=1):
+    return {"appName": "vesktop", "summary": summary, "body": body, "id": dms_id}
+
+
+def phone(summary, body="hi"):
+    return {"desktopEntry": "org.kde.kdeconnect.daemon", "summary": summary, "body": body}
+
+
+class Conversations(unittest.TestCase):
+    def setUp(self):
+        with store.locked() as state:
+            state.agents.clear()
+            state.messages.clear()
+        self.now = 0
+        self.invoked = []
+        self.real_invoke = messages.invoke
+        messages.invoke = lambda dms_id, summary: self.invoked.append((dms_id, summary)) or True
+
+    def tearDown(self):
+        messages.invoke = self.real_invoke
+
+    def ingest(self, notification, band="later"):
+        self.now += 1
+        return messages.ingest(notification, self.now, place=lambda _: band)
+
+    def queue(self):
+        with store.locked() as state:
+            return build(state, [], self.now + 1, idle)
+
+    def test_a_burst_from_one_channel_is_one_item_that_one_go_handles(self):
+        for number in range(1, 6):
+            self.ingest(discord("bob (#general, Friends)", f"message {number}", number))
+        self.ingest(discord("alice", "hello", 9))
+        queue = self.queue()
+        self.assertEqual([(item["title"], item["count"]) for item in queue], [("bob (#general, Friends)", 5), ("alice", 1)])
+        self.assertEqual(queue[0]["detail"], "message 5")
+        self.assertEqual(messages.heading(queue[0]), "bob (#general, Friends) · 5 messages")
+        self.assertEqual(messages.heading(queue[1]), "alice")
+        messages.go(queue[0])
+        self.assertEqual(self.invoked, [(5, "bob (#general, Friends)")])
+        self.assertEqual([item["title"] for item in self.queue()], ["alice"])
+
+    def test_going_runs_the_action_of_a_message_that_joined_after_the_queue_was_read(self):
+        self.ingest(discord("bob (#general, Friends)", "one", 1))
+        read = self.queue()[0]
+        self.ingest(discord("carol (#general, Friends)", "two", 2))
+        messages.go(read)
+        self.assertEqual(self.invoked, [(2, "carol (#general, Friends)")])
+        self.assertEqual(self.queue(), [])
+
+    def test_only_a_new_item_or_a_raised_band_pops_up(self):
+        first, pops_up = self.ingest(discord("bob (#general, Friends)"), "reply_soon")
+        self.assertTrue(pops_up)
+        self.assertEqual(self.ingest(discord("bob (#general, Friends)"), "reply_soon")[1], False)
+        self.assertEqual(self.ingest(discord("bob (#general, Friends)"), "later")[1], False)
+        self.assertEqual(self.queue()[0]["band"], bands.REPLY_SOON)
+        raised, pops_up = self.ingest(discord("bob (#general, Friends)"), "urgent")
+        self.assertTrue(pops_up)
+        self.assertEqual((raised["id"], raised["band"], raised["count"]), (first["id"], bands.URGENT, 4))
+        self.assertEqual(self.ingest(discord("bob (#general, Friends)"), "urgent")[1], False)
+
+    def test_a_joined_item_keeps_its_first_message_s_place(self):
+        self.ingest(discord("bob (#general, Friends)"))
+        self.ingest(discord("alice"))
+        self.ingest(discord("bob (#general, Friends)"))
+        self.assertEqual([(item["title"], item["order"]) for item in self.queue()], [("bob (#general, Friends)", 1), ("alice", 2)])
+
+    def test_a_conversation_is_the_channel_not_the_sender(self):
+        self.ingest(discord("bob (#general, Friends)"))
+        self.ingest(discord("carol (#general, Friends)"))
+        self.ingest(discord("bob (#random, Friends)"))
+        self.ingest(discord("bob (#general, Rivals)"))
+        self.ingest(discord("bob (router nerds)"))
+        self.ingest(discord("dan (router nerds)"))
+        self.ingest(discord("bob"))
+        self.ingest(discord("⁨bob⁩"))
+        self.assertEqual(
+            [(item["title"], item["count"]) for item in self.queue()],
+            [("carol (#general, Friends)", 2), ("bob (#random, Friends)", 1), ("bob (#general, Rivals)", 1), ("dan (router nerds)", 2), ("bob", 2)],
+        )
+
+    def test_phone_notifications_join_by_app_and_title(self):
+        self.ingest(phone("WhatsApp: Mum", "one"))
+        self.ingest(phone("WhatsApp: Mum", "two"))
+        self.ingest(phone("WhatsApp: Dad"))
+        self.ingest(phone("Signal: Mum"))
+        self.ingest(discord("WhatsApp: Mum"))
+        self.assertEqual(
+            [(item["title"], item["count"], item["source"]) for item in self.queue()],
+            [("WhatsApp: Mum", 2, "phone"), ("WhatsApp: Dad", 1, "phone"), ("Signal: Mum", 1, "phone"), ("WhatsApp: Mum", 1, "discord")],
+        )
+
+    def test_a_muted_or_non_item_notification_leaves_an_open_item_alone(self):
+        self.ingest(discord("bob (#general, Friends)", "first"))
+        before = self.queue()
+        self.assertEqual(self.ingest(discord("bob (#general, Friends)", "advert"), None), (None, False))
+        self.assertEqual(self.queue(), before)
+
+    def test_an_item_stored_before_conversations_still_lists_and_goes(self):
+        with store.locked() as state:
+            state.messages["message/old"] = {"id": "message/old", "kind": "message", "band": bands.LATER, "order": 0, "source": "discord", "dms_id": 3, "title": "bob", "detail": "old"}
+        new, pops_up = self.ingest(discord("bob"))
+        self.assertTrue(pops_up)
+        queue = self.queue()
+        self.assertEqual([item["id"] for item in queue], ["message/old", new["id"]])
+        self.assertEqual(messages.heading(queue[0]), "bob")
+        messages.go(queue[0])
+        self.assertEqual(self.invoked, [(3, "bob")])
+        self.assertEqual([item["id"] for item in self.queue()], [new["id"]])
 
 
 class Background(unittest.TestCase):
