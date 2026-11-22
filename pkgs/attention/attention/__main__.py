@@ -59,7 +59,7 @@ def cmd_next():
 
 
 def public(item):
-    return {k: v for k, v in item.items() if k != "agent"} | {"band_name": bands.NAMES[item["band"]]}
+    return {k: v for k, v in item.items() if k not in ("agent", "conversation")} | {"band_name": bands.NAMES[item["band"]]}
 
 
 def cmd_list(as_json):
@@ -69,8 +69,7 @@ def cmd_list(as_json):
         print(json.dumps([public(item) for item in queue]))
         return 0
     for item in queue:
-        title = messages.heading(item) if item["kind"] == "message" else item["title"]
-        print(f"{bands.NAMES[item['band']]:<14} {title}" + (f" · {item['detail'].splitlines()[0]}" if item["detail"] else ""))
+        print(f"{bands.NAMES[item['band']]:<14} {messages.heading(item)}" + (f" · {item['detail'].splitlines()[0]}" if item["detail"] else ""))
     return 0
 
 

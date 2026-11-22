@@ -32,12 +32,12 @@ def ingest(notification, now, place=classify.place):
                 "count": 0,
             }
             state.messages[item["id"]] = item
-            raised = True
+            pops_up = True
         else:
-            raised = band < item["band"]
+            pops_up = band < item["band"]
             item["band"] = min(band, item["band"])
         item.update(latest, count=item["count"] + 1)
-    return item, raised
+    return item, pops_up
 
 
 def heading(item):
@@ -67,9 +67,10 @@ def invoke(dms_id, summary):
 
 
 def go(item):
-    """Going to a third-party item handles it: its action runs, or its full text is shown."""
+    """Going to a third-party item handles it: its action runs, or its full text is shown.
+    The stored record is the one used, since a message may have joined since the caller read the queue."""
     with store.locked() as state:
-        state.messages.pop(item["id"], None)
+        item = state.messages.pop(item["id"], item)
     if item.get("dms_id") is None or not invoke(item["dms_id"], item["title"]):
         subprocess.run(
             ["notify-send", "--app-name=Attention", "--transient", item["title"] or "Notification", item["detail"]],

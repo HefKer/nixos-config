@@ -163,6 +163,14 @@ class Conversations(unittest.TestCase):
         self.assertEqual(self.invoked, [(5, "bob (#general, Friends)")])
         self.assertEqual([item["title"] for item in self.queue()], ["alice"])
 
+    def test_going_runs_the_action_of_a_message_that_joined_after_the_queue_was_read(self):
+        self.ingest(discord("bob (#general, Friends)", "one", 1))
+        read = self.queue()[0]
+        self.ingest(discord("carol (#general, Friends)", "two", 2))
+        messages.go(read)
+        self.assertEqual(self.invoked, [(2, "carol (#general, Friends)")])
+        self.assertEqual(self.queue(), [])
+
     def test_only_a_new_item_or_a_raised_band_pops_up(self):
         first, pops_up = self.ingest(discord("bob (#general, Friends)"), "reply_soon")
         self.assertTrue(pops_up)
