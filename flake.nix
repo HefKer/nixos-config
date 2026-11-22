@@ -26,6 +26,12 @@
     # Not `follows`-ed: its cachix cache is built against its own nixpkgs pin.
     nix-gaming.url = "github:fufexan/nix-gaming";
 
+    # Prebuilt weekly nix-index database, so comma and command-not-found need no local `nix-index` run.
+    nix-index-database = {
+      url = "github:nix-community/nix-index-database";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     nix-flatpak.url = "github:gmodena/nix-flatpak";
 
     sops-nix = {

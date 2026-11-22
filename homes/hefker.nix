@@ -23,6 +23,7 @@ in
     ./modules/chromium.nix
     ./modules/gui.nix
     ./modules/kanata-keymap.nix
+    ./modules/nix-index.nix
     ./modules/notify-focus.nix
     ./modules/privoxy.nix
     ./modules/spotify.nix
