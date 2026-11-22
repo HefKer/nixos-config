@@ -1,7 +1,7 @@
 # The package sets store (the synced folder, one file per alarm) and sound above this line.
 # Each host's `alarm sync` mirrors the files as transient systemd timers, so a file is the alarm everywhere.
 # A file holds label= and either at= (one ring, epoch) or repeat= (days and HH:MM, an OnCalendar spec) or both:
-# a repeating alarm's at= is a snoozed ring, and handled= is the last occurrence dismissed or snoozed.
+# a repeating alarm's at= is a snoozed ring, and handled= is the last occurrence dismissed, snoozed or skipped.
 
 self=$(readlink -f "$0")
 # How long an alarm rings, and how late it may start ringing before it counts as missed.
@@ -14,7 +14,8 @@ alarm DAYS TIME [LABEL]    set a repeating one: daily, weekdays or mon,wed,fri, 
 alarm ls [--json]          list pending alarms, soonest first
 alarm rm ID... | --all     cancel (a repeating alarm's whole series)
 alarm snooze ID [DUR]      push back by DUR (default 5m); a repeating alarm only while it rings
-alarm prompt               fuzzel: type WHEN [LABEL] to set, or pick one to cancel or snooze
+alarm skip ID              don't ring a repeating alarm's next occurrence, keeping the series
+alarm prompt               fuzzel: type WHEN [LABEL] to set, or pick one to cancel, snooze or skip
 alarm sync                 mirror the alarm files as systemd timers (run by alarm-sync.path)
 EOF
 }
@@ -64,11 +65,11 @@ save() {
   mv -f -- "$store/.$1.tmp" "$store/$1"
 }
 
-# Sets prev and next, the occurrences of $repeat around now (0 if none in the window).
+# Sets prev and next, the occurrences of $repeat around now, and following, the one after next (0 if none in the window).
 occurrences() {
   local now t d days=${repeat% *} hm=${repeat#* }
   now=$(date +%s)
-  prev=0 next=0
+  prev=0 next=0 following=0
   # One date(1) call for all days. A day whose HH:MM falls in a DST gap fails alone and is skipped,
   # as systemd's calendar timer skips it; the window spans two of every weekday on each side.
   while read -r t d; do
@@ -77,19 +78,24 @@ occurrences() {
       prev=$t
     elif [ "$next" -eq 0 ]; then
       next=$t
+    elif [ "$following" -eq 0 ]; then
+      following=$t
     fi
   done < <(for i in $(seq -14 14); do echo "today $i days"; done | LC_ALL=C date -f - +%F |
     sed "s/\$/ $hm/" | LC_ALL=C date -f - '+%s %a' 2>/dev/null || true)
 }
 
-# The soonest ring of the loaded alarm: its at=, or a repeating alarm's next occurrence if sooner.
+# The soonest ring of the loaded alarm: its at=, or a repeating alarm's next unskipped occurrence if sooner.
 next_ring() {
+  local n
   [ -n "$repeat" ] || {
     echo "$at"
     return
   }
   occurrences
-  [[ -n $at && $at -lt $next ]] && echo "$at" || echo "$next"
+  n=$next
+  [ "$handled" -lt "$next" ] || n=$following
+  [[ -n $at && $at -lt $n ]] && echo "$at" || echo "$n"
 }
 
 # "weekdays 07:30" for a repeat= spec.
@@ -281,8 +287,22 @@ cmd_snooze() {
   cmd_sync
 }
 
+# Marks a repeating alarm's next occurrence handled ahead of time; a snoozed ring in at= still rings.
+# Every host computes the same next, so Syncthing sees the same bytes.
+cmd_skip() {
+  [ $# -eq 1 ] || die "usage: alarm skip ID"
+  load "$1" || die "no alarm $1"
+  [ -n "$repeat" ] || die "$label rings once; cancel it with alarm rm $1"
+  occurrences
+  [ "$next" -gt 0 ] || die "$label has no next occurrence to skip"
+  handled=$next
+  save "$1"
+  printf '%s\tskipping %s, then %s\t%s\n' "$1" "$(date -d "@$next" '+%a %H:%M')" "$(describe_ring "$(next_ring)" "$repeat")" "$label"
+  cmd_sync
+}
+
 cmd_prompt() {
-  local out id label choice line desc
+  local out id label choice line desc menu
   # Exact matching, so typing "10m tea" doesn't fuzzy-match a pending "tea"; Shift+Enter always sets.
   # No --accept-nth: fuzzel applies it to typed text too, and a line with no 2nd column comes out as a literal "{2}".
   out=$(
@@ -295,13 +315,24 @@ cmd_prompt() {
   # A picked row ends in a tab and its id; typed text has no tab.
   if [[ $out =~ $'\t'([0-9a-f]{8})$ ]] && load "${BASH_REMATCH[1]}"; then
     id=${BASH_REMATCH[1]}
-    choice=$(printf '%s\nSnooze 5 min\nSnooze 15 min\n' "Cancel${repeat:+ series}" |
-      fuzzel --dmenu --only-match --index --prompt "$label> " --lines 3 --width 40) || exit 0
+    menu=("Cancel${repeat:+ series}" "Snooze 5 min" "Snooze 15 min")
+    [ -z "$repeat" ] || menu+=("Skip next")
+    choice=$(printf '%s\n' "${menu[@]}" |
+      fuzzel --dmenu --only-match --index --prompt "$label> " --lines "${#menu[@]}" --width 40) || exit 0
     case $choice in
       0) cmd_rm "$id" ;;
       1 | 2)
         line=$(cmd_snooze "$id" "$([ "$choice" = 1 ] && echo 5m || echo 15m)" 2>&1) ||
           notify-send -a Alarm -i dialog-error "Not snoozed" "${line#alarm: }"
+        ;;
+      3)
+        if line=$(cmd_skip "$id" 2>&1); then
+          IFS=$'\t' read -r _ desc label <<<"$line"
+          notify-send -a Alarm -i alarm -t 3000 "$label" "$desc"
+          repeat record alarm skip "$id"
+        else
+          notify-send -a Alarm -i dialog-error "Not skipped" "${line#alarm: }"
+        fi
         ;;
     esac
     return
@@ -367,13 +398,13 @@ cmd_sync() {
 }
 
 # Ends ring $2 (an epoch, or a repeat tag) of the loaded alarm $1, due at $3: a one-shot is deleted,
-# a snoozed ring of a repeating alarm clears its at=, and an occurrence is marked handled.
+# a snoozed ring of a repeating alarm clears its at=, and an occurrence is marked handled (never lowered, so a skip stays).
 # Every host that timed out writes the same bytes, so Syncthing sees no conflict.
 finish() {
   if [ -z "$repeat" ]; then
     rm -f -- "${store:?}/$1"
   elif [[ $2 == r* ]]; then
-    handled=$3
+    [ "$handled" -ge "$3" ] || handled=$3
     save "$1"
   else
     at=""
@@ -437,7 +468,7 @@ cmd_ring() {
   case $action in
     snooze)
       at=$(($(date +%s) + 300))
-      [[ $2 != r* ]] || handled=$due
+      [[ $2 != r* || $handled -ge $due ]] || handled=$due
       save "$id"
       ;;
     *) finish "$id" "$2" "$due" ;;
@@ -446,7 +477,7 @@ cmd_ring() {
 
 case ${1:-ls} in
   -h | --help | help) usage ;;
-  ls | rm | snooze | prompt | sync | ring)
+  ls | rm | snooze | skip | prompt | sync | ring)
     c=$1
     shift
     "cmd_$c" "$@"
