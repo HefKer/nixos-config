@@ -36,7 +36,8 @@ in
   ++ lib.optional isDevelopment ./modules/herdr-plugins.nix
   ++ lib.optional isDevelopment ./modules/hunk-extensions.nix
   ++ lib.optional isDevelopment ./modules/phone
-  ++ lib.optional isGaming ./modules/game-focus-watcher.nix;
+  ++ lib.optional isGaming ./modules/game-focus-watcher.nix
+  ++ lib.optional isGaming ./modules/steam-update.nix;
 
   home = {
     inherit username;

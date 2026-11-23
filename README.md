@@ -448,6 +448,14 @@ together](#how-it-fits-together) for what that means when you copy one.
   [`homes/modules/udiskie.nix`](homes/modules/udiskie.nix) ·
   [ea64d1a](https://github.com/HefKer/nixos-config/commit/ea64d1a)
 
+- <a id="steam-update"></a>**Steam opens without its update wait.** A
+  user timer starts Steam windowless 10 minutes into each session and every 12
+  hours, waits until the client has started (its updater runs first), then
+  runs `steam -shutdown`. It skips if Steam is already running and leaves it
+  running if a Steam or game window opened meanwhile, so updates land without
+  Steam staying resident. [`pkgs/steam-update/`](pkgs/steam-update/),
+  [`homes/modules/steam-update.nix`](homes/modules/steam-update.nix)
+
 - <a id="qutebrowser-caret"></a>**Caret mode on Trusted Types pages.**
   qutebrowser's `caret.js` fills a `<style>` through `innerHTML`, which YouTube,
   Google and GitHub reject, so caret mode never starts there; a `postPatch`
