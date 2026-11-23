@@ -43,10 +43,11 @@ let
       (lib.escapeRegex id)
       "game"
     ]) nonSteamGames;
-  # The keymap's layer-while-held layers, never taken for the layer to restore.
+  # Every layer-while-held layer in the keymap (fn1 on Caps, nav on Space, fn2), never taken for the layer to restore.
   heldLayers = [
     "fn1"
     "fn2"
+    "nav"
   ];
 
   ports = lib.mapAttrsToList (_: keyboard: keyboard.port) osConfig.services.kanata.keyboards;
