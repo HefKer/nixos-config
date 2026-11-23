@@ -112,6 +112,8 @@ in
       lutris
       heroic # Epic/GOG/Amazon
       cemu
+      mgba # GB/GBC/GBA
+      melonds # DS
       # https://www.protondb.com/ to verify if games run on loonix
       (prismlauncher.override {
         # Add binary required by some mod
