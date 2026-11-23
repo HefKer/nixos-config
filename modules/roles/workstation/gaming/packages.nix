@@ -129,6 +129,9 @@ in
       })
     ];
 
+    # mGBA's shaders at a path stable across updates, which its config.ini in the dotfiles names.
+    environment.pathsToLink = [ "/share/mgba" ];
+
     # Steam's wrapper assigns STEAM_EXTRA_COMPAT_TOOLS_PATHS itself, overriding sessionVariables, so it isn't set here.
   };
 }

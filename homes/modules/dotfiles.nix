@@ -71,6 +71,8 @@ let
     # The directory also holds lazygit's state.yml and PR cache; lazygit never writes config.yml.
     "lazygit/.config/lazygit/config.yml"
     "marksman/.config/marksman"
+    # The directory also holds mGBA's library databases and qt.ini; mGBA writes config.ini in place, so the link survives.
+    "mgba/.config/mgba/config.ini"
     "mpv/.config/mpv"
     "niri/.config/niri"
     "nvim/.config/nvim"
