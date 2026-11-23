@@ -18,7 +18,10 @@ let
     "Stardew Valley"
   ];
   # Games outside Steam, which have no steam_app_ id.
-  nonSteamGames = [ ];
+  nonSteamGames = [
+    "io.mgba.mGBA"
+    "net.kuribo64.melonDS"
+  ];
   # App-id regexes (whole app-id) to kanata layers; the first match wins, so osu's steam_app_0 and Stardew come before Steam's.
   layers =
     map (id: [
