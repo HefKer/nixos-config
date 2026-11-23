@@ -145,6 +145,14 @@ in
       versioning = trashcan 90;
       ignorePerms = true;
     };
+    # ROMs with their battery saves beside them; versioned so a corrupted save can be rolled back.
+    Games = {
+      id = "gg5k3-gupgx";
+      path = "games";
+      peers = workstations ++ [ "phone" ];
+      versioning = staggered 30;
+      ignorePerms = true;
+    };
     # One file per alarm, read by the alarm command on each host.
     alarms = {
       id = "ha1jq-rn4g0";
