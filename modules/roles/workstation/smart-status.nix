@@ -6,7 +6,7 @@
 }:
 let
   cfg = config.custom.roles.workstation;
-  # Root queries the drives daily; the user's health smart probe reads the findings file this writes.
+  # Root queries the drives daily; the user's health smart probe reads the findings file this writes, and anyone reads <dev>.json.
   smartStatus = pkgs.writeShellApplication {
     name = "smart-status";
     runtimeInputs = with pkgs; [
@@ -26,9 +26,14 @@ let
       cp "$accepted" "$nextAccepted"
       smartctl --scan -j | jq -r '.devices[] | "\(.name)\t\(.type)"' | while IFS=$'\t' read -r dev type; do
         status=0
-        j=$(smartctl -j -i -H -A -d "$type" "$dev") || status=$?
+        j=$(smartctl -j -a -d "$type" "$dev") || status=$?
         # Bits 0-1: the drive couldn't be opened or queried (a USB bridge without SAT, say); nothing to judge.
         if [ $((status & 3)) != 0 ]; then continue; fi
+        # The full report, world-readable, so reading a drive's SMART data needs no sudo.
+        report=/var/lib/smart-status/$(basename "$dev").json
+        printf '%s\n' "$j" >"$report.tmp"
+        chmod 644 "$report.tmp"
+        mv "$report.tmp" "$report"
         serial=$(jq -r '.serial_number // empty' <<<"$j")
         media=$(jq -r '.nvme_smart_health_information_log.media_errors // empty' <<<"$j")
         base=$media

@@ -305,9 +305,10 @@ together](#how-it-fits-together) for what that means when you copy one.
   run didn't have. Probes cover link drift, Syncthing conflict files, unseen
   peers and folder errors, failed units, a pending reboot, low disk space,
   an old nixpkgs, SMART trouble (read from a root timer's file, NVMe media
-  errors only once they rise past the count already accepted), build output
-  untouched for a month, and repos with uncommitted or unpushed work left
-  idle. `health` re-runs them, and `health --greeting` prints a one-line
+  errors only once they rise past the count already accepted; the timer also
+  leaves each drive's full `smartctl -j -a` report world-readable), build
+  output untouched for a month, a pre-commit hook git can no longer find, and
+  repos with uncommitted or unpushed work left idle. `health` re-runs them, and `health --greeting` prints a one-line
   count for a shell greeting.
   [`homes/modules/health.nix`](homes/modules/health.nix),
   [`pkgs/health/`](pkgs/health/),

@@ -29,3 +29,5 @@ Single-context: `GLOSSARY.md` and `docs/adr/` at the repo root. See `docs/agents
 See `README.md` for repo layout.
 
 `docs/research/` is gitignored notes living only in the main checkout: from any worktree, read and write `/home/hefker/nixos/main/docs/research/`, and keep it out of commits.
+
+Each drive's SMART data, refreshed daily by root, is world-readable at `/var/lib/smart-status/<dev>.json` (`smartctl -j -a`).
