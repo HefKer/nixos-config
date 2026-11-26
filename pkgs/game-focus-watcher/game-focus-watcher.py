@@ -8,10 +8,13 @@ passthrough survives a session. Each --held-layer names a layer a key only
 holds on, like Fn1 under Caps; it's never the one restored, since a held
 layer restored with ChangeLayer stays on after the key is released. A locked
 Fn layer is indistinguishable from a held one, so a game session ends it.
+With --state-file, that file holds the game's layer while a game has focus
+and is absent otherwise, for others (say) to read.
 """
 
 import argparse
 import json
+import os
 import re
 import socket
 import subprocess
@@ -141,7 +144,7 @@ class KanataConnection:
 class Watcher:
     """Tracks niri's focused window and drives every instance from it."""
 
-    def __init__(self, rules, ports, held=()):
+    def __init__(self, rules, ports, held=(), state_file=None):
         self.rules = [(re.compile(pattern), layer) for pattern, layer in rules]
         self.layers = {layer for _, layer in rules}
         self.held = set(held)
@@ -149,6 +152,22 @@ class Watcher:
         self.windows = {}
         self.focused = None
         self.target = None
+        self.state_file = state_file
+        self.write_state()
+
+    def write_state(self):
+        if self.state_file is None:
+            return
+        if self.target is None:
+            try:
+                os.unlink(self.state_file)
+            except FileNotFoundError:
+                pass
+        else:
+            tmp = self.state_file + ".tmp"
+            with open(tmp, "w") as f:
+                f.write(self.target + "\n")
+            os.replace(tmp, self.state_file)
 
     def layer_for(self, app_id):
         if app_id is None:
@@ -180,6 +199,7 @@ class Watcher:
         if target != self.target:
             self.target = target
             log(f"game focused: {target}" if target else "game unfocused")
+            self.write_state()
             for instance in self.instances:
                 if target:
                     instance.enter(target)
@@ -223,8 +243,11 @@ def main():
     )
     parser.add_argument("--held-layer", action="append", default=[])
     parser.add_argument("--port", action="append", type=int, required=True)
+    parser.add_argument("--state-file")
     args = parser.parse_args()
-    Watcher(args.layer, args.port, args.held_layer).run(args.niri)
+    Watcher(
+        args.layer, args.port, args.held_layer, args.state_file
+    ).run(args.niri)
 
 
 if __name__ == "__main__":

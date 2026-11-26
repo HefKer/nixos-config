@@ -328,6 +328,9 @@ in
         touch $out
       '';
 
+  # Its unit tests run in the build.
+  say = pkgs.callPackage ../pkgs/say { };
+
   notify-focus =
     pkgs.runCommandLocal "check-notify-focus" { nativeBuildInputs = [ pkgs.python3 ]; }
       ''

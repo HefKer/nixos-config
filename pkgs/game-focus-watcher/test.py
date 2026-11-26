@@ -1,7 +1,9 @@
 """Unit tests for the game focus watcher's layer switching, without niri or kanata."""
 
 import importlib.util
+import os
 import sys
+import tempfile
 import unittest
 
 spec = importlib.util.spec_from_file_location("watcher", sys.argv.pop(1))
@@ -147,6 +149,23 @@ class Test(unittest.TestCase):
         self.k.handle({"ConfigFileReload": {}}, False)
         self.k.handle({"CurrentLayerName": {"name": "hrm"}}, False)
         self.assertEqual(self.k.current, "game")
+
+
+class StateFileTest(unittest.TestCase):
+    def test_file_present_only_while_a_game_is_focused(self):
+        with tempfile.TemporaryDirectory() as d:
+            path = os.path.join(d, "game-focus")
+            open(path, "w").close()
+            w = watcher.Watcher(RULES, [], HELD, path)
+            # A file left by a watcher that died is cleared at start.
+            self.assertFalse(os.path.exists(path))
+            w.update(windows("wezterm", "steam_app_1245620"))
+            self.assertFalse(os.path.exists(path))
+            w.update(focus(1))
+            with open(path) as f:
+                self.assertEqual(f.read(), "game\n")
+            w.update(focus(0))
+            self.assertFalse(os.path.exists(path))
 
 
 if __name__ == "__main__":
