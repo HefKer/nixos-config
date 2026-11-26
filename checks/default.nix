@@ -213,6 +213,13 @@ in
             echo "$plain"
             fail=1
           fi
+          # sops-install-secrets refuses a value sops stored as a number or bool, failing the switch.
+          typed=$(yq 'del(.sops) | .. | select(tag == "!!str" and test(",type:(int|float|bool)\\]$")) | path | join(".")' "$f" 2>/dev/null || true)
+          if [ -n "$typed" ]; then
+            echo "$f: non-string values, which sops-install-secrets refuses; re-enter them as quoted strings, under:"
+            echo "$typed"
+            fail=1
+          fi
         done < <(find secrets ! -type d)
         if [ "$fail" != 0 ]; then exit 1; fi
         touch $out
