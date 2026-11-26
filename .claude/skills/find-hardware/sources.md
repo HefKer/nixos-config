@@ -31,9 +31,9 @@ moment...", "Error Page") or a near-empty body is a failed rung.
 | PCPartPicker | new-part price history, compatibility filters | 2 |
 | Micro Center | open box, in-store-only prices; add `&storeid=<store>` from the private inputs. Each product carries `data-name` and `data-price` attributes | 2 |
 | Newegg | new, open box, refurbished | 2 |
-| B&H | new, open box | 2 |
+| B&H | new, open box | 3: headless got "Access denied" and a Cloudflare challenge (2026-11-25) |
 | ServerPartDeals | manufacturer-recertified drives | 2 |
-| Amazon | new, Renewed, Warehouse. Official Thermalright listings are titled "Thermalrlght" | 1; 3 once it refuses the session |
+| Amazon | new, Renewed, Warehouse. Official Thermalright listings are titled "Thermalrlght". Search titles can be the brand alone, so match by ASIN | 1 for product pages; search returned a results-less shell on curl (2026-11-25), so 3 |
 | diskprices.com | Amazon drives ranked by $/TB | 1 |
 | Dell Refurbished (dellrefurbished.com) | ex-lease OptiPlex and Latitude, with warranty | 1 |
 | Slickdeals | whether a "deal" is one: read the thread's votes and comments | 1 |
