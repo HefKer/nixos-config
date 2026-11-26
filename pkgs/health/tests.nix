@@ -48,6 +48,10 @@ runCommandLocal "health-tests"
         roots = [ "dev" ];
         days = 30;
       })
+      (probes.gitHook {
+        repo = "hooked";
+        hook = "pre-commit";
+      })
       (probes.nixpkgsAge {
         lastModified = 0;
         maxAgeDays = 30;
@@ -161,6 +165,16 @@ runCommandLocal "health-tests"
     expect "$(health-probe-unpushed-work)" "dev/ahead: unpushed commits on main, idle since 2026-01-01" "a fresh edit is not idle"
 
     expect "$(health-probe-nixpkgs-age)" "nixpkgs is from 1970-01-01, over 30 days old; update the flake" "an old nixpkgs is due an update"
+
+    git init -q hooked
+    git -C hooked config core.hooksPath "$PWD/gone"
+    expect "$(health-probe-git-hook)" "hooked: pre-commit hook $PWD/gone/pre-commit is not executable (core.hooksPath: $PWD/gone)" \
+      "a hooksPath pointing nowhere is a finding"
+    git -C hooked config core.hooksPath .githooks
+    mkdir hooked/.githooks
+    printf '#!/bin/sh\n' >hooked/.githooks/pre-commit
+    chmod +x hooked/.githooks/pre-commit
+    expect "$(health-probe-git-hook)" "" "an executable hook under a relative hooksPath is clean"
 
     if [ "$fail" != 0 ]; then exit 1; fi
     touch $out

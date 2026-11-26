@@ -205,6 +205,21 @@
     '';
   };
 
+  # Git skips a hook it can't find without a word, so a core.hooksPath pointing nowhere goes unnoticed.
+  gitHook =
+    { repo, hook }:
+    writeShellApplication {
+      name = "health-probe-git-hook";
+      runtimeInputs = [ gitMinimal ];
+      text = ''
+        git -C ${lib.escapeShellArg repo} rev-parse --git-dir >/dev/null 2>&1 || exit 0
+        path=$(git -C ${lib.escapeShellArg repo} rev-parse --path-format=absolute --git-path hooks)/${hook}
+        if [ ! -x "$path" ]; then
+          echo "${repo}: ${hook} hook $path is not executable (core.hooksPath: $(git -C ${lib.escapeShellArg repo} config core.hooksPath || echo unset))"
+        fi
+      '';
+    };
+
   # Reads what the system-level smart-status unit last wrote; drives need root to query.
   smart =
     file:
