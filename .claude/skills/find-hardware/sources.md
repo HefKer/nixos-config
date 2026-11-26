@@ -26,14 +26,14 @@ moment...", "Error Page") or a near-empty body is a failed rung.
 
 | Source | Good for | Rung |
 |---|---|---|
-| eBay, sold (`&LH_Sold=1&LH_Complete=1`) | the used **baseline**; resale ranges | 3 |
+| eBay, sold (`&LH_Sold=1&LH_Complete=1&_ipg=60`) | the used **baseline**; resale ranges. Take the median of price + shipping over rows starting "Sold", dropping lots, parts and bundles. A first visit lands on a CAPTCHA the user clears | 3 |
 | eBay, active | used and seller-refurbished listings | 3 |
 | PCPartPicker | new-part price history, compatibility filters | 2 |
 | Micro Center | open box, in-store-only prices; add `&storeid=<store>` from the private inputs. Each product carries `data-name` and `data-price` attributes | 2 |
 | Newegg | new, open box, refurbished | 2 |
 | B&H | new, open box | 2 |
 | ServerPartDeals | manufacturer-recertified drives | 2 |
-| Amazon | new, Renewed, Warehouse | 1 |
+| Amazon | new, Renewed, Warehouse. Official Thermalright listings are titled "Thermalrlght" | 1; 3 once it refuses the session |
 | diskprices.com | Amazon drives ranked by $/TB | 1 |
 | Dell Refurbished (dellrefurbished.com) | ex-lease OptiPlex and Latitude, with warranty | 1 |
 | Slickdeals | whether a "deal" is one: read the thread's votes and comments | 1 |
