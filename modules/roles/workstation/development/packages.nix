@@ -71,6 +71,7 @@ in
       nixd
       nixfmt
       statix
+      nix-search-tv # index behind fish's nixfind
 
       # Other Langs/Tools
       yaml-language-server
