@@ -75,6 +75,11 @@ in
           "--port"
           (toString port)
         ]) ports
+        # say holds non-urgent speech while this file exists; %t is $XDG_RUNTIME_DIR.
+        ++ [
+          "--state-file"
+          "%t/game-focus"
+        ]
       );
       Restart = "on-failure";
     };
