@@ -32,6 +32,9 @@ in
       owner = consts.username;
     };
 
+    # sops reads the user's age key from Bitwarden; host keys decrypt at activation without it.
+    environment.sessionVariables.SOPS_AGE_KEY_CMD = "rbw get sops-age-key";
+
     # Insecure for trusting eMudhra's roots, which ~/.pki/nssdb distrusts (certutil); the pinned version makes a bump re-raise it.
     nixpkgs.config.permittedInsecurePackages = [ "qutebrowser-3.7.0" ];
 

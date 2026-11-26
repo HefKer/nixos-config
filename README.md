@@ -610,7 +610,7 @@ A new host must be able to read its secrets **before its first rebuild that need
 
 Secrets live in `secrets/` as ciphertext: `secrets/<host>.yaml` for one machine, `secrets/shared.yaml` for all of them. `modules/core/secrets.nix` imports sops-nix, which decrypts them at activation to `/run/secrets`, outside the Nix store. Each host decrypts with an age key derived from its SSH host key; the user is a recipient of everything through an age key kept in Bitwarden, so no machine's disk has to survive. Only secrets that can be rotated belong here, because git history keeps every encrypted version for good. The reasoning is in [ADR-0006](docs/adr/0006-secrets-are-sops-encrypted-in-the-public-repo.md).
 
-Edit a file with `SOPS_AGE_KEY_CMD="rbw get sops-age-key" sops secrets/shared.yaml`, and declare `sops.secrets.<name>` next to the module that consumes it. `nix flake check` fails on any file in `secrets/` that isn't encrypted.
+Edit a file with `sops secrets/shared.yaml`: workstations export `SOPS_AGE_KEY_CMD="rbw get sops-age-key"` session-wide, so sops fetches the user's age key from Bitwarden. Then declare `sops.secrets.<name>` next to the module that consumes it. `nix flake check` fails on any file in `secrets/` that isn't encrypted.
 
 ### Sync
 
