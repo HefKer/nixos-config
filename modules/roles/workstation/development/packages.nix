@@ -25,6 +25,9 @@ in
       # --- File & Text Search/Manipulation CLI Tools ---
       jq
       sqlite # sqlite3 CLI
+      file
+      libxml2 # xmllint
+      nmap
 
       # --- Display / mirroring ---
       wl-mirror # mirror one Wayland output into a window
