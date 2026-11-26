@@ -40,8 +40,7 @@ def socket_path():
     )
 
 
-# A sentence ends at . ! ? or …, maybe closed by a quote or bracket, before
-# whitespace; or at a blank line.
+# A sentence ends at . ! ? or … (maybe then a quote or bracket) and a space, or at a blank line.
 SENTENCE_END = re.compile(
     r"(?<=[.!?…])\s+|(?<=[.!?…][\"'”’)\]])\s+|\n\s*\n"
 )
@@ -280,25 +279,35 @@ class Player:
 
 
 class Gate:
-    """Whether non-urgent speech is held: DND on, or a game focused."""
+    """Whether non-urgent speech is held: DND on, or a game focused.
+
+    DND is polled in a thread, so a lookup never waits on dms.
+    """
+
+    POLL = 1.0
 
     def __init__(self, dms, game_file):
-        self.dms = dms
         self.game_file = game_file
+        self.dnd = False
+        if dms:
+            threading.Thread(target=self.poll, args=(dms,), daemon=True).start()
+
+    def poll(self, dms):
+        cmd = [dms, "ipc", "call", "notifications", "getDoNotDisturb"]
+        while True:
+            try:
+                out = subprocess.run(
+                    cmd, capture_output=True, text=True, timeout=2
+                ).stdout.strip()
+                self.dnd = out == "true"
+            except (OSError, subprocess.SubprocessError):
+                pass
+            time.sleep(self.POLL)
 
     def __call__(self):
         if self.game_file and os.path.exists(self.game_file):
             return True
-        if not self.dms:
-            return False
-        try:
-            out = subprocess.run(
-                [self.dms, "ipc", "call", "notifications", "getDoNotDisturb"],
-                capture_output=True, text=True, timeout=1,
-            ).stdout.strip()
-        except (OSError, subprocess.SubprocessError):
-            return False
-        return out == "true"
+        return self.dnd
 
 
 class Daemon:
@@ -311,8 +320,7 @@ class Daemon:
         self.gate = gate
         self.queue = Queue()
         self.cond = threading.Condition()
-        # One synth thread per engine, so an alert never waits behind a
-        # Kokoro sentence prefetched for an item that was cut off.
+        # One synth thread per engine, so an alert never waits behind a Kokoro prefetch.
         self.pools = {"alert": ThreadPoolExecutor(1), "read": ThreadPoolExecutor(1)}
 
     # Requests
@@ -424,10 +432,9 @@ class Daemon:
     def finish(self, item):
         with self.cond:
             self.queue.playing = None
+            # A cut-off item ("requeue") keeps its place and sentence cursor.
             if item.interrupt is None or item.interrupt == "drop":
                 self.queue.remove(item)
-            # A --now item that spoke is done; anything it cut off keeps
-            # its place and cursor.
             item.interrupt = None
             self.cond.notify_all()
 
@@ -462,15 +469,23 @@ class Daemon:
         server.serve_forever()
 
 
-def request(req):
+def request(req, wait=5.0):
     path = socket_path()
-    try:
-        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as sock:
-            sock.connect(path)
-            sock.sendall((json.dumps(req) + "\n").encode())
-            data = sock.makefile("r").readline()
-    except OSError as err:
-        sys.exit(f"say: daemon not reachable at {path}: {err}")
+    deadline = time.monotonic() + wait
+    while True:
+        try:
+            with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as sock:
+                sock.connect(path)
+                sock.sendall((json.dumps(req) + "\n").encode())
+                data = sock.makefile("r").readline()
+            break
+        except (FileNotFoundError, ConnectionRefusedError) as err:
+            # The daemon is starting or restarting; give it a moment.
+            if time.monotonic() > deadline:
+                sys.exit(f"say: daemon not reachable at {path}: {err}")
+            time.sleep(0.1)
+        except OSError as err:
+            sys.exit(f"say: daemon not reachable at {path}: {err}")
     resp = json.loads(data)
     if "error" in resp:
         sys.exit(f"say: {resp['error']}")
