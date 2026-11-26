@@ -15,6 +15,10 @@ date.
    profile. Read at a human's pace: one search, then the listings worth opening.
 4. **Hand-off**: give the user the search link, and judge what they paste back.
 
+Pace every shop: a burst of searches gets the session refused (Amazon answered "Something
+went wrong" on both rungs after one run's worth of queries; PCPartPicker returned empty
+pages after about ten). Space requests out, and batch a need's models into few searches.
+
 A page counts as read when it yields prices. A 200 with a challenge title ("Just a
 moment...", "Error Page") or a near-empty body is a failed rung.
 
@@ -25,7 +29,7 @@ moment...", "Error Page") or a near-empty body is a failed rung.
 | eBay, sold (`&LH_Sold=1&LH_Complete=1`) | the used **baseline**; resale ranges | 3 |
 | eBay, active | used and seller-refurbished listings | 3 |
 | PCPartPicker | new-part price history, compatibility filters | 2 |
-| Micro Center | open box, in-store-only prices; add `&storeid=<store>` from the private inputs | 2 |
+| Micro Center | open box, in-store-only prices; add `&storeid=<store>` from the private inputs. Each product carries `data-name` and `data-price` attributes | 2 |
 | Newegg | new, open box, refurbished | 2 |
 | B&H | new, open box | 2 |
 | ServerPartDeals | manufacturer-recertified drives | 2 |
