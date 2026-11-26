@@ -60,6 +60,8 @@ let
 in
 {
   config = lib.mkIf cfg.enable {
+    # smartctl by hand, for self-tests and reading a drive the daily unit flagged; already in the closure through smart-status
+    environment.systemPackages = [ pkgs.smartmontools ];
     systemd.services.smart-status = {
       description = "Write SMART findings for the health probes";
       serviceConfig = {
