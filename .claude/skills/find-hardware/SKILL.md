@@ -27,6 +27,8 @@ out are the user's.
    - A **re-check** of an existing shortlist starts at step 3.
 2. **Stage 1, what.** Hand `/research` this file's criteria, `preferences.md` and the need.
    Its brief:
+   - The user's location (climate, local prices) comes from the private inputs or from
+     asking; a time zone spans cities with different climates.
    - Search wide for the spec class: ServeTheHome and its forums, r/homelab, r/selfhosted,
      r/buildapc, manufacturer spec sheets, nixos-hardware, and Rui's config at
      `/home/hefker/nixos/reference/` (a tie-breaker).
