@@ -17,6 +17,7 @@ in
     ./packages.nix
     ./printing.nix
     ./rebuild-notify.nix
+    ./say.nix
     ./spotify.nix
     ./smart-status.nix
     ./stale-apps-notify.nix

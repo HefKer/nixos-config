@@ -413,6 +413,16 @@ together](#how-it-fits-together) for what that means when you copy one.
   link from a sink, so visualizers and screen recorders never trip it.
   [`pkgs/mic-mute-warn/`](pkgs/mic-mute-warn/),
   [`modules/roles/workstation/mic-mute-warn.nix`](modules/roles/workstation/mic-mute-warn.nix)
+- <a id="say"></a>**A local `say` any script can call.** A user daemon keeps
+  sherpa-onnx warm with two pinned voices, Piper for alerts (first audio
+  ~0.2 s) and Kokoro for reading (~1 s, loaded on first use and unloaded when
+  idle), and speaks sentence by sentence through `pw-cat`. Items queue, and
+  `--now`, `--stop`, `--pause`, `--clear` and tags (`-t attn:1 -r` replaces a
+  queued line) control them; `--list --json` shows the queue. Under DMS
+  do-not-disturb or while a game is focused only `--urgent` speaks, and a cut
+  item resumes at its sentence.
+  [`pkgs/say/`](pkgs/say/),
+  [`modules/roles/workstation/say.nix`](modules/roles/workstation/say.nix)
 - <a id="alarm"></a>**Timers and alarms that follow you between machines.**
   `alarm 10m tea` or `alarm 7:30 standup` (also from a fuzzel prompt on Mod+A)
   writes one small file per alarm into a Syncthing folder; on each host a path
