@@ -10,119 +10,63 @@ let
   inherit (pkgs) lib;
 
   # Each host's exact link set, target in $HOME -> source under the root; a swapped host variant fails here.
-  expectedLinks = {
-    desktop = {
-      ".config/niri-host.kdl" = "niri/host/desktop.kdl";
-      ".config/atuin" = "atuin/.config/atuin";
-      ".claude-hulio/CLAUDE.md" = "claude/.claude/CLAUDE.md";
-      ".claude-hulio/commands" = "claude/.claude/commands";
-      ".claude-hulio/keybindings.json" = "claude/.claude/keybindings.json";
-      ".claude/CLAUDE.md" = "claude/.claude/CLAUDE.md";
-      ".claude/bin" = "claude/.claude/bin";
-      ".claude/commands" = "claude/.claude/commands";
-      ".claude/hooks" = "claude/.claude/hooks";
-      ".claude/keybindings.json" = "claude/.claude/keybindings.json";
-      ".claude/statusline.sh" = "claude/.claude/statusline.sh";
-      ".config/backlog" = "backlog/.config/backlog";
-      ".config/bind-palette" = "bind-palette/.config/bind-palette";
-      ".config/btop" = "btop/.config/btop";
-      ".config/DankMaterialShell" = "DankMaterialShell/.config/DankMaterialShell";
-      ".config/Dux Shell" = "DankMaterialShell/.config/DankMaterialShell";
-      ".config/fastfetch" = "fastfetch/.config/fastfetch";
-      ".config/fish" = "fish/.config/fish";
-      ".config/fuzzel" = "fuzzel/.config/fuzzel";
-      ".config/git/config" = "git/.config/git/config";
-      ".config/git/ignore" = "git/.config/git/ignore";
-      ".config/herdr/config.toml" = "herdr/.config/herdr/config.toml";
-      ".config/herdr/plugins/config/jhochenbaum.hunkdiff" =
-        "herdr/.config/herdr/plugins/config/jhochenbaum.hunkdiff";
-      ".config/herdr/plugins/config/ntindle.herdr-resurrect" =
-        "herdr/.config/herdr/plugins/config/ntindle.herdr-resurrect";
-      ".config/herdr-auto-title/config.env" = "herdr/.config/herdr-auto-title/config.env";
-      ".config/hunk/config.toml" = "hunk/.config/hunk/config.toml";
-      ".config/lazygit/config.yml" = "lazygit/.config/lazygit/config.yml";
-      ".config/marksman" = "marksman/.config/marksman";
-      ".config/mgba/config.ini" = "mgba/.config/mgba/config.ini";
-      ".config/mimeapps.list" = "xdg/.config/mimeapps.list";
-      ".config/mpv" = "mpv/.config/mpv";
-      ".config/niri" = "niri/.config/niri";
-      ".config/nvim" = "nvim/.config/nvim";
-      ".config/qutebrowser" = "qutebrowser/.config/qutebrowser";
-      ".config/starship.toml" = "starship/.config/starship.toml";
-      ".config/swayimg" = "swayimg/.config/swayimg";
-      ".config/tealdeer" = "tealdeer/.config/tealdeer";
-      ".config/vesktop/settings.json" = "vesktop/.config/vesktop/settings.json";
-      ".config/vesktop/settings" = "vesktop/.config/vesktop/settings";
-      ".config/wezterm" = "wezterm/.config/wezterm";
-      ".config/wlr-which-key" = "wlr-which-key/.config/wlr-which-key";
-      ".config/xdg-desktop-portal-termfilechooser" =
-        "xdg-desktop-portal-termfilechooser/.config/xdg-desktop-portal-termfilechooser";
-      ".config/yazi" = "yazi/.config/yazi";
-      ".config/yt-dlp" = "yt-dlp/.config/yt-dlp";
-      ".local/bin/qute-sandbox" = "scripts/qute-sandbox";
-      ".local/bin/jev" = "scripts/jev";
-      ".local/bin/proxy-watch" = "scripts/proxy-watch";
-      ".local/bin/proxy-why" = "scripts/proxy-why";
-      ".local/bin/session-find" = "scripts/session-find";
-      ".local/bin/ytdl" = "scripts/ytdl";
-      ".local/share/qutebrowser/userscripts" = "qutebrowser/.local/share/qutebrowser/userscripts";
-    };
-    lenovo = {
-      ".config/niri-host.kdl" = "niri/host/lenovo.kdl";
-      ".config/atuin" = "atuin/.config/atuin";
-      ".claude-hulio/CLAUDE.md" = "claude/.claude/CLAUDE.md";
-      ".claude-hulio/commands" = "claude/.claude/commands";
-      ".claude-hulio/keybindings.json" = "claude/.claude/keybindings.json";
-      ".claude/CLAUDE.md" = "claude/.claude/CLAUDE.md";
-      ".claude/bin" = "claude/.claude/bin";
-      ".claude/commands" = "claude/.claude/commands";
-      ".claude/hooks" = "claude/.claude/hooks";
-      ".claude/keybindings.json" = "claude/.claude/keybindings.json";
-      ".claude/statusline.sh" = "claude/.claude/statusline.sh";
-      ".config/backlog" = "backlog/.config/backlog";
-      ".config/bind-palette" = "bind-palette/.config/bind-palette";
-      ".config/btop" = "btop/.config/btop";
-      ".config/DankMaterialShell" = "DankMaterialShell/.config/DankMaterialShell";
-      ".config/Dux Shell" = "DankMaterialShell/.config/DankMaterialShell";
-      ".config/fastfetch" = "fastfetch/.config/fastfetch";
-      ".config/fish" = "fish/.config/fish";
-      ".config/fuzzel" = "fuzzel/.config/fuzzel";
-      ".config/git/config" = "git/.config/git/config";
-      ".config/git/ignore" = "git/.config/git/ignore";
-      ".config/herdr/config.toml" = "herdr/.config/herdr/config.toml";
-      ".config/herdr/plugins/config/jhochenbaum.hunkdiff" =
-        "herdr/.config/herdr/plugins/config/jhochenbaum.hunkdiff";
-      ".config/herdr/plugins/config/ntindle.herdr-resurrect" =
-        "herdr/.config/herdr/plugins/config/ntindle.herdr-resurrect";
-      ".config/herdr-auto-title/config.env" = "herdr/.config/herdr-auto-title/config.env";
-      ".config/hunk/config.toml" = "hunk/.config/hunk/config.toml";
-      ".config/lazygit/config.yml" = "lazygit/.config/lazygit/config.yml";
-      ".config/marksman" = "marksman/.config/marksman";
-      ".config/mgba/config.ini" = "mgba/.config/mgba/config.ini";
-      ".config/mimeapps.list" = "xdg/.config/mimeapps.list";
-      ".config/mpv" = "mpv/.config/mpv";
-      ".config/niri" = "niri/.config/niri";
-      ".config/nvim" = "nvim/.config/nvim";
-      ".config/qutebrowser" = "qutebrowser/.config/qutebrowser";
-      ".config/starship.toml" = "starship/.config/starship.toml";
-      ".config/swayimg" = "swayimg/.config/swayimg";
-      ".config/tealdeer" = "tealdeer/.config/tealdeer";
-      ".config/vesktop/settings.json" = "vesktop/.config/vesktop/settings.json";
-      ".config/vesktop/settings" = "vesktop/.config/vesktop/settings";
-      ".config/wezterm" = "wezterm/.config/wezterm";
-      ".config/wlr-which-key" = "wlr-which-key/.config/wlr-which-key";
-      ".config/xdg-desktop-portal-termfilechooser" =
-        "xdg-desktop-portal-termfilechooser/.config/xdg-desktop-portal-termfilechooser";
-      ".config/yazi" = "yazi/.config/yazi";
-      ".config/yt-dlp" = "yt-dlp/.config/yt-dlp";
-      ".local/bin/qute-sandbox" = "scripts/qute-sandbox";
-      ".local/bin/jev" = "scripts/jev";
-      ".local/bin/proxy-watch" = "scripts/proxy-watch";
-      ".local/bin/proxy-why" = "scripts/proxy-why";
-      ".local/bin/session-find" = "scripts/session-find";
-      ".local/bin/ytdl" = "scripts/ytdl";
-      ".local/share/qutebrowser/userscripts" = "qutebrowser/.local/share/qutebrowser/userscripts";
-    };
+  expectedLinks = lib.genAttrs [ "desktop" "lenovo" ] (
+    host: sharedLinks // { ".config/niri-host.kdl" = "niri/host/${host}.kdl"; }
+  );
+  sharedLinks = {
+    ".config/atuin" = "atuin/.config/atuin";
+    ".claude-hulio/CLAUDE.md" = "claude/.claude/CLAUDE.md";
+    ".claude-hulio/commands" = "claude/.claude/commands";
+    ".claude-hulio/keybindings.json" = "claude/.claude/keybindings.json";
+    ".claude/CLAUDE.md" = "claude/.claude/CLAUDE.md";
+    ".claude/bin" = "claude/.claude/bin";
+    ".claude/commands" = "claude/.claude/commands";
+    ".claude/hooks" = "claude/.claude/hooks";
+    ".claude/keybindings.json" = "claude/.claude/keybindings.json";
+    ".claude/statusline.sh" = "claude/.claude/statusline.sh";
+    ".config/backlog" = "backlog/.config/backlog";
+    ".config/bind-palette" = "bind-palette/.config/bind-palette";
+    ".config/btop" = "btop/.config/btop";
+    ".config/DankMaterialShell" = "DankMaterialShell/.config/DankMaterialShell";
+    ".config/Dux Shell" = "DankMaterialShell/.config/DankMaterialShell";
+    ".config/fastfetch" = "fastfetch/.config/fastfetch";
+    ".config/fish" = "fish/.config/fish";
+    ".config/fuzzel" = "fuzzel/.config/fuzzel";
+    ".config/git/config" = "git/.config/git/config";
+    ".config/git/ignore" = "git/.config/git/ignore";
+    ".config/herdr/config.toml" = "herdr/.config/herdr/config.toml";
+    ".config/herdr/plugins/config/jhochenbaum.hunkdiff" =
+      "herdr/.config/herdr/plugins/config/jhochenbaum.hunkdiff";
+    ".config/herdr/plugins/config/ntindle.herdr-resurrect" =
+      "herdr/.config/herdr/plugins/config/ntindle.herdr-resurrect";
+    ".config/herdr-auto-title/config.env" = "herdr/.config/herdr-auto-title/config.env";
+    ".config/hunk/config.toml" = "hunk/.config/hunk/config.toml";
+    ".config/lazygit/config.yml" = "lazygit/.config/lazygit/config.yml";
+    ".config/marksman" = "marksman/.config/marksman";
+    ".config/mgba/config.ini" = "mgba/.config/mgba/config.ini";
+    ".config/mimeapps.list" = "xdg/.config/mimeapps.list";
+    ".config/mpv" = "mpv/.config/mpv";
+    ".config/niri" = "niri/.config/niri";
+    ".config/nvim" = "nvim/.config/nvim";
+    ".config/qutebrowser" = "qutebrowser/.config/qutebrowser";
+    ".config/starship.toml" = "starship/.config/starship.toml";
+    ".config/swayimg" = "swayimg/.config/swayimg";
+    ".config/tealdeer" = "tealdeer/.config/tealdeer";
+    ".config/vesktop/settings.json" = "vesktop/.config/vesktop/settings.json";
+    ".config/vesktop/settings" = "vesktop/.config/vesktop/settings";
+    ".config/wezterm" = "wezterm/.config/wezterm";
+    ".config/wlr-which-key" = "wlr-which-key/.config/wlr-which-key";
+    ".config/xdg-desktop-portal-termfilechooser" =
+      "xdg-desktop-portal-termfilechooser/.config/xdg-desktop-portal-termfilechooser";
+    ".config/yazi" = "yazi/.config/yazi";
+    ".config/yt-dlp" = "yt-dlp/.config/yt-dlp";
+    ".local/bin/qute-sandbox" = "scripts/qute-sandbox";
+    ".local/bin/jev" = "scripts/jev";
+    ".local/bin/proxy-watch" = "scripts/proxy-watch";
+    ".local/bin/proxy-why" = "scripts/proxy-why";
+    ".local/bin/session-find" = "scripts/session-find";
+    ".local/bin/ytdl" = "scripts/ytdl";
+    ".local/share/qutebrowser/userscripts" = "qutebrowser/.local/share/qutebrowser/userscripts";
   };
 
   # Shell lines checking one host, built from the home.file set home-manager actually produces.
