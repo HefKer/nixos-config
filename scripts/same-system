@@ -35,6 +35,9 @@ in {
   homePackages = builtins.mapAttrs (_: u: sort (names u.home.packages)) (c.home-manager.users or { });
 }'
 
+# Every commit stamps its own system.configurationRevision, so both sides build without it.
+unrevved='c: (c.extendModules { modules = [ ({ lib, ... }: { system.configurationRevision = lib.mkForce null; }) ]; }).config.system.build.toplevel.drvPath'
+
 hosts() { nix eval --json "$1#nixosConfigurations" --apply builtins.attrNames 2>/dev/null | tr -d '[]"' | tr , ' '; }
 base_hosts=$(hosts "$base_ref")
 target_hosts=$(hosts "$target_ref")
@@ -47,8 +50,8 @@ for h in $(echo "$base_hosts $target_hosts" | tr ' ' '\n' | sort -u); do
   if ! grep -qw "$h" <<<"$target_hosts"; then verdict "$h: removed (absent at $target_label)"; status=1; continue; fi
 
   attr="nixosConfigurations.$h.config"
-  a=$(nix eval --raw "$base_ref#$attr.system.build.toplevel.drvPath" 2>/dev/null)
-  b=$(nix eval --raw "$target_ref#$attr.system.build.toplevel.drvPath" 2>/dev/null)
+  a=$(nix eval --raw "$base_ref#nixosConfigurations.$h" --apply "$unrevved" 2>/dev/null)
+  b=$(nix eval --raw "$target_ref#nixosConfigurations.$h" --apply "$unrevved" 2>/dev/null)
   if [ "$a" = "$b" ]; then
     verdict "$h: identical"
     continue

@@ -30,4 +30,6 @@ See `README.md` for repo layout.
 
 `docs/research/` is gitignored notes living only in the main checkout: from any worktree, read and write `/home/hefker/nixos/main/docs/research/`, and keep it out of commits.
 
+Commit X is live when `git merge-base --is-ancestor X <rev>` succeeds, `<rev>` being `nixos-version --configuration-revision` minus any `-dirty` suffix (a build from uncommitted changes).
+
 Each drive's SMART data, refreshed daily by root, is world-readable at `/var/lib/smart-status/<dev>.json` (`smartctl -j -a`).
