@@ -48,7 +48,7 @@ Choose software for the user the same way every time: **dealbreakers** first, th
      librespot's audio-key block.)
 3. **Preview** every finalist, following [`preview.md`](preview.md): what it looks like in
    use, shown to the user before they install anything.
-4. **Write up** in `docs/research/<topic>.md`, in this order:
+4. **Write up** in `/home/hefker/nixos/main/docs/research/<topic>.md`, in this order:
    - **Verdict** first: the pick, and the one-line reason.
    - A table: finalists × dealbreakers and soft-ranking criteria. The Light row carries the
      measured closure size and idle memory.
@@ -67,7 +67,7 @@ Choose software for the user the same way every time: **dealbreakers** first, th
 5. **Report back.**
    - GH issue: comment the verdict, finalists and trial commands, linking the doc; set its
      label to `ready-for-human` (the user tries the finalists next).
-   - In chat: the verdict, finalists, trial commands, and `imv docs/research/<topic>/` to
+   - In chat: the verdict, finalists, trial commands, and `imv /home/hefker/nixos/main/docs/research/<topic>/` to
      page through the preview.
 6. **Learn from the verdict.** When the user reports back on a trial, propose an edit to
    `preferences.md` for any preference their verdict revealed, with the example that showed

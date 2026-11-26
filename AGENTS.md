@@ -27,3 +27,5 @@ Single-context: `GLOSSARY.md` and `docs/adr/` at the repo root. See `docs/agents
 ## More
 
 See `README.md` for repo layout.
+
+`docs/research/` is gitignored notes living only in the main checkout: from any worktree, read and write `/home/hefker/nixos/main/docs/research/`, and keep it out of commits.

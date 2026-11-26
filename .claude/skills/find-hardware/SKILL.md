@@ -50,7 +50,7 @@ out are the user's.
      + three years of electricity for anything always-on (idle watts × rate) − resale of
      what it replaces.
    - A listing that trips a stage 1 trigger reopens the pick: say so and re-rank.
-   - Append every listing read to `docs/research/<need>.prices.csv`
+   - Append every listing read to `/home/hefker/nixos/main/docs/research/<need>.prices.csv`
      (`date,model,condition,source,landed`).
    - Cut to **3–5 finalists**; every other listing worth a mention goes on the rejected
      list with its reason.
@@ -61,7 +61,7 @@ out are the user's.
    - **wait**: above baseline with a sale window inside two weeks, or the price log shows
      it still falling.
    - **pass**: the wrong tier at this price.
-5. **Write up** in `docs/research/<need>.md`, in this order:
+5. **Write up** in `/home/hefker/nixos/main/docs/research/<need>.md`, in this order:
    - **Verdict** first: the pick, buy / wait / pass, and the one-line reason.
    - A table: finalists × condition, source type, landed cost, three-year total, baseline,
      warranty or return window, and each soft-ranking criterion.
