@@ -48,6 +48,12 @@ A single named machine built from this flake: one platform plus the roles it
 takes on. The only place capabilities are switched on.
 _Avoid_: node, box, device
 
+**Agentspace**:
+A host of its own where agents may run at full load, drive a graphical session
+and break configurations, without touching the session the user is working in.
+Never the always-on server.
+_Avoid_: dev server, dev box, build box
+
 ### Dotfiles
 
 **Dotfile**:
