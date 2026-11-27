@@ -103,6 +103,17 @@
             ./hosts/lenovo
           ];
         };
+
+        lat5430 = lib.nixosSystem {
+          inherit system;
+          specialArgs = {
+            inherit inputs consts;
+          };
+          modules = [
+            ./modules
+            ./hosts/lat5430
+          ];
+        };
       };
 
       formatter.${system} = pkgs.nixfmt-tree;
