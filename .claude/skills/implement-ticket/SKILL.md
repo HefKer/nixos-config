@@ -26,8 +26,9 @@ the number (merge, close the issue, skip review) override the matching step belo
 5. **Review** with `/code-review` from `main`. Fix every blocking finding in a new commit and
    re-run the step-3 checks on it.
 6. **Hand back**: the branch and its commits, each acceptance criterion with its evidence, the
-   `same-system` result per host, the review outcome, and what the user still has to run on
-   the machine (`nixos-rebuild`, reboots). When the branch changes the link set, run
+   `same-system` result per host, the review outcome, and only the steps that need root, a
+   reboot, or the user's hands or eyes (`nixos-rebuild switch`, judging a sound). Once the user
+   says the switch is done, run the remaining checks yourself. When the branch changes the link set, run
    `scripts/link-drift` from the worktree and list each path it reports with the `mv` that
    clears it. Leave the merge to the user unless they asked you to merge; then run
    `git merge --no-ff <branch>`.

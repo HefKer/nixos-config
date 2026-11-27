@@ -26,6 +26,9 @@ no check can make.
   (`GLOSSARY.md`): when it completes it runs `repeat record CMD ARG...` with its replay, by bare
   command name and menu-free, and a cancel records nothing. If it shouldn't be repeated, a
   comment beside its bind says why.
+- A user unit Home Manager starts or restarts on switch finishes in seconds. One that waits on
+  the network, a lock or a device runs from a timer or path unit, or carries
+  `X-SwitchMethod = "keep-old"`, so it can't time out the activation.
 
 ## Docs and comments
 

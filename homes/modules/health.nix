@@ -120,6 +120,10 @@ in
       maxAgeDays = cfg.nixpkgsMaxAgeDays;
     };
     reboot-required.script = builtinProbes.rebootRequired;
+    flake-hook.script = builtinProbes.gitHook {
+      repo = "${home}/nixos/main";
+      hook = "pre-commit";
+    };
     smart.script = builtinProbes.smart "/var/lib/smart-status/findings";
   };
 

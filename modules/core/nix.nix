@@ -6,6 +6,9 @@
     SUDO_EDITOR = "nvim";
   };
 
+  # nixos-version --configuration-revision names the commit the running system was built from; -dirty when uncommitted.
+  system.configurationRevision = inputs.self.rev or inputs.self.dirtyRev or null;
+
   # null removes the alias entirely; "" would still shadow the binary.
   environment.shellAliases.ls = lib.mkForce null;
 

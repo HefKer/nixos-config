@@ -1,7 +1,7 @@
 # Preview
 
 The **preview** shows each finalist in use, so the user can judge its feel before a trial.
-Shots go in `docs/research/<topic>/`, named `<finalist>-<n>-<view>.png`; the directory is
+Shots go in `/home/hefker/nixos/main/docs/research/<topic>/`, named `<finalist>-<n>-<view>.png`; the directory is
 gitignored, so they stay local.
 
 ## Views
@@ -19,7 +19,7 @@ view is missing and why.
 ## Trial config
 
 Shoot each finalist on a **trial config**: a throwaway config directory at
-`docs/research/<topic>/<finalist>-config/`, passed by `XDG_CONFIG_HOME` or the app's own
+`/home/hefker/nixos/main/docs/research/<topic>/<finalist>-config/`, passed by `XDG_CONFIG_HOME` or the app's own
 flag, holding a minimal config with the user's vim-style binds and the colours of the
 matching app in `~/dots`. The user then sees the app as it would be adopted, their real
 `~/.config` stays untouched, and the write-up's *Try it* line reuses the same directory.

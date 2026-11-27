@@ -305,9 +305,10 @@ together](#how-it-fits-together) for what that means when you copy one.
   run didn't have. Probes cover link drift, Syncthing conflict files, unseen
   peers and folder errors, failed units, a pending reboot, low disk space,
   an old nixpkgs, SMART trouble (read from a root timer's file, NVMe media
-  errors only once they rise past the count already accepted), build output
-  untouched for a month, and repos with uncommitted or unpushed work left
-  idle. `health` re-runs them, and `health --greeting` prints a one-line
+  errors only once they rise past the count already accepted; the timer also
+  leaves each drive's full `smartctl -j -a` report world-readable), build
+  output untouched for a month, a pre-commit hook git can no longer find, and
+  repos with uncommitted or unpushed work left idle. `health` re-runs them, and `health --greeting` prints a one-line
   count for a shell greeting.
   [`homes/modules/health.nix`](homes/modules/health.nix),
   [`pkgs/health/`](pkgs/health/),
@@ -610,7 +611,7 @@ A new host must be able to read its secrets **before its first rebuild that need
 
 Secrets live in `secrets/` as ciphertext: `secrets/<host>.yaml` for one machine, `secrets/shared.yaml` for all of them. `modules/core/secrets.nix` imports sops-nix, which decrypts them at activation to `/run/secrets`, outside the Nix store. Each host decrypts with an age key derived from its SSH host key; the user is a recipient of everything through an age key kept in Bitwarden, so no machine's disk has to survive. Only secrets that can be rotated belong here, because git history keeps every encrypted version for good. The reasoning is in [ADR-0006](docs/adr/0006-secrets-are-sops-encrypted-in-the-public-repo.md).
 
-Edit a file with `SOPS_AGE_KEY_CMD="rbw get sops-age-key" sops secrets/shared.yaml`, and declare `sops.secrets.<name>` next to the module that consumes it. `nix flake check` fails on any file in `secrets/` that isn't encrypted.
+Edit a file with `sops secrets/shared.yaml`: workstations export `SOPS_AGE_KEY_CMD="rbw get sops-age-key"` session-wide, so sops fetches the user's age key from Bitwarden. Then declare `sops.secrets.<name>` next to the module that consumes it. `nix flake check` fails on any file in `secrets/` that isn't encrypted.
 
 ### Sync
 
